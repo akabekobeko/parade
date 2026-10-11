@@ -66,6 +66,15 @@ export const musicSchema = z.object({
    * in half steps.
    */
   rating: z.number().nullable(),
+  /**
+   * User-set favorite flag (`docs/specs/v1.4/architecture/database.md`).
+   * Stored as 0 / 1 in SQLite and never written to the file; the transform
+   * hands the Renderer a boolean so no view ever sees the raw integer.
+   * Independent of `rating`, which comes from the file's tag.
+   */
+  favorite: z
+    .union([z.literal(0), z.literal(1)])
+    .transform((value) => value === 1),
   /** Artwork reference into the `pictures` table. */
   pictureId: z.number().int().nullable(),
   /**

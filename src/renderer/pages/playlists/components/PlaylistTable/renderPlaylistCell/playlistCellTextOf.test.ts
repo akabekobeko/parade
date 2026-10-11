@@ -22,6 +22,7 @@ const music = (patch: Partial<Music> = {}): Music => ({
   durationMs: 225_000,
   bpm: 120,
   rating: null,
+  favorite: false,
   pictureId: null,
   picturePath: null,
   // No UTC designator: parsed as local time, so the date is the same in

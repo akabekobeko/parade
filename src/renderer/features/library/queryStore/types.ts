@@ -47,10 +47,19 @@ export type QueryStore = {
   /**
    * Update a cached success value in place — no refetch. Used by mutation
    * commands whose IPC response already tells the new state, so views update
-   * without a loading flicker. A no-op unless the key holds a success state.
+   * without a loading flicker. A no-op unless the key holds a success state,
+   * or when the updater hands back the very same instance (nothing to show).
    *
    * @param key - Query key to patch.
    * @param updater - Maps the cached value to the next one.
    */
   readonly patch: <T>(key: QueryKey, updater: (value: T) => T) => void;
+  /**
+   * Every key currently in the cache, subscribed or idle. Lets a mutation
+   * command patch or invalidate a family of keys (`musicsByArtist:*`, ...)
+   * without the store knowing the key conventions.
+   *
+   * @returns A snapshot of the cached keys.
+   */
+  readonly keys: () => readonly QueryKey[];
 };

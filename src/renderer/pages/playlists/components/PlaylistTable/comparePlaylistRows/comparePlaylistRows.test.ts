@@ -24,6 +24,7 @@ const music = (patch: Partial<Music>): Music => ({
   durationMs: 1000,
   bpm: 100,
   rating: 0.5,
+  favorite: false,
   pictureId: null,
   picturePath: null,
   addedAt: "2026-01-01T00:00:00.000Z",

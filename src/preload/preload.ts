@@ -71,6 +71,11 @@ const buildBridge = (): MpBridge => ({
       ipcRenderer.invoke(IpcKeys.SetArtistPicture, request),
     setArtistInitial: (request) =>
       ipcRenderer.invoke(IpcKeys.SetArtistInitial, request),
+    setMusicFavorite: (request) =>
+      ipcRenderer.invoke(IpcKeys.SetMusicFavorite, request),
+    setAlbumFavorite: (request) =>
+      ipcRenderer.invoke(IpcKeys.SetAlbumFavorite, request),
+    getAlbumFavorites: () => ipcRenderer.invoke(IpcKeys.GetAlbumFavorites),
     updateMusics: (request) =>
       ipcRenderer.invoke(IpcKeys.UpdateMusics, request),
     onImportProgress: (listener) =>

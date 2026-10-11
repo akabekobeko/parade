@@ -22,6 +22,7 @@ const music = (overrides: Partial<Music> = {}): Music => ({
   durationMs: 1000,
   bpm: 128,
   rating: 0.8,
+  favorite: false,
   pictureId: null,
   picturePath: null,
   addedAt: "",

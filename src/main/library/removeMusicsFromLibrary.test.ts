@@ -1,10 +1,12 @@
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeEach, expect, it } from "vitest";
+import { albumKeyOf } from "../../shared/albumKeyOf";
 import { runMigrations } from "../db/runMigrations";
 import { getOrCreatePictureId } from "./getOrCreatePictureId";
 import { upsertMusic } from "./musicRepository";
 import { registerArtistPictureIfMissing } from "./registerArtistPictureIfMissing";
 import { removeMusicsFromLibrary } from "./removeMusicsFromLibrary";
+import { setAlbumFavorite } from "./setAlbumFavorite";
 import { setArtistInitial } from "./setArtistInitial";
 import type { MusicRowInput } from "./trackMapping";
 
@@ -135,6 +137,23 @@ it("drops the artist initial when the artist's last track goes", () => {
   setArtistInitial(db, "Other", "O");
   removeMusicsFromLibrary(db, [a]);
   expect(db.prepare("SELECT artist FROM artist_initials").all()).toEqual([
+    { artist: "Other" },
+  ]);
+});
+
+it("drops the album favorite once the album's last track is removed", () => {
+  // `row` leaves the album empty, so both tracks share the album ("Artist", "").
+  const a = insert("/m/a.mp3");
+  const b = insert("/m/b.mp3");
+  insert("/m/other.mp3", "Other");
+  setAlbumFavorite(db, albumKeyOf("Artist", ""), true);
+  setAlbumFavorite(db, albumKeyOf("Other", ""), true);
+
+  removeMusicsFromLibrary(db, [a]);
+  expect(count("album_favorites")).toBe(2);
+
+  removeMusicsFromLibrary(db, [b]);
+  expect(db.prepare("SELECT artist FROM album_favorites").all()).toEqual([
     { artist: "Other" },
   ]);
 });

@@ -22,6 +22,7 @@ const music = (id: number): Music => ({
   durationMs: 1000,
   bpm: null,
   rating: null,
+  favorite: false,
   pictureId: null,
   picturePath: null,
   addedAt: "",

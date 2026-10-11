@@ -211,3 +211,31 @@ it("invalidate after a patch still refetches and applies the response", async ()
     value: ["fresh"],
   });
 });
+
+it("patch leaves the entry alone when the updater returns the same instance", async () => {
+  const { fetch, pending } = createManualFetcher();
+  const store = createQueryStore(fetch);
+  const listener = vi.fn();
+  store.subscribe("artists", listener);
+  pending[0]?.resolve(ok(["a"]));
+  await flush();
+  const before = store.getSnapshot("artists");
+
+  store.patch<readonly string[]>("artists", (value) => value);
+  expect(listener).toHaveBeenCalledTimes(1);
+  expect(store.getSnapshot("artists")).toBe(before);
+});
+
+it("keys lists every cached key, subscribed or idle", async () => {
+  const { fetch, pending } = createManualFetcher();
+  const store = createQueryStore(fetch);
+  expect(store.keys()).toEqual([]);
+
+  const unsubscribe = store.subscribe("artists", vi.fn());
+  store.subscribe("musicsByArtist:A", vi.fn());
+  pending[0]?.resolve(ok(["a"]));
+  await flush();
+  unsubscribe();
+
+  expect([...store.keys()].sort()).toEqual(["artists", "musicsByArtist:A"]);
+});

@@ -5,6 +5,7 @@ import {
   onCancelFetch,
   onFetchMusicInfo,
 } from "./onFetchMusicInfo/onFetchMusicInfo";
+import { onGetAlbumFavorites } from "./onGetAlbumFavorites";
 import { onGetAlbums } from "./onGetAlbums";
 import { onGetArtists } from "./onGetArtists";
 import { onGetFilterOptions } from "./onGetFilterOptions";
@@ -26,8 +27,10 @@ import { onPlaylistUpdate } from "./onPlaylistUpdate";
 import { onRemoveAlbum } from "./onRemoveAlbum";
 import { onRemoveArtist } from "./onRemoveArtist";
 import { onRemoveMusics } from "./onRemoveMusics";
+import { onSetAlbumFavorite } from "./onSetAlbumFavorite";
 import { onSetArtistInitial } from "./onSetArtistInitial";
 import { onSetArtistPicture } from "./onSetArtistPicture";
+import { onSetMusicFavorite } from "./onSetMusicFavorite";
 import { onSetSettings } from "./onSetSettings/onSetSettings";
 import { onUpdateMusics } from "./onUpdateMusics/onUpdateMusics";
 
@@ -72,6 +75,9 @@ export const initializeIpcEvents = (): void => {
   ipcMain.handle(IpcKeys.GetStats, onGetStats);
   ipcMain.handle(IpcKeys.SetArtistPicture, onSetArtistPicture);
   ipcMain.handle(IpcKeys.SetArtistInitial, onSetArtistInitial);
+  ipcMain.handle(IpcKeys.SetMusicFavorite, onSetMusicFavorite);
+  ipcMain.handle(IpcKeys.SetAlbumFavorite, onSetAlbumFavorite);
+  ipcMain.handle(IpcKeys.GetAlbumFavorites, onGetAlbumFavorites);
   ipcMain.handle(IpcKeys.UpdateMusics, onUpdateMusics);
   ipcMain.handle(IpcKeys.LookupMusic, onLookupMusic);
   ipcMain.handle(IpcKeys.FetchMusicInfo, onFetchMusicInfo);
@@ -116,6 +122,9 @@ export const releaseIpcEvents = (): void => {
   ipcMain.removeHandler(IpcKeys.GetStats);
   ipcMain.removeHandler(IpcKeys.SetArtistPicture);
   ipcMain.removeHandler(IpcKeys.SetArtistInitial);
+  ipcMain.removeHandler(IpcKeys.SetMusicFavorite);
+  ipcMain.removeHandler(IpcKeys.SetAlbumFavorite);
+  ipcMain.removeHandler(IpcKeys.GetAlbumFavorites);
   ipcMain.removeHandler(IpcKeys.UpdateMusics);
   ipcMain.removeHandler(IpcKeys.LookupMusic);
   ipcMain.removeHandler(IpcKeys.FetchMusicInfo);

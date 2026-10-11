@@ -34,6 +34,7 @@ export const MUSIC_COLUMNS = `
   m.duration_ms  AS durationMs,
   m.bpm          AS bpm,
   m.rating       AS rating,
+  m.favorite     AS favorite,
   m.picture_id   AS pictureId,
   p.file_path    AS picturePath,
   m.added_at     AS addedAt,

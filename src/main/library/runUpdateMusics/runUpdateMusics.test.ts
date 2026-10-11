@@ -6,11 +6,15 @@ import {
   type Track,
 } from "@akabeko/music-metadata-editor";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { albumKeyOf } from "../../../shared/albumKeyOf";
 import { runMigrations } from "../../db/runMigrations";
 import type { UpdateProgressPayload } from "../../ipc/types";
+import { cleanupLibraryOrphans } from "../cleanupLibraryOrphans";
+import { getAlbumFavorites } from "../getAlbumFavorites";
 import { getOrCreatePictureId } from "../getOrCreatePictureId";
 import { upsertMusic } from "../musicRepository";
 import { registerArtistPictureIfMissing } from "../registerArtistPictureIfMissing";
+import { setAlbumFavorite } from "../setAlbumFavorite";
 import type { MusicRowInput } from "../trackMapping";
 import {
   runUpdateMusics,
@@ -445,4 +449,82 @@ it("reports a DB failure after a successful file write as failed", async () => {
   expect(summary.updated).toEqual([]);
   expect(summary.failed[0]?.musicId).toBe(id);
   expect(files.get("/m/a.mp3")?.pictures).toHaveLength(1);
+});
+
+it("keeps the track's favorite flag across a tag edit", async () => {
+  const id = seed("/m/a.mp3");
+  db.prepare("UPDATE musics SET favorite = 1 WHERE id = ?").run(id);
+
+  const summary = await runUpdateMusics(
+    db,
+    { musicIds: [id], patch: { title: "Renamed" } },
+    events(),
+    deps(),
+  );
+
+  expect(dbRow(id).favorite).toBe(1);
+  expect(summary.updated[0]?.music.favorite).toBe(true);
+});
+
+it("carries the album favorite over when the whole album is renamed", async () => {
+  const id = seed("/m/a.mp3");
+  setAlbumFavorite(db, albumKeyOf("Artist", "Album"), true);
+
+  await runUpdateMusics(
+    db,
+    { musicIds: [id], patch: { album: "Renamed" } },
+    events(),
+    deps(),
+  );
+  // onUpdateMusics GCs once per run; the old key has no track left.
+  cleanupLibraryOrphans(db);
+
+  expect(getAlbumFavorites(db)).toEqual([albumKeyOf("Artist", "Renamed")]);
+});
+
+it("keeps the old key on when some of its tracks stay behind", async () => {
+  const moved = seed("/m/a.mp3");
+  seed("/m/b.mp3");
+  setAlbumFavorite(db, albumKeyOf("Artist", "Album"), true);
+
+  await runUpdateMusics(
+    db,
+    { musicIds: [moved], patch: { album: "Split" } },
+    events(),
+    deps(),
+  );
+  cleanupLibraryOrphans(db);
+
+  expect(getAlbumFavorites(db)).toEqual([
+    albumKeyOf("Artist", "Album"),
+    albumKeyOf("Artist", "Split"),
+  ]);
+});
+
+it("does not turn the new album on when the old one was not a favorite", async () => {
+  const id = seed("/m/a.mp3");
+
+  await runUpdateMusics(
+    db,
+    { musicIds: [id], patch: { album: "Renamed" } },
+    events(),
+    deps(),
+  );
+
+  expect(getAlbumFavorites(db)).toEqual([]);
+});
+
+it("follows an album artist change (the display artist is part of the key)", async () => {
+  const id = seed("/m/a.mp3");
+  setAlbumFavorite(db, albumKeyOf("Artist", "Album"), true);
+
+  await runUpdateMusics(
+    db,
+    { musicIds: [id], patch: { albumArtist: "Various" } },
+    events(),
+    deps(),
+  );
+  cleanupLibraryOrphans(db);
+
+  expect(getAlbumFavorites(db)).toEqual([albumKeyOf("Various", "Album")]);
 });

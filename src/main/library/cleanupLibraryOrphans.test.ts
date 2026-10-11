@@ -1,10 +1,12 @@
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeEach, expect, it } from "vitest";
+import { albumKeyOf } from "../../shared/albumKeyOf";
 import { runMigrations } from "../db/runMigrations";
 import { cleanupLibraryOrphans } from "./cleanupLibraryOrphans";
 import { getOrCreatePictureId } from "./getOrCreatePictureId";
 import { upsertMusic } from "./musicRepository";
 import { registerArtistPictureIfMissing } from "./registerArtistPictureIfMissing";
+import { setAlbumFavorite } from "./setAlbumFavorite";
 import { setArtistInitial } from "./setArtistInitial";
 import type { MusicRowInput } from "./trackMapping";
 
@@ -119,5 +121,37 @@ it("drops the artist initial stranded by a re-import that renamed the artist", (
   cleanupLibraryOrphans(db);
   expect(db.prepare("SELECT artist FROM artist_initials").all()).toEqual([
     { artist: "Keep" },
+  ]);
+});
+
+it("drops the album favorite stranded by a re-import that renamed the album", () => {
+  upsertMusic(db, { ...row("/m/a.mp3"), album: "Old" }, NOW);
+  upsertMusic(db, { ...row("/m/keep.mp3"), album: "Keep" }, NOW);
+  setAlbumFavorite(db, albumKeyOf("Artist", "Old"), true);
+  setAlbumFavorite(db, albumKeyOf("Artist", "Keep"), true);
+  // Same file re-imported after its album tag changed.
+  upsertMusic(db, { ...row("/m/a.mp3"), album: "New" }, NOW);
+
+  cleanupLibraryOrphans(db);
+  expect(db.prepare("SELECT album FROM album_favorites").all()).toEqual([
+    { album: "Keep" },
+  ]);
+});
+
+it("keys album favorites on the display artist of the tracks", () => {
+  upsertMusic(
+    db,
+    { ...row("/m/c.mp3", "Feat A"), albumArtist: "Various", album: "Comp" },
+    NOW,
+  );
+  db.exec(
+    `INSERT INTO album_favorites (artist, album)
+     VALUES ('Various', 'Comp'), ('Feat A', 'Comp')`,
+  );
+
+  cleanupLibraryOrphans(db);
+  // "Feat A" is not a display artist here, so its row is an orphan.
+  expect(db.prepare("SELECT artist FROM album_favorites").all()).toEqual([
+    { artist: "Various" },
   ]);
 });

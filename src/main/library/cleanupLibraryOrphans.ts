@@ -1,4 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
+import { deleteOrphanedAlbumFavorites } from "./deleteOrphanedAlbumFavorites";
 import { deleteOrphanedArtistInitials } from "./deleteOrphanedArtistInitials";
 import { deleteOrphanedArtistPictures } from "./deleteOrphanedArtistPictures";
 import { deleteOrphanedPictures } from "./deleteOrphanedPictures";
@@ -8,9 +9,10 @@ import { deleteOrphanedPictures } from "./deleteOrphanedPictures";
  *
  * Every mutation that can strand referencing rows (library removal,
  * re-import with changed tags, artist-picture replacement) funnels through
- * the same two steps:
+ * the same steps:
  * 1. Drop `artist_pictures` / `artist_initials` rows whose artist no longer
- *    has any track.
+ *    has any track, and `album_favorites` rows whose album no longer has
+ *    any track.
  * 2. Drop `pictures` rows referenced by neither `musics.picture_id` nor
  *    `artist_pictures.picture_id`, collecting their file paths.
  *
@@ -27,6 +29,7 @@ export const cleanupLibraryOrphans = (db: DatabaseSync): string[] => {
   try {
     deleteOrphanedArtistPictures(db);
     deleteOrphanedArtistInitials(db);
+    deleteOrphanedAlbumFavorites(db);
     const orphaned = deleteOrphanedPictures(db);
     db.exec("COMMIT");
     return orphaned;

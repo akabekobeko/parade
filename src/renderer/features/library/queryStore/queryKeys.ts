@@ -11,6 +11,8 @@ export const queryKeys = {
   albums: (filter: AlbumFilter): QueryKey =>
     `albums:${serializeAlbumFilter(filter)}`,
   musicsByAlbum: (albumKey: string): QueryKey => `musicsByAlbum:${albumKey}`,
+  /** Identity keys of every favorite album (`readonly string[]`). */
+  albumFavorites: "albumFavorites" as QueryKey,
   playlists: "playlists" as QueryKey,
   /** @param routeId - `p<id>` (static) / `s<id>` (smart), the route id form. */
   musicsByPlaylist: (routeId: string): QueryKey =>
