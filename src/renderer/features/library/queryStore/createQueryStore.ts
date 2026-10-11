@@ -95,17 +95,20 @@ export const createQueryStore = (fetch: QueryFetcher): QueryStore => {
         return;
       }
 
+      const value = updater(entry.state.value as T);
+      if (value === entry.state.value) {
+        return; // Nothing changed for this key; spare its subscribers.
+      }
+
       // Bump the generation so an in-flight response cannot overwrite the
       // patch: the patch reflects a mutation that response predates.
       entry.generation += 1;
-      entry.state = {
-        status: "success",
-        value: updater(entry.state.value as T),
-      };
+      entry.state = { status: "success", value };
       for (const listener of [...entry.listeners]) {
         listener();
       }
     },
+    keys: () => [...entries.keys()],
     invalidate: (key) => {
       const targets =
         key === undefined ? [...entries.keys()] : entries.has(key) ? [key] : [];

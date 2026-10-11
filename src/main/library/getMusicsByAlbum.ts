@@ -1,4 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
+import { parseAlbumKey } from "../../shared/albumKeyOf";
 import { musicSchema } from "../../shared/schemas/musicSchema";
 import type { Music } from "../ipc/types";
 import { MUSIC_COLUMNS } from "./constants";
@@ -16,13 +17,11 @@ export const getMusicsByAlbum = (
   db: DatabaseSync,
   albumKey: string,
 ): Music[] => {
-  const separator = albumKey.indexOf("\u0000");
-  if (separator < 0) {
+  const parts = parseAlbumKey(albumKey);
+  if (parts === null) {
     return [];
   }
 
-  const artist = albumKey.slice(0, separator);
-  const album = albumKey.slice(separator + 1);
   return musicSchema.array().parse(
     db
       .prepare(
@@ -32,6 +31,6 @@ export const getMusicsByAlbum = (
          WHERE COALESCE(NULLIF(m.album_artist, ''), m.artist) = ? AND m.album = ?
          ORDER BY m.disc, m.track, m.title`,
       )
-      .all(artist, album),
+      .all(parts.artist, parts.album),
   );
 };

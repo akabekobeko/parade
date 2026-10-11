@@ -37,6 +37,18 @@ it("registers every implemented invoke handler", () => {
     IpcKeys.CancelFetch,
     expect.any(Function),
   );
+  expect(handle).toHaveBeenCalledWith(
+    IpcKeys.SetMusicFavorite,
+    expect.any(Function),
+  );
+  expect(handle).toHaveBeenCalledWith(
+    IpcKeys.SetAlbumFavorite,
+    expect.any(Function),
+  );
+  expect(handle).toHaveBeenCalledWith(
+    IpcKeys.GetAlbumFavorites,
+    expect.any(Function),
+  );
 });
 
 it("is idempotent — a second call registers nothing", () => {

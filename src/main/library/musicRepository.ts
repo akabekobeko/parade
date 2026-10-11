@@ -9,6 +9,12 @@ import type { MusicRowInput } from "./trackMapping";
  * `added_at` survive: `ON CONFLICT(file_path) DO UPDATE` never touches
  * either. `picture_id` is kept when the re-import carries no artwork
  * (`COALESCE`) so stripping tags from a file does not lose its cover.
+ *
+ * `favorite` is deliberately absent from both the INSERT column list and
+ * the `DO UPDATE SET` clause (`docs/specs/v1.4/architecture/database.md`):
+ * it is user state, not a tag, so a new row starts at the column default
+ * (0) and a re-import / tag edit never touches it. Only
+ * `mp:library:setMusicFavorite` writes it.
  */
 
 const UPSERT_SQL = `

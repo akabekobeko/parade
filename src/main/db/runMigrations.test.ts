@@ -131,3 +131,50 @@ it("throws DatabaseDowngradeError when user_version is newer than the list", () 
     }
   }
 });
+
+it("adds the favorite flag and the album_favorites table when migrating from v4", () => {
+  db = new DatabaseSync(":memory:");
+  runMigrations(db, migrations.slice(0, 4));
+  db.exec(
+    `INSERT INTO musics (file_path, audio_format, title, added_at, updated_at)
+     VALUES ('/m/a.mp3', 'mp3', 'T', '', '')`,
+  );
+
+  runMigrations(db);
+
+  expect(getUserVersion(db)).toBe(5);
+  // Existing tracks start with the flag off; the column never holds NULL.
+  const favorite = db
+    .prepare("SELECT favorite FROM musics WHERE file_path = '/m/a.mp3'")
+    .get() as { favorite: number };
+  expect(favorite).toEqual({ favorite: 0 });
+  const column = (
+    db.prepare("PRAGMA table_info(musics)").all() as Array<{
+      name: string;
+      type: string;
+      notnull: number;
+      dflt_value: string | null;
+    }>
+  ).find((entry) => entry.name === "favorite");
+  expect(column).toMatchObject({
+    type: "INTEGER",
+    notnull: 1,
+    dflt_value: "0",
+  });
+
+  expect(tableNames(db)).toContain("album_favorites");
+  const keyColumns = (
+    db.prepare("PRAGMA table_info(album_favorites)").all() as Array<{
+      name: string;
+      pk: number;
+      notnull: number;
+    }>
+  )
+    .filter((entry) => entry.pk > 0)
+    .sort((a, b) => a.pk - b.pk)
+    .map(({ name, pk, notnull }) => ({ name, pk, notnull }));
+  expect(keyColumns).toEqual([
+    { name: "artist", pk: 1, notnull: 1 },
+    { name: "album", pk: 2, notnull: 1 },
+  ]);
+});

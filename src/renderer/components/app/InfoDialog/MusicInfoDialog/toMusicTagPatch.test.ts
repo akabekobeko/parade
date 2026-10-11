@@ -69,6 +69,7 @@ it("round-trips a rating through the form (5 → 1.0 → 5)", () => {
     durationMs: 0,
     bpm: null,
     rating: stored ?? null,
+    favorite: false,
     pictureId: null,
     picturePath: null,
     addedAt: "",

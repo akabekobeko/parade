@@ -13,6 +13,7 @@ import { toIpcError } from "../../ipc/utils/toIpcError";
 import { imagesDirectory } from "../../protocol/imagesDirectory";
 import { getMusicsByIds } from "../getMusicsByIds";
 import { getOrCreatePictureId } from "../getOrCreatePictureId";
+import { inheritAlbumFavorite } from "../inheritAlbumFavorite";
 import { upsertMusic } from "../musicRepository";
 import { registerArtistPictureIfMissing } from "../registerArtistPictureIfMissing";
 import { saveArtwork } from "../saveArtwork";
@@ -53,7 +54,10 @@ const DEFAULT_DEPS: UpdateRunDeps = {
  * parallel writes outweighs the gain) and each one is re-read and upserted
  * in its own short transaction, so the DB only ever mirrors what is really
  * in the file. One failed file never aborts the run: it lands in
- * `failed` and the loop moves on. Orphan GC and the `mp:library:changed`
+ * `failed` and the loop moves on. A track whose album identity changed
+ * carries its album's favorite over to the new key (`inheritAlbumFavorite`)
+ * in the same transaction as its upsert. Orphan GC (which then drops the
+ * old key once no track is left under it) and the `mp:library:changed`
  * broadcast are the caller's job, once per run.
  *
  * @param db - The open library connection.
@@ -124,6 +128,11 @@ export const runUpdateMusics = async (
         const pictureId =
           artworkPath !== null ? getOrCreatePictureId(db, artworkPath) : null;
         upsertMusic(db, row, now, pictureId);
+        inheritAlbumFavorite(
+          db,
+          { artist: displayArtistOf(music), album: music.album },
+          { artist: displayArtistOf(row), album: row.album },
+        );
         if (request.picture === null) {
           clearMusicPictureId(db, music.id);
         }

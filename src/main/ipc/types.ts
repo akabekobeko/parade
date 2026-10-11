@@ -129,6 +129,15 @@ export type AlbumFilter = {
    * whose year is unknown.
    */
   readonly decades?: ReadonlyArray<number | null>;
+  /**
+   * Keep only albums flagged as favorite
+   * (`docs/specs/v1.4/architecture/favorite-filter.md`). Fed by the content
+   * toolbar's filter menu like `musicTitle`; never persisted in
+   * `AppSettings` (`sanitizeAlbumFilter` whitelists its fields). Part of the
+   * query key so restricted and unrestricted lists never share a cache
+   * entry. The WHERE fragment lands with the filter menu (Phase 4).
+   */
+  readonly favoriteOnly?: boolean;
 };
 
 /**
@@ -748,6 +757,22 @@ export type SetArtistInitialRequest = {
   readonly initial: string | null;
 };
 
+/** Request payload for `mp:library:setMusicFavorite`. */
+export type SetMusicFavoriteRequest = {
+  /** Row id of the track. */
+  readonly musicId: number;
+  /** New flag value. */
+  readonly favorite: boolean;
+};
+
+/** Request payload for `mp:library:setAlbumFavorite`. */
+export type SetAlbumFavoriteRequest = {
+  /** Identity key from {@link AlbumSummary.albumKey} / `AlbumGroup.key`. */
+  readonly albumKey: string;
+  /** New flag value. */
+  readonly favorite: boolean;
+};
+
 /** Request payload for `mp:library:getMusicsByArtist`. */
 export type GetMusicsByArtistRequest = {
   /**
@@ -921,6 +946,19 @@ export type MpBridge = {
     readonly setArtistInitial: (
       request: SetArtistInitialRequest,
     ) => Promise<IpcResult<void>>;
+    /**
+     * Turn one track's favorite on or off. No `onChanged` push follows;
+     * the Renderer patches its caches from the request.
+     */
+    readonly setMusicFavorite: (
+      request: SetMusicFavoriteRequest,
+    ) => Promise<IpcResult<void>>;
+    /** Turn one album's favorite on or off (no `onChanged` push either). */
+    readonly setAlbumFavorite: (
+      request: SetAlbumFavoriteRequest,
+    ) => Promise<IpcResult<void>>;
+    /** Identity keys of every favorite album. */
+    readonly getAlbumFavorites: () => Promise<IpcResult<readonly string[]>>;
     /**
      * Write the same tag / artwork change to several tracks; progress
      * arrives via {@link MpBridge.library.onUpdateProgress}.

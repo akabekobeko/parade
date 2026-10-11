@@ -43,6 +43,10 @@ export const fetchLibraryQuery: QueryFetcher = (key) => {
     });
   }
 
+  if (key === "albumFavorites") {
+    return window.mp.library.getAlbumFavorites();
+  }
+
   if (key === "playlists") {
     return window.mp.playlist.list();
   }

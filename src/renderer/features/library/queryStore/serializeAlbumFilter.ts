@@ -6,6 +6,8 @@ import type { AlbumFilter } from "@mp/ipc";
  * Two filters with the same meaning must map to the same key (the cache
  * identity), so inactive fields are dropped and the OR-set fields are
  * sorted — `{genres: ["a","b"]}` and `{genres: ["b","a"]}` share one entry.
+ * `favoriteOnly` is kept only when set, so the restricted and unrestricted
+ * album lists are distinct entries (`isFavoriteOnlyAlbumsKey` reads it back).
  *
  * @param filter - Filter to serialise.
  * @returns Deterministic JSON of the active filter fields.
@@ -23,5 +25,6 @@ export const serializeAlbumFilter = (filter: AlbumFilter): string => {
     ...(musicTitle !== "" ? { musicTitle } : {}),
     ...(genres.length > 0 ? { genres } : {}),
     ...(decades.length > 0 ? { decades } : {}),
+    ...(filter.favoriteOnly === true ? { favoriteOnly: true } : {}),
   });
 };

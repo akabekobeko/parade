@@ -21,6 +21,7 @@ const ROW = {
   durationMs: 1000,
   bpm: null,
   rating: null,
+  favorite: 0,
   pictureId: null,
   picturePath: null,
   addedAt: "2026-08-10T00:00:00.000Z",
@@ -28,7 +29,18 @@ const ROW = {
 };
 
 it("accepts a row of the track SELECT as it is", () => {
-  expect(musicSchema.parse(ROW)).toEqual(ROW);
+  expect(musicSchema.parse(ROW)).toEqual({ ...ROW, favorite: false });
+});
+
+it("turns the 0 / 1 favorite column into a boolean", () => {
+  expect(musicSchema.parse({ ...ROW, favorite: 0 }).favorite).toBe(false);
+  expect(musicSchema.parse({ ...ROW, favorite: 1 }).favorite).toBe(true);
+});
+
+it("rejects a favorite value other than 0 / 1", () => {
+  expect(() => musicSchema.parse({ ...ROW, favorite: 2 })).toThrow();
+  expect(() => musicSchema.parse({ ...ROW, favorite: null })).toThrow();
+  expect(() => musicSchema.parse({ ...ROW, favorite: true })).toThrow();
 });
 
 it("accepts fractional durations and tag numbers mme may report", () => {
