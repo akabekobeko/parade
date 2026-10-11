@@ -8,6 +8,7 @@ const DEFAULT_COLUMNS = resolveVisibleColumns(PLAYLIST_COLUMNS, undefined);
 it("uses the default widths when nothing is saved", () => {
   expect(resolveColumnWidths(DEFAULT_COLUMNS, undefined)).toEqual({
     ordinal: 44,
+    favorite: 48,
     title: 280,
     artist: 200,
     album: 200,

@@ -1,5 +1,6 @@
 import type { Music } from "@mp/ipc";
 import type { DragEvent, MouseEvent } from "react";
+import { FavoriteStarButton } from "@/components/app/FavoriteStarButton/FavoriteStarButton";
 import { PausedButton } from "@/components/app/MusicRow/PausedButton";
 import { PlayingButton } from "@/components/app/MusicRow/PlayingButton";
 import { TrackNumberButton } from "@/components/app/MusicRow/TrackNumberButton";
@@ -16,7 +17,10 @@ import type {
   PlaylistColumnId,
 } from "@/features/playlistColumns/types";
 import { cn } from "@/libs/utils";
-import { PLAYLIST_TABLE_MENU_STICKY_RIGHT } from "./constants";
+import {
+  COLUMN_TEXT_ALIGN_CLASS_NAMES,
+  PLAYLIST_TABLE_MENU_STICKY_RIGHT,
+} from "./constants";
 import { renderPlaylistCell } from "./renderPlaylistCell/renderPlaylistCell";
 
 type Props = {
@@ -59,6 +63,11 @@ type Props = {
    * unlike `onPlay`).
    */
   readonly onTogglePlayPause: () => void;
+  /**
+   * The favorite cell's Star was clicked: flip this row's track to `next`
+   * (`docs/specs/v1.4/features/playlist-favorite-column.md`).
+   */
+  readonly onToggleFavorite: (next: boolean) => void;
   /** A drag of this row started. */
   readonly onDragStart: () => void;
   /** A dragged row moved over this row. */
@@ -150,7 +159,9 @@ const MENU_CELL_CLASS_NAME =
  * reachable from the keyboard (Enter) without making the row focusable.
  * The leading cell doubles as the playback indicator / control, shared with
  * `MusicRow`: `PlayingButton` for the playing row, `PausedButton` for the
- * paused row, `TrackNumberButton` for any other row.
+ * paused row, `TrackNumberButton` for any other row. The favorite cell
+ * holds the Star (`FavoriteStarButton`) and is a control cell like the
+ * leading and the menu cell, so its clicks never select or play the row.
  *
  * The row itself is the right-click menu's trigger and the draggable
  * element, so sibling rows stay adjacent in the DOM for the selection
@@ -171,6 +182,7 @@ export const PlaylistTableRow = ({
   onSelect,
   onPlay,
   onTogglePlayPause,
+  onToggleFavorite,
   onDragStart,
   onDragOver,
   onDrop,
@@ -234,6 +246,24 @@ export const PlaylistTableRow = ({
           );
         }
 
+        if (column.id === "favorite") {
+          return (
+            <td
+              key={column.id}
+              // biome-ignore lint/a11y/noRedundantRoles: the display override drops the implicit role.
+              role="cell"
+              data-row-control
+              className="flex shrink-0 items-center justify-center px-2"
+              style={style}
+            >
+              <FavoriteStarButton
+                favorite={music.favorite}
+                onToggle={onToggleFavorite}
+              />
+            </td>
+          );
+        }
+
         if (column.id === "menu") {
           return (
             <td
@@ -262,7 +292,7 @@ export const PlaylistTableRow = ({
             role="cell"
             className={cn(
               "min-w-0 shrink-0 px-2",
-              column.align === "end" ? "text-end" : "text-start",
+              COLUMN_TEXT_ALIGN_CLASS_NAMES[column.align],
             )}
             style={style}
           >

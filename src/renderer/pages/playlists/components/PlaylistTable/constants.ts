@@ -1,3 +1,25 @@
+import type { PlaylistColumn } from "@/features/playlistColumns/types";
+
+/** Flex alignment of a cell's or header button's content per column alignment. */
+export const COLUMN_JUSTIFY_CLASS_NAMES: Record<
+  PlaylistColumn["align"],
+  string
+> = {
+  start: "justify-start",
+  end: "justify-end",
+  center: "justify-center",
+};
+
+/** Text alignment of a cell or a plain header label per column alignment. */
+export const COLUMN_TEXT_ALIGN_CLASS_NAMES: Record<
+  PlaylistColumn["align"],
+  string
+> = {
+  start: "text-start",
+  end: "text-end",
+  center: "text-center",
+};
+
 /**
  * Height of the table's header row in px. A constant rather than a measured
  * value, so the row virtualisation can offset by the same number.

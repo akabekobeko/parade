@@ -50,6 +50,7 @@ export const AlbumDetail = ({ album, albums }: Props) => {
     playFrom,
     playAll,
     removeFromLibrary,
+    toggleFavorite,
     playingStateOf,
   } = useAlbumDetail(album, albums);
 
@@ -152,6 +153,7 @@ export const AlbumDetail = ({ album, albums }: Props) => {
                   }}
                   onPlay={() => playFrom(music)}
                   onTogglePlayPause={() => commands.togglePlayPause()}
+                  onToggleFavorite={(next) => toggleFavorite(music, next)}
                   menuItems={[
                     {
                       label: t("menu.playMusic"),

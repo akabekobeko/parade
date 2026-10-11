@@ -42,8 +42,9 @@ type Args = {
  * is muted and small like the v1.2 artist / album columns, and numbers,
  * durations, and dates use tabular digits.
  *
- * @returns The cell content; `null` for a blank cell and for the `ordinal`
- *   and `menu` columns, whose controls the row component renders itself.
+ * @returns The cell content; `null` for a blank cell and for the `ordinal`,
+ *   `favorite`, and `menu` columns, whose controls the row component
+ *   renders itself.
  */
 export const renderPlaylistCell = ({
   columnId,
@@ -53,6 +54,7 @@ export const renderPlaylistCell = ({
 }: Args): ReactNode => {
   switch (columnId) {
     case "ordinal":
+    case "favorite":
     case "menu":
       return null;
     case "title":

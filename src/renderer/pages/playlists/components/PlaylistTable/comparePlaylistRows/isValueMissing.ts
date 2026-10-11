@@ -6,7 +6,8 @@ import type { PlaylistColumnId } from "@/features/playlistColumns/types";
  * either direction (`docs/specs/v1.3/features/column-sort.md`). Matches the
  * condition for a blank cell: an unset text tag (empty string), an unknown
  * year, bpm, or rating (`null`; `0` is a value), or an untagged track
- * number (`0`). The other columns always have a value.
+ * number (`0`). The other columns always have a value; the favorite flag's
+ * off is a value too.
  *
  * @param columnId - Column the rows are sorted by.
  * @param music - Track of the row.
@@ -37,6 +38,7 @@ export const isValueMissing = (
     // Listed rather than left to a default, so a new column fails to
     // compile until it is given a rule here.
     case "ordinal":
+    case "favorite":
     case "disc":
     case "audioFormat":
     case "addedAt":

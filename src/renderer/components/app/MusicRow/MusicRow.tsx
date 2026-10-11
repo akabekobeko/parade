@@ -8,6 +8,7 @@ import {
 import { formatTime } from "@/libs/formatTime";
 import { cn } from "@/libs/utils";
 import { EllipsisText } from "../EllipsisText/EllipsisText";
+import { FavoriteStarButton } from "../FavoriteStarButton/FavoriteStarButton";
 import { RowMenu, type RowMenuItems } from "../RowMenu/RowMenu";
 import { RowMenuEntries } from "../RowMenu/RowMenuItems";
 import { PausedButton } from "./PausedButton";
@@ -44,6 +45,12 @@ type Props = {
    * play button — the play button resumes from the paused position, unlike `onPlay`).
    */
   readonly onTogglePlayPause?: () => void;
+  /**
+   * The Star was clicked: flip the track's favorite to `next`
+   * (`docs/specs/v1.4/features/music-favorite.md`). The parent runs the IPC
+   * and the cache update; the row only shows `music.favorite`.
+   */
+  readonly onToggleFavorite: (next: boolean) => void;
   /**
    * Per-track menu entries (#43), shown by the [...] dropdown and by the
    * row's right-click menu alike.
@@ -104,7 +111,10 @@ const rowClassName = (playing: boolean, selected: boolean): string =>
  * The leading cell doubles as the playback indicator / control (Apple Music
  * style), picked by `playing`: `PlayingButton` for the playing row,
  * `PausedButton` for the paused row, `TrackNumberButton` for any other
- * (stopped) row. The playing / paused row also lights its rounded border up
+ * (stopped) row. Left of it sits the favorite Star (`FavoriteStarButton`),
+ * always visible; like the leading cell it lies outside the title button,
+ * so a click on it never selects or plays the row, and the row height is
+ * unchanged. The playing / paused row also lights its rounded border up
  * with a blurred glow (see `rowClassName`), like the album artwork in the
  * Artists / Albums views.
  */
@@ -117,6 +127,7 @@ export const MusicRow = ({
   onClick,
   onPlay,
   onTogglePlayPause,
+  onToggleFavorite,
   menuItems,
 }: Props) => {
   const number =
@@ -124,6 +135,11 @@ export const MusicRow = ({
 
   const cells = (
     <>
+      <FavoriteStarButton
+        className="shrink-0"
+        favorite={music.favorite}
+        onToggle={onToggleFavorite}
+      />
       <span className="flex w-7 shrink-0 items-center justify-end font-mono text-muted-foreground text-xs tabular-nums">
         {playing === "playing" ? (
           <PlayingButton onPause={onTogglePlayPause} />

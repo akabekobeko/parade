@@ -13,6 +13,7 @@ import {
 } from "@/features/library/selection/applySelectionClick";
 import { menuTargetsOf } from "@/features/library/selection/menuTargetsOf";
 import { useLibraryQuery } from "@/features/library/useLibraryQuery";
+import { useToggleMusicFavorite } from "@/features/library/useToggleMusicFavorite";
 import {
   usePlaybackState,
   usePlayerCommands,
@@ -59,6 +60,8 @@ export const useAlbumDetail = (
   const { current } = usePlayerState();
   const playbackState = usePlaybackState();
   const [bound, setBound] = useState<BoundSelection | null>(null);
+  /** Row Star: flip one track's favorite (the clicked row only). */
+  const toggleFavorite = useToggleMusicFavorite();
 
   const { applied: trackFilter } = useSyncExternalStore(
     trackFilterStore.subscribe,
@@ -150,6 +153,7 @@ export const useAlbumDetail = (
     playFrom,
     playAll,
     removeFromLibrary,
+    toggleFavorite,
     playingStateOf,
   };
 };

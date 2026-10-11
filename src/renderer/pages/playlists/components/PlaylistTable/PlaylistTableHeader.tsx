@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Star } from "lucide-react";
 import type { DragEvent } from "react";
 import { useT } from "@/features/i18n/useT";
 import type {
@@ -9,6 +9,8 @@ import type {
 import { cn } from "@/libs/utils";
 import { ColumnResizeHandle } from "./ColumnResizeHandle";
 import {
+  COLUMN_JUSTIFY_CLASS_NAMES,
+  COLUMN_TEXT_ALIGN_CLASS_NAMES,
   PLAYLIST_TABLE_HEADER_HEIGHT,
   PLAYLIST_TABLE_MENU_STICKY_RIGHT,
   PLAYLIST_TABLE_PADDING_X,
@@ -51,7 +53,10 @@ type Props = {
  * A sortable column's label is a button (plain text otherwise): a click
  * sorts by the column or
  * flips the direction (`docs/specs/v1.3/features/column-sort.md`), and the
- * sorted column shows an arrow and `aria-sort`. A resizable column has a
+ * sorted column shows an arrow and `aria-sort`. A column with a
+ * `headerIcon` draws that icon instead of its label text and names itself
+ * through `aria-label` (the favorite column's Star,
+ * `docs/specs/v1.4/features/playlist-favorite-column.md`). A resizable column has a
  * drag handle on its right edge
  * (`docs/specs/v1.3/features/column-resize.md`); the drag starts from the
  * displayed width, which this header knows through `widthOf`.
@@ -149,15 +154,24 @@ export const PlaylistTableHeader = ({
               {column.labelKey === null ? null : column.sortable ? (
                 <button
                   type="button"
+                  aria-label={
+                    column.headerIcon !== undefined
+                      ? t(column.labelKey)
+                      : undefined
+                  }
                   className={cn(
                     "flex min-w-0 flex-1 cursor-default items-center gap-1 rounded-sm px-2 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset",
-                    column.align === "end" ? "justify-end" : "justify-start",
+                    COLUMN_JUSTIFY_CLASS_NAMES[column.align],
                     sorted && "text-foreground",
                   )}
                   onClick={() => onSort(column.id)}
                   {...dragProps}
                 >
-                  <span className="truncate">{t(column.labelKey)}</span>
+                  {column.headerIcon === "star" ? (
+                    <Star aria-hidden className="size-3.5 shrink-0" />
+                  ) : (
+                    <span className="truncate">{t(column.labelKey)}</span>
+                  )}
                   {sorted &&
                     (sort.order === "asc" ? (
                       <ChevronUp aria-hidden className="size-3 shrink-0" />
@@ -169,7 +183,7 @@ export const PlaylistTableHeader = ({
                 <span
                   className={cn(
                     "min-w-0 flex-1 self-center truncate px-2",
-                    column.align === "end" ? "text-end" : "text-start",
+                    COLUMN_TEXT_ALIGN_CLASS_NAMES[column.align],
                   )}
                   {...dragProps}
                 >

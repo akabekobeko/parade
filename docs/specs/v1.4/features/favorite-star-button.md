@@ -20,7 +20,7 @@ Lucide の `Star` を使い、塗りつぶしは既存の `PlayFillIcon` と同�
 
 - `<button type="button">` にし、`aria-pressed` で ON / OFF を表します。`aria-label` は ON なら「Remove from favorites」、OFF なら「Add to favorites」(i18n キー `favorite.add` / `favorite.remove`)
 - クリックで ON / OFF を反転します。処理は呼び出し元から渡された `onToggle(next: boolean)` に委ね、ボタン自身は IPC を知りません
-- 行の中に置くときは `data-row-control` を持つ要素で包み、クリックが行の選択・再生・ダブルクリックへ伝わらないようにします (既存の `isRowEvent` の除外規則。Playlists では `[data-row-control] button`)
+- 行の中に置くときはクリックが行の選択・再生・ダブルクリックへ伝わらないようにします。行全体がクリック対象の Playlists では `data-row-control` を持つセルで包みます (既存の `isRowEvent` の除外規則 `[data-row-control] button`)。`MusicRow` ではタイトルの `<button>` の外に置くだけで足ります ([曲のお気に入り](music-favorite.md))
 - 既存の `HoverIconButton` は hover まで非表示にしますが、Star は **常に表示** します。OFF の薄い色が「まだお気に入りでない」ことを示す印です
 - ツールチップは出しません。`aria-label` だけにします (行の中で hover のたびにツールチップが出るのを避ける)
 - 連打の抑止はしません。IPC は数ミリ秒で返り、最後のクリックの値が残れば十分です

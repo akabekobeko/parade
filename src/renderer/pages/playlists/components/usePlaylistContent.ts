@@ -13,6 +13,7 @@ import {
 import { menuTargetsOf } from "@/features/library/selection/menuTargetsOf";
 import { uniqueMusics } from "@/features/library/selection/uniqueMusics";
 import { useLibraryQuery } from "@/features/library/useLibraryQuery";
+import { useToggleMusicFavorite } from "@/features/library/useToggleMusicFavorite";
 import {
   usePlaybackState,
   usePlayerCommands,
@@ -109,6 +110,8 @@ export const usePlaylistContent = (routeId: string) => {
   const [overIndex, setOverIndex] = useState<number | null>(null);
   /** Whether the smart-rules editor is open (smart playlists only). */
   const [editingRules, setEditingRules] = useState(false);
+  /** Favorite cell's Star: flip one track's favorite (the clicked row only). */
+  const toggleFavorite = useToggleMusicFavorite();
   /**
    * Sort of this playlist. Not persisted: the component remounts per
    * playlist, so every playlist opens in the playlist order.
@@ -404,6 +407,8 @@ export const usePlaylistContent = (routeId: string) => {
     },
     /** Row menu: the tracks an entry applies to and the menu's actions. */
     menu: { targetsOf: menuTargetsOfRow, openMusicInfo, removeRowAt },
+    /** Favorite cell: flip the row's track. */
+    toggleFavorite,
     /** Smart-rules editor dialog (smart playlists only). */
     rulesEditor: {
       open: editingRules,

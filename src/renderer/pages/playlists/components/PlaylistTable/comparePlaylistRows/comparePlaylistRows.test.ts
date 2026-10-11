@@ -176,3 +176,21 @@ it("keeps equal rows in the playlist order in either direction", () => {
   expect(sorted(rows, "album", "asc")).toEqual([1, 3, 0, 2]);
   expect(sorted(rows, "album", "desc")).toEqual([0, 2, 1, 3]);
 });
+
+it("sorts the favorite flag on-first when ascending, off-first when descending", () => {
+  const rows = rowsOf([
+    { favorite: false },
+    { favorite: true },
+    { favorite: false },
+    { favorite: true },
+  ]);
+  // Equal flags keep the playlist order in both directions.
+  expect(sorted(rows, "favorite", "asc")).toEqual([1, 3, 0, 2]);
+  expect(sorted(rows, "favorite", "desc")).toEqual([0, 2, 1, 3]);
+});
+
+it("treats an off favorite as a value, not as missing", () => {
+  // Were off "missing", it would sink to the end in both directions.
+  const rows = rowsOf([{ favorite: false }, { favorite: true }]);
+  expect(sorted(rows, "favorite", "desc")).toEqual([0, 1]);
+});

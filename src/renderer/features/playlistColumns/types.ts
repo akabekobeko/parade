@@ -1,6 +1,7 @@
 /** Identifier of a column the Playlist view's table can show. */
 export type PlaylistColumnId =
   | "ordinal"
+  | "favorite"
   | "title"
   | "artist"
   | "album"
@@ -41,8 +42,17 @@ export type PlaylistColumn = {
   readonly resizable: boolean;
   /** Whether a header click sorts by this column. */
   readonly sortable: boolean;
-  /** Horizontal alignment of the header and the cells. */
-  readonly align: "start" | "end";
+  /**
+   * Horizontal alignment of the header and the cells. `center` is for an
+   * icon-only column (the favorite Star).
+   */
+  readonly align: "start" | "end" | "center";
+  /**
+   * Icon drawn in the header instead of the label text
+   * (`docs/specs/v1.4/features/playlist-favorite-column.md`); `labelKey`
+   * then names the header for assistive technology.
+   */
+  readonly headerIcon?: "star";
 };
 
 /**

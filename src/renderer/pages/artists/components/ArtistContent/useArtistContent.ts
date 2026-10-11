@@ -15,6 +15,7 @@ import {
 import { menuTargetsOf } from "@/features/library/selection/menuTargetsOf";
 import { useArtistMusics } from "@/features/library/useArtistMusics";
 import { useArtists } from "@/features/library/useArtists";
+import { useToggleMusicFavorite } from "@/features/library/useToggleMusicFavorite";
 import { activeAlbumKeyOf } from "@/features/player/activeAlbumKeyOf";
 import {
   usePlaybackState,
@@ -46,6 +47,8 @@ export const useArtistContent = (artistName: string) => {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [selection, setSelection] = useState<SelectionState>(EMPTY_SELECTION);
+  /** Row Star: flip one track's favorite (the clicked row only). */
+  const toggleFavorite = useToggleMusicFavorite();
 
   const allMusics = musicsState.status === "success" ? musicsState.value : [];
   // The applied listener below reads the artist's tracks as of the apply;
@@ -208,6 +211,7 @@ export const useArtistContent = (artistName: string) => {
     openMusicInfo,
     openAlbumInfo,
     removeFromLibrary,
+    toggleFavorite,
     playingStateOf,
     activeAlbumKey,
   };
