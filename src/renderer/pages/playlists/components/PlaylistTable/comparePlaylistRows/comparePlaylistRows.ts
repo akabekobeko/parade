@@ -53,6 +53,11 @@ const compareValues = (
     case "addedAt":
       // ISO-8601 strings order like the instants they denote.
       return compareKeys(a.music.addedAt, b.music.addedAt);
+    case "favorite":
+      // On before off: the first click on the Star header gathers the
+      // favorites at the top while "another column sorts ascending" holds
+      // (`docs/specs/v1.4/features/playlist-favorite-column.md`).
+      return Number(b.music.favorite) - Number(a.music.favorite);
     case "menu":
       return 0;
   }
@@ -66,6 +71,8 @@ const compareValues = (
  *   other texts (genre, the credits from composer to publisher, format)
  *   compare case-insensitively; the rest compare as numbers, and the added
  *   date by its full timestamp.
+ * - The favorite flag sorts on before off when ascending; off is a value,
+ *   not a missing one.
  * - Rows without a value (`isValueMissing`) go last in either direction.
  * - Equal rows keep the playlist order, also when descending.
  *

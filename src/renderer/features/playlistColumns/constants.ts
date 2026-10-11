@@ -11,7 +11,10 @@ export const MIN_COLUMN_WIDTH = 48;
  * the display order until the user reorders the columns
  * (`docs/specs/v1.3/features/columns.md`). The default
  * visible set mirrors the v1.2 track list: ordinal, title, artist, album,
- * and duration.
+ * and duration. The favorite Star (v1.4) is pinned between the ordinal and
+ * the title: always shown, so no saved `visibleIds` needs migrating, and
+ * fixed in place like the ordinal
+ * (`docs/specs/v1.4/features/playlist-favorite-column.md`).
  */
 export const PLAYLIST_COLUMNS: readonly PlaylistColumn[] = [
   {
@@ -23,6 +26,17 @@ export const PLAYLIST_COLUMNS: readonly PlaylistColumn[] = [
     resizable: false,
     sortable: true,
     align: "end",
+  },
+  {
+    id: "favorite",
+    labelKey: "playlist.column.favorite",
+    width: MIN_COLUMN_WIDTH,
+    pinned: true,
+    defaultVisible: true,
+    resizable: false,
+    sortable: true,
+    align: "center",
+    headerIcon: "star",
   },
   {
     id: "title",

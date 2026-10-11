@@ -4,7 +4,10 @@ import { formatTime } from "@/libs/formatTime";
 import { formatAddedDate } from "./formatAddedDate";
 
 /** Columns whose cell is plain text derived from the track. */
-type TextColumnId = Exclude<PlaylistColumnId, "ordinal" | "rating" | "menu">;
+type TextColumnId = Exclude<
+  PlaylistColumnId,
+  "ordinal" | "favorite" | "rating" | "menu"
+>;
 
 /**
  * Text of a plain-text cell (`docs/specs/v1.3/features/columns.md`). The

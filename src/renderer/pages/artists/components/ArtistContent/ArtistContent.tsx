@@ -38,6 +38,7 @@ export const ArtistContent = ({ artistName }: Props) => {
     openMusicInfo,
     openAlbumInfo,
     removeFromLibrary,
+    toggleFavorite,
     playingStateOf,
     activeAlbumKey,
   } = useArtistContent(artistName);
@@ -125,6 +126,7 @@ export const ArtistContent = ({ artistName }: Props) => {
                     }}
                     onPlay={() => playFrom(row.music)}
                     onTogglePlayPause={() => commands.togglePlayPause()}
+                    onToggleFavorite={(next) => toggleFavorite(row.music, next)}
                     onPlayNext={() => commands.insertNext([row.music])}
                     onAddToQueue={() => commands.appendToQueue([row.music])}
                     onMusicInfo={() => openMusicInfo(row.music)}

@@ -56,7 +56,8 @@ const EMPTY = music({
  * a new column is checked without being listed here.
  */
 const TEXT_COLUMNS = PLAYLIST_COLUMNS.map((column) => column.id).filter(
-  (id) => id !== "ordinal" && id !== "rating" && id !== "menu",
+  (id) =>
+    id !== "ordinal" && id !== "favorite" && id !== "rating" && id !== "menu",
 );
 
 it("treats an empty text tag as missing", () => {
@@ -92,6 +93,7 @@ it("treats an untagged track number as missing", () => {
 it("never treats the always-valued columns as missing", () => {
   for (const columnId of [
     "ordinal",
+    "favorite",
     "disc",
     "duration",
     "audioFormat",

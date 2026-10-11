@@ -123,6 +123,7 @@ export const ja: Dictionary = {
   "playlist.create": "作成",
   "playlist.newSmart": "新規スマートプレイリスト",
   "playlist.column.ordinal": "#",
+  "playlist.column.favorite": "お気に入り",
   "playlist.column.title": "タイトル",
   "playlist.column.artist": "アーティスト",
   "playlist.column.album": "アルバム",
@@ -270,6 +271,9 @@ export const ja: Dictionary = {
   "albumInfo.field.genre": "ジャンル",
   "albumInfo.field.songCount": "曲数",
   "albumInfo.field.duration": "時間",
+  "favorite.add": "お気に入りに追加",
+  "favorite.remove": "お気に入りから削除",
+  "favorite.failed": "お気に入りを更新できませんでした: {message}",
   "library.loadFailed": "読み込みに失敗しました: {message}",
   "library.removeTitle": "ライブラリーから削除",
   "library.removeArtistMessage":

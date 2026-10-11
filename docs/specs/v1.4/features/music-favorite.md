@@ -14,7 +14,7 @@ Artists ビューと Albums ビュー下段の曲リスト行 (`MusicRow`) で�
 
 - Star をトラック番号の **左隣** に置きます。既存の先頭セル (`w-7`、番号の右寄せ) の左に `size-4` の Star セルを足し、行の `gap-2` で間隔を取ります
 - トラック番号セルの振る舞い (hover で再生、再生中は `AudioLines`、一時停止中は `Volume`) は変えません
-- Star セルは `data-row-control` を持ち、クリックは行の選択やダブルクリック再生に伝わりません ([Star ボタン](favorite-star-button.md))
+- Star は先頭セルと同じくタイトルの `<button>` の外に置くため、クリックは行の選択やダブルクリック再生に伝わりません。`MusicRow` の行コンテナー自体にはクリック ハンドラーがないので、Playlists の `data-row-control` のような除外の印は要りません ([Star ボタン](favorite-star-button.md))
 - 選択中の行、再生中の行 (glow 付きの枠) でも Star の見た目は同じです。行の背景色に対して OFF の薄い色が見えることを確認します
 
 ## 操作

@@ -44,6 +44,7 @@ export const PlaylistContent = ({ routeId }: Props) => {
     reorder,
     playback,
     menu,
+    toggleFavorite,
     rulesEditor,
   } = usePlaylistContent(routeId);
 
@@ -136,6 +137,7 @@ export const PlaylistContent = ({ routeId }: Props) => {
                     onTogglePlayPause={() =>
                       playback.commands.togglePlayPause()
                     }
+                    onToggleFavorite={(next) => toggleFavorite(music, next)}
                     onDragStart={() => reorder.start(item.index)}
                     onDragOver={() => reorder.over(item.index)}
                     onDrop={() => reorder.drop(item.index)}

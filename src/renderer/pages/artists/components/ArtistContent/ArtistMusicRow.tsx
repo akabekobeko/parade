@@ -25,6 +25,8 @@ type Props = {
   readonly onPlay: () => void;
   /** Toggle play / pause of the current track (hover pause / play). */
   readonly onTogglePlayPause: () => void;
+  /** The Star was clicked; the parent flips the favorite to `next`. */
+  readonly onToggleFavorite: (next: boolean) => void;
   /** Menu "Play next"; the parent inserts this track after the current. */
   readonly onPlayNext: () => void;
   /** Menu "Add to queue"; the parent appends this track to the queue. */
@@ -47,6 +49,7 @@ export const ArtistMusicRow = ({
   onSelect,
   onPlay,
   onTogglePlayPause,
+  onToggleFavorite,
   onPlayNext,
   onAddToQueue,
   onMusicInfo,
@@ -63,6 +66,7 @@ export const ArtistMusicRow = ({
       onClick={onSelect}
       onPlay={onPlay}
       onTogglePlayPause={onTogglePlayPause}
+      onToggleFavorite={onToggleFavorite}
       menuItems={[
         {
           label: t("menu.playMusic"),

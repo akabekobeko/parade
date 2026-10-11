@@ -123,6 +123,7 @@ export const en: Dictionary = {
   "playlist.create": "Create",
   "playlist.newSmart": "New smart playlist",
   "playlist.column.ordinal": "#",
+  "playlist.column.favorite": "Favorite",
   "playlist.column.title": "Title",
   "playlist.column.artist": "Artist",
   "playlist.column.album": "Album",
@@ -271,6 +272,9 @@ export const en: Dictionary = {
   "albumInfo.field.genre": "Genre",
   "albumInfo.field.songCount": "Songs",
   "albumInfo.field.duration": "Duration",
+  "favorite.add": "Add to favorites",
+  "favorite.remove": "Remove from favorites",
+  "favorite.failed": "Failed to update the favorite: {message}",
   "library.loadFailed": "Failed to load: {message}",
   "library.removeTitle": "Remove from Library",
   "library.removeArtistMessage":

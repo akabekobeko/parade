@@ -26,7 +26,7 @@ Playlists のテーブル ([v1.3 Playlists のテーブル](../../v1.3/features/
 
 ## セル
 
-- セルの中身は曲リスト行と同じ `FavoriteStarButton` です ([Star ボタン](favorite-star-button.md))。`renderPlaylistCell` の `favorite` の分岐で描きます
+- セルの中身は曲リスト行と同じ `FavoriteStarButton` です ([Star ボタン](favorite-star-button.md))。`ordinal` / `menu` と同じく `PlaylistTableRow` が操作セルとして直接描き、`renderPlaylistCell` は `null` を返します (テキスト セルの導出関数にハンドラーを通さないため)
 - セルは `data-row-control` を持ち、クリックは行の選択や再生に伝わりません (`isRowEvent` の除外規則をそのまま使う)
 - 対象はクリックした行の曲だけです ([曲のお気に入り](music-favorite.md))。同じ曲が複数行にあれば、キャッシュの差し替えで全ての行が変わります
 
