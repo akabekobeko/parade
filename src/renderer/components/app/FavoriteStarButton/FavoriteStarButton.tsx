@@ -8,6 +8,11 @@ type Props = {
   readonly favorite: boolean;
   /** Called with the flipped value; the caller runs the IPC and the cache update. */
   readonly onToggle: (next: boolean) => void;
+  /**
+   * Clicks are ignored and `aria-disabled` is set (the look stays, there is
+   * no disabled style): the album info dialog's Star while an apply runs.
+   */
+  readonly disabled?: boolean;
   /** Extra classes for the button (placement in a row or a card). */
   readonly className?: string;
 };
@@ -25,12 +30,15 @@ type Props = {
  * the `aria-label` alone.
  *
  * Knows nothing about IPC: it only reports the flipped value. There is no
- * disabled state and no double-click guard; the update is one quick UPDATE
- * and the last click's value is the one that stays.
+ * disabled look and no double-click guard; the update is one quick UPDATE
+ * and the last click's value is the one that stays. `disabled` exists for
+ * the one place a click must wait (a form being applied): it keeps the
+ * button focusable and announces the state through `aria-disabled`.
  */
 export const FavoriteStarButton = ({
   favorite,
   onToggle,
+  disabled = false,
   className,
 }: Props) => {
   const t = useT();
@@ -38,6 +46,7 @@ export const FavoriteStarButton = ({
     <button
       type="button"
       aria-pressed={favorite}
+      aria-disabled={disabled || undefined}
       aria-label={favorite ? t("favorite.remove") : t("favorite.add")}
       className={cn(
         "inline-flex size-4 items-center justify-center transition-[color,filter] duration-200",
@@ -47,7 +56,11 @@ export const FavoriteStarButton = ({
           : "text-muted-foreground/40 hover:text-foreground",
         className,
       )}
-      onClick={() => onToggle(!favorite)}
+      onClick={() => {
+        if (!disabled) {
+          onToggle(!favorite);
+        }
+      }}
     >
       {favorite ? (
         <StarFillIcon aria-hidden className="size-4" />

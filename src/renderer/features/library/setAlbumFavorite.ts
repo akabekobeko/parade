@@ -9,8 +9,10 @@ import { queryKeys } from "./queryStore/queryKeys";
  * artist album headers, the album info dialog) re-renders without a refetch
  * (`docs/specs/v1.4/architecture/ipc.md`).
  *
- * A list still loading is refetched instead of patched: its in-flight
- * response was read before the UPDATE and would show the old flag.
+ * A list not in the success state is refetched instead of patched: one
+ * still loading has an in-flight response read before the UPDATE that
+ * would show the old flag, and one that failed to load has nothing to
+ * patch, so the refetch is its way back to a list at all.
  *
  * Album lists restricted to favorites are the one place membership changes
  * (an album turned off has to leave the grid), so those keys are
@@ -32,7 +34,7 @@ export const setAlbumFavorite = async (
     return result.error;
   }
 
-  if (libraryStore.getSnapshot(queryKeys.albumFavorites).status === "loading") {
+  if (libraryStore.getSnapshot(queryKeys.albumFavorites).status !== "success") {
     libraryStore.invalidate(queryKeys.albumFavorites);
   } else {
     libraryStore.patch<readonly string[]>(queryKeys.albumFavorites, (keys) => {

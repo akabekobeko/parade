@@ -131,3 +131,23 @@ it("refetches the favorites when their first fetch is still in flight", async ()
   await flush();
   expect(cachedFavorites()).toEqual([KEY]);
 });
+
+it("refetches the favorites when their load had failed", async () => {
+  ipc.mockResolvedValueOnce({ ok: true, value: undefined });
+  getAlbumFavorites.mockResolvedValueOnce({
+    ok: false,
+    error: { name: "Error", message: "boom" },
+  });
+  await subscribe(queryKeys.albumFavorites);
+  expect(libraryStore.getSnapshot(queryKeys.albumFavorites).status).toBe(
+    "error",
+  );
+
+  favorites = [KEY]; // What the DB holds after the IPC.
+  await setAlbumFavorite(KEY, true);
+  await flush();
+
+  // Nothing to patch: the refetch brings the list back with the new flag.
+  expect(getAlbumFavorites).toHaveBeenCalledTimes(2);
+  expect(cachedFavorites()).toEqual([KEY]);
+});

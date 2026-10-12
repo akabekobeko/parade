@@ -35,8 +35,10 @@ export const PageContent = () => {
     virtualizer,
     selectedAlbum,
     activeAlbumKey,
+    favorites,
     toggleSelected,
     playAlbum,
+    toggleFavorite,
   } = usePageContent();
 
   return (
@@ -87,8 +89,12 @@ export const PageContent = () => {
                           width={layout.cardWidth}
                           expanded={album.albumKey === selectedAlbum?.albumKey}
                           playing={album.albumKey === activeAlbumKey}
+                          favorite={favorites.has(album.albumKey)}
                           onToggle={() => toggleSelected(album)}
                           onPlay={() => void playAlbum(album)}
+                          onToggleFavorite={(next) =>
+                            toggleFavorite(album.albumKey, next)
+                          }
                         />
                       ))}
                     </HStack>

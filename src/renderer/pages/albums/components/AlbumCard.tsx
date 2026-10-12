@@ -1,6 +1,7 @@
 import type { AlbumSummary } from "@mp/ipc";
 import { Disc3, Trash2 } from "lucide-react";
 import { EllipsisText } from "@/components/app/EllipsisText/EllipsisText";
+import { FavoriteStarButton } from "@/components/app/FavoriteStarButton/FavoriteStarButton";
 import { PlayFillIcon } from "@/components/app/Icons/PlayFillIcon";
 import {
   ContextMenu,
@@ -22,10 +23,14 @@ type Props = {
   readonly expanded: boolean;
   /** Whether this card's album contains the playing / paused track. */
   readonly playing: boolean;
+  /** Whether the album is a favorite (the title row's Star). */
+  readonly favorite: boolean;
   /** Artwork click; the page expands or collapses this album's detail. */
   readonly onToggle: () => void;
   /** Hover play button click; the page queues this album from the top. */
   readonly onPlay: () => void;
+  /** Title row Star click, with the flipped flag; the page runs the IPC. */
+  readonly onToggleFavorite: (next: boolean) => void;
 };
 
 /**
@@ -54,14 +59,21 @@ const artworkClassName = (playing: boolean): string =>
  * `artworkClassName`); a stopped player lights nothing.
  * Right-click opens the context menu with "Remove from library"
  * (confirmation via `LibraryRemoveDialog`).
+ *
+ * The title row ends with the favorite Star
+ * (`docs/specs/v1.4/features/album-favorite.md`): the title shrinks and
+ * clips before it, and the Star sits outside the artwork `<button>` so a
+ * click never toggles the detail pane.
  */
 export const AlbumCard = ({
   album,
   width,
   expanded,
   playing,
+  favorite,
   onToggle,
   onPlay,
+  onToggleFavorite,
 }: Props) => {
   const t = useT();
   const card = (
@@ -96,7 +108,17 @@ export const AlbumCard = ({
           <PlayFillIcon className="size-4" />
         </button>
       </div>
-      <EllipsisText className="pt-2 font-medium text-sm" text={album.album} />
+      <div className="flex items-center gap-1 pt-2">
+        <EllipsisText
+          className="min-w-0 flex-1 font-medium text-sm"
+          text={album.album}
+        />
+        <FavoriteStarButton
+          favorite={favorite}
+          onToggle={onToggleFavorite}
+          className="shrink-0"
+        />
+      </div>
       <EllipsisText
         className="text-muted-foreground text-xs"
         text={album.artist}
