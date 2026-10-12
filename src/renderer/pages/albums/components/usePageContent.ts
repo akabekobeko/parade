@@ -4,7 +4,9 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useElementWidth } from "@/features/layout/useElementWidth";
 import { musicInfoStore } from "@/features/library/musicInfoStore";
 import { queryKeys } from "@/features/library/queryStore/queryKeys";
+import { useAlbumFavorites } from "@/features/library/useAlbumFavorites";
 import { useLibraryQuery } from "@/features/library/useLibraryQuery";
+import { useToggleAlbumFavorite } from "@/features/library/useToggleAlbumFavorite";
 import { activeAlbumKeyOf } from "@/features/player/activeAlbumKeyOf";
 import {
   usePlaybackState,
@@ -39,6 +41,10 @@ export const usePageContent = () => {
   const albumsState = useLibraryQuery<readonly AlbumSummary[]>(
     queryKeys.albums(musicTitle === "" ? applied : { ...applied, musicTitle }),
   );
+  /** Keys of the favorite albums; each card looks its own up. */
+  const favorites = useAlbumFavorites();
+  /** Card Star: flip one album's favorite (the clicked card only). */
+  const toggleFavorite = useToggleAlbumFavorite();
   const commands = usePlayerCommands();
   const { current } = usePlayerState();
   const playbackState = usePlaybackState();
@@ -125,7 +131,9 @@ export const usePageContent = () => {
     virtualizer,
     selectedAlbum,
     activeAlbumKey,
+    favorites,
     toggleSelected,
     playAlbum,
+    toggleFavorite,
   };
 };

@@ -13,6 +13,7 @@ import {
   type SelectionState,
 } from "@/features/library/selection/applySelectionClick";
 import { menuTargetsOf } from "@/features/library/selection/menuTargetsOf";
+import { useAlbumFavorites } from "@/features/library/useAlbumFavorites";
 import { useArtistMusics } from "@/features/library/useArtistMusics";
 import { useArtists } from "@/features/library/useArtists";
 import { useToggleMusicFavorite } from "@/features/library/useToggleMusicFavorite";
@@ -49,6 +50,8 @@ export const useArtistContent = (artistName: string) => {
   const [selection, setSelection] = useState<SelectionState>(EMPTY_SELECTION);
   /** Row Star: flip one track's favorite (the clicked row only). */
   const toggleFavorite = useToggleMusicFavorite();
+  /** Keys of the favorite albums; each album heading looks its own up. */
+  const favorites = useAlbumFavorites();
 
   const allMusics = musicsState.status === "success" ? musicsState.value : [];
   // The applied listener below reads the artist's tracks as of the apply;
@@ -212,6 +215,7 @@ export const useArtistContent = (artistName: string) => {
     openAlbumInfo,
     removeFromLibrary,
     toggleFavorite,
+    favorites,
     playingStateOf,
     activeAlbumKey,
   };

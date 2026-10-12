@@ -3,6 +3,7 @@ import { Disc3, ListEnd, NotepadText, Trash2 } from "lucide-react";
 import { AddToPlaylistSubmenu } from "@/components/app/AddToPlaylistSubmenu/AddToPlaylistSubmenu";
 import { EllipsisText } from "@/components/app/EllipsisText/EllipsisText";
 import { PlayFillIcon } from "@/components/app/Icons/PlayFillIcon";
+import { StarFillIcon } from "@/components/app/Icons/StarFillIcon";
 import { RowMenu } from "@/components/app/RowMenu/RowMenu";
 import { useFetchMusicInfoItem } from "@/components/app/RowMenu/useFetchMusicInfoItem";
 import { HStack, VStack } from "@/components/app/stacks";
@@ -20,6 +21,8 @@ type Props = {
   readonly musics: readonly Music[];
   /** Whether the album contains the playing / paused track. */
   readonly playing: boolean;
+  /** Whether the album is a favorite (the solid Star after the title). */
+  readonly favorite: boolean;
   /** Play overlay / menu "Play album"; the parent queues this album. */
   readonly onPlay: () => void;
   /** Menu "Add to queue"; the parent appends this album's tracks. */
@@ -52,11 +55,17 @@ const artworkClassName = (playing: boolean): string =>
  * artwork, and playing / pausing one of the album's tracks, light its border
  * up with a glow (see `artworkClassName`); hovering also reveals a play
  * overlay, as the artist picture in `ArtistHeader` does.
+ *
+ * A favorite album shows a solid Star after its title
+ * (`docs/specs/v1.4/features/album-favorite.md`): a mark only, not a
+ * button — the flag is switched from the menu's "Album info" — and nothing
+ * at all when off, so the heading does not compete with the rows' Stars.
  */
 export const AlbumHeaderRow = ({
   group,
   musics,
   playing,
+  favorite,
   onPlay,
   onAddToQueue,
   onAlbumInfo,
@@ -89,8 +98,14 @@ export const AlbumHeaderRow = ({
         </button>
       </div>
       <div className="min-w-0 flex-1 pb-1">
-        <h2 className="font-medium text-base">
-          <EllipsisText text={group.album} />
+        <h2 className="flex min-w-0 items-center gap-2 font-medium text-base">
+          <EllipsisText className="min-w-0" text={group.album} />
+          {favorite && (
+            <StarFillIcon
+              aria-hidden
+              className="size-4 shrink-0 text-foreground"
+            />
+          )}
         </h2>
         <EllipsisText
           className="text-muted-foreground text-xs"

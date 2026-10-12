@@ -148,6 +148,20 @@ export const AlbumCard = ({ album, width }: Props) => { … };
 - ロジック自体が翻訳文字列を必要とする場合のみ、Hooks 内で `useT` を呼んでよい
   - 例: `usePlaylistListPanel` (プレイリストの既定名)、`useImportConfirmDialog` (状態別の説明文)
 
+## テスト
+
+### DOM を動かすテストは書かず、ロジックを純関数へ切り出してテストする
+
+- jsdom や @testing-library/react は導入しない。Hooks やコンポーネントを DOM 上で動かして振る舞いを検証するテストは書かない
+- 検証したい判定や非同期フローは純関数として切り出し、Node 環境の vitest でテストする。Hooks は切り出した関数を呼ぶ薄い glue に留める
+  - 例: Apply の活性条件は `canApplyAlbumInfo`、IPC の呼び出しと失敗の正規化は `applyAlbumFavorite`、失敗 toast の判定は `reportFavoriteFailure`
+  - 曲情報ダイアログも同じ構成で、`diffFormValues` や `effectiveValuesOf` をテストし、`useMusicInfoDialog` 自体はテストしない
+- key による remount で担保される振る舞い (前後移動での未保存の破棄など) は構造に任せ、テストで再現しない
+- マークアップの確認が必要なときは `react-dom/server` の `renderToStaticMarkup` を使う (例: `EllipsisText.test.tsx`、`AlbumCard.test.tsx`)
+  - store を購読するコンポーネントは SSR できないので、購読は親の Hooks へ寄せて値を props で渡す (例: `AlbumHeaderRow` の `favorite`)
+  - `useT` のような Provider 依存の Hooks は `vi.mock` でキーをそのまま返す関数に差し替える
+- 理由: DOM を動かすテストは環境と依存が重く、壊れやすい。ロジックが純関数に分かれていれば Node だけで速く確実に検証でき、コンポーネント側は表示に専念できる
+
 ## デモ用データ
 
 ### 生成物に影響する変更では DEMO_ASSETS_VERSION を増やす

@@ -39,6 +39,7 @@ export const ArtistContent = ({ artistName }: Props) => {
     openAlbumInfo,
     removeFromLibrary,
     toggleFavorite,
+    favorites,
     playingStateOf,
     activeAlbumKey,
   } = useArtistContent(artistName);
@@ -100,6 +101,7 @@ export const ArtistContent = ({ artistName }: Props) => {
                     group={row.group}
                     musics={albumMusicsOf(row.group)}
                     playing={row.group.key === activeAlbumKey}
+                    favorite={favorites.has(row.group.key)}
                     onPlay={() => playAlbum(row.group)}
                     onAddToQueue={() =>
                       commands.appendToQueue(albumMusicsOf(row.group))
