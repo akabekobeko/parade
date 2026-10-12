@@ -21,6 +21,8 @@ export const ja: Dictionary = {
   "toolbar.filterSongs": "曲を絞り込む",
   "toolbar.columns": "カラム",
   "toolbar.resetColumns": "カラムを初期状態へ戻す",
+  "toolbar.filter": "フィルター",
+  "toolbar.favoritesOnly": "お気に入りのみ表示",
   "import.dialog.title": "音楽のインポート",
   "import.dialog.expanding": "音楽ファイルを検索しています…",
   "import.dialog.count": "{count} 件のファイルをインポートします。",
@@ -113,6 +115,7 @@ export const ja: Dictionary = {
   "playlist.notFound": "プレイリストが見つかりません。",
   "playlist.emptyTracks":
     "曲がありません。Artist や Album ビューから追加してください。",
+  "playlist.noMatch": "条件に一致する曲がありません。",
   "playlist.delete": "削除",
   "playlist.deleteTitle": "プレイリストの削除",
   "playlist.deleteMessage":

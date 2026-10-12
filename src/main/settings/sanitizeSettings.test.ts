@@ -41,6 +41,13 @@ it("keeps valid persisted fields", () => {
   });
 });
 
+it("drops the toolbar-fed album filter fields that are never persisted", () => {
+  const settings = sanitizeSettings({
+    albumFilter: { text: "abc", musicTitle: "rain", favoriteOnly: true },
+  });
+  expect(settings.albumFilter).toEqual({ text: "abc" });
+});
+
 it("drops invalid fields and falls back to defaults", () => {
   const settings = sanitizeSettings({
     window: { width: "wide", height: Number.NaN, maximized: "yes" },

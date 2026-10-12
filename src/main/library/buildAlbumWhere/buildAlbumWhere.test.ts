@@ -4,8 +4,44 @@ import { buildAlbumWhere } from "./buildAlbumWhere";
 it("builds no fragment for an empty filter", () => {
   expect(buildAlbumWhere({})).toEqual([]);
   expect(
-    buildAlbumWhere({ text: "  ", musicTitle: "  ", genres: [], decades: [] }),
+    buildAlbumWhere({
+      text: "  ",
+      musicTitle: "  ",
+      genres: [],
+      decades: [],
+      favoriteOnly: false,
+    }),
   ).toEqual([]);
+});
+
+it("builds a favoriteOnly fragment on the album_favorites table", () => {
+  expect(buildAlbumWhere({ favoriteOnly: true })).toEqual([
+    {
+      sql: "EXISTS (SELECT 1 FROM album_favorites f WHERE f.artist = COALESCE(NULLIF(m.album_artist, ''), m.artist) AND f.album = m.album)",
+      params: [],
+    },
+  ]);
+});
+
+it("ANDs favoriteOnly with the other kinds in declaration order", () => {
+  const fragments = buildAlbumWhere({
+    musicTitle: "rain",
+    genres: ["Rock"],
+    favoriteOnly: true,
+    decades: [1990],
+  });
+  expect(fragments.map((fragment) => fragment.sql.split(" ")[0])).toEqual([
+    "m.title",
+    "m.genre",
+    "EXISTS",
+    "((m.year",
+  ]);
+  expect(fragments.flatMap((fragment) => fragment.params)).toEqual([
+    "%rain%",
+    "Rock",
+    1990,
+    2000,
+  ]);
 });
 
 it("builds a musicTitle fragment matching track titles", () => {

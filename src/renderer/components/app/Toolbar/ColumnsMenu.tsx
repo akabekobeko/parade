@@ -1,19 +1,12 @@
 import { Columns3 } from "lucide-react";
 import {
-  DropdownMenu,
   DropdownMenuCheckboxItem,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { useT } from "@/features/i18n/useT";
 import type { PlaylistColumnId } from "@/features/playlistColumns/types";
-import { ClusterButton } from "./ClusterButton";
-
-/** Delay before the tooltip shows, like the toolbar's icon cluster. */
-const TOOLTIP_DELAY_MS = 700;
+import { ToolbarMenu } from "./ToolbarMenu";
 
 /** One checkbox entry of the columns menu. */
 export type ColumnsMenuItem = {
@@ -41,9 +34,8 @@ type Props = {
  * (`docs/specs/v1.3/features/column-visibility.md`): a checkbox per
  * optional column of the Playlist table, then "Reset columns". Toggling an
  * entry keeps the menu open so several columns can be switched in a row.
- * The pinned columns are not listed. The trigger is the toolbar's
- * `ClusterButton`: glowing icon, tooltip, and opt-out of the window drag
- * region.
+ * The pinned columns are not listed. The trigger and the popup are the
+ * toolbar's `ToolbarMenu` shell.
  */
 export const ColumnsMenu = ({
   items,
@@ -53,32 +45,21 @@ export const ColumnsMenu = ({
 }: Props) => {
   const t = useT();
   return (
-    <DropdownMenu>
-      <TooltipProvider delay={TOOLTIP_DELAY_MS}>
-        <DropdownMenuTrigger
-          render={
-            <ClusterButton label={t("toolbar.columns")}>
-              <Columns3 />
-            </ClusterButton>
-          }
-        />
-      </TooltipProvider>
-      <DropdownMenuContent align="end">
-        {items.map((item) => (
-          <DropdownMenuCheckboxItem
-            key={item.id}
-            checked={item.visible}
-            closeOnClick={false}
-            onCheckedChange={(checked) => onToggle(item.id, checked)}
-          >
-            {t(item.labelKey)}
-          </DropdownMenuCheckboxItem>
-        ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem disabled={!resettable} onClick={onReset}>
-          {t("toolbar.resetColumns")}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <ToolbarMenu icon={<Columns3 />} label={t("toolbar.columns")}>
+      {items.map((item) => (
+        <DropdownMenuCheckboxItem
+          key={item.id}
+          checked={item.visible}
+          closeOnClick={false}
+          onCheckedChange={(checked) => onToggle(item.id, checked)}
+        >
+          {t(item.labelKey)}
+        </DropdownMenuCheckboxItem>
+      ))}
+      <DropdownMenuSeparator />
+      <DropdownMenuItem disabled={!resettable} onClick={onReset}>
+        {t("toolbar.resetColumns")}
+      </DropdownMenuItem>
+    </ToolbarMenu>
   );
 };

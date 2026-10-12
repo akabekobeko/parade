@@ -135,7 +135,7 @@ export type AlbumFilter = {
    * toolbar's filter menu like `musicTitle`; never persisted in
    * `AppSettings` (`sanitizeAlbumFilter` whitelists its fields). Part of the
    * query key so restricted and unrestricted lists never share a cache
-   * entry. The WHERE fragment lands with the filter menu (Phase 4).
+   * entry; `buildAlbumWhere` turns it into an EXISTS on `album_favorites`.
    */
   readonly favoriteOnly?: boolean;
 };

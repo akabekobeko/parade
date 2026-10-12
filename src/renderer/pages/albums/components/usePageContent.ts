@@ -13,6 +13,7 @@ import {
   usePlayerCommands,
   usePlayerState,
 } from "@/features/player/PlayerProvider";
+import { isContentFilterActive } from "@/features/trackFilter/isContentFilterActive";
 import { trackFilterStore } from "@/features/trackFilter/trackFilterStore";
 import { albumFilterStore } from "./albumFilterStore";
 import { buildAlbumGridRows } from "./buildAlbumGridRows";
@@ -31,15 +32,27 @@ export const usePageContent = () => {
     albumFilterStore.subscribe,
     albumFilterStore.getSnapshot,
   );
-  const { applied: trackFilter } = useSyncExternalStore(
+  const { applied: trackFilter, favoriteOnly } = useSyncExternalStore(
     trackFilterStore.subscribe,
     trackFilterStore.getSnapshot,
   );
-  // The toolbar's song filter joins the sidebar filter for the query only —
-  // it never enters albumFilterStore, so it is not persisted with the rest.
+  // The toolbar's filters (song text, favorites only) join the sidebar
+  // filter for the query only — they never enter albumFilterStore, so they
+  // are not persisted with the rest. "Favorites only" keeps the albums
+  // flagged as favorite (SQL on `album_favorites`), whatever their tracks'
+  // flags (`docs/specs/v1.4/architecture/favorite-filter.md`).
   const musicTitle = trackFilter.albums.trim();
+  /** Whether the toolbar narrows the grid beyond the sidebar filter. */
+  const toolbarFiltered = isContentFilterActive({
+    text: trackFilter.albums,
+    favoriteOnly: favoriteOnly.albums,
+  });
   const albumsState = useLibraryQuery<readonly AlbumSummary[]>(
-    queryKeys.albums(musicTitle === "" ? applied : { ...applied, musicTitle }),
+    queryKeys.albums({
+      ...applied,
+      ...(musicTitle === "" ? {} : { musicTitle }),
+      ...(favoriteOnly.albums ? { favoriteOnly: true } : {}),
+    }),
   );
   /** Keys of the favorite albums; each card looks its own up. */
   const favorites = useAlbumFavorites();
@@ -122,6 +135,7 @@ export const usePageContent = () => {
 
   return {
     applied,
+    toolbarFiltered,
     albumsState,
     albums,
     layout,

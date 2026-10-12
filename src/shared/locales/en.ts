@@ -22,6 +22,8 @@ export const en: Dictionary = {
   "toolbar.filterSongs": "Filter songs",
   "toolbar.columns": "Columns",
   "toolbar.resetColumns": "Reset columns",
+  "toolbar.filter": "Filter",
+  "toolbar.favoritesOnly": "Favorites only",
   "import.dialog.title": "Import Music",
   "import.dialog.expanding": "Scanning for audio files…",
   "import.dialog.count": "{count} files will be imported.",
@@ -114,6 +116,7 @@ export const en: Dictionary = {
   "playlist.notFound": "Playlist not found.",
   "playlist.emptyTracks":
     "This playlist is empty. Add songs from the Artist or Album view.",
+  "playlist.noMatch": "No songs match the filters.",
   "playlist.delete": "Delete",
   "playlist.deleteTitle": "Delete Playlist",
   "playlist.deleteMessage": "Delete “{name}”? This cannot be undone.",

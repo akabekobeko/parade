@@ -36,8 +36,10 @@ import type {
   ColumnDropSide,
   PlaylistColumnId,
 } from "@/features/playlistColumns/types";
-import { matchesTrackFilter } from "@/features/trackFilter/matchesTrackFilter";
+import { isContentFilterActive } from "@/features/trackFilter/isContentFilterActive";
+import { matchesContentFilter } from "@/features/trackFilter/matchesContentFilter";
 import { trackFilterStore } from "@/features/trackFilter/trackFilterStore";
+import { isReorderable } from "./isReorderable";
 import { moveItem } from "./moveItem";
 import { comparePlaylistRows } from "./PlaylistTable/comparePlaylistRows/comparePlaylistRows";
 import {
@@ -203,29 +205,41 @@ export const usePlaylistContent = (routeId: string) => {
     setSortState(nextPlaylistSort(sort, columnId));
   };
 
-  const { applied: trackFilter } = useSyncExternalStore(
+  const { applied: trackFilter, favoriteOnly } = useSyncExternalStore(
     trackFilterStore.subscribe,
     trackFilterStore.getSnapshot,
   );
-  const filterActive = trackFilter.playlists.trim() !== "";
-  // The toolbar's song filter narrows what the table shows and plays, and
-  // the sort orders what is left; playback, Shift ranges, and the song info
-  // dialog all follow this displayed order. Rows carry their position in
-  // the playlist order because the ordinal, the selection, and mutations
-  // (removal) address the playlist itself, not the displayed view.
+  const filterText = trackFilter.playlists;
+  const favoritesOnly = favoriteOnly.playlists;
+  const filterActive = isContentFilterActive({
+    text: filterText,
+    favoriteOnly: favoritesOnly,
+  });
+  // The toolbar's filters (song text, favorites only) narrow what the
+  // table shows and plays, and the sort orders what is left; playback,
+  // Shift ranges, and the song info dialog all follow this displayed
+  // order. Rows carry their position in the playlist order because the
+  // ordinal, the selection, and mutations (removal) address the playlist
+  // itself, not the displayed view. A row whose Star is switched off
+  // under "favorites only" leaves the table with the cache patch, and the
+  // selection with it (the patched list is a new identity, see `bound`).
   //
   // Memoised on measurement: sorting 10,000 rows by a name column takes
   // about 16ms, a whole frame, and this hook re-renders on every pointer
   // move of a column resize drag.
-  const filterText = trackFilter.playlists;
   const rows = useMemo((): readonly PlaylistRow[] => {
     const filtered = musics
       .map((music, index) => ({ music, index }))
-      .filter(({ music }) => matchesTrackFilter(music.title, filterText));
+      .filter(({ music }) =>
+        matchesContentFilter(music, {
+          text: filterText,
+          favoriteOnly: favoritesOnly,
+        }),
+      );
     return playlistOrder
       ? filtered
       : filtered.toSorted(comparePlaylistRows(sort));
-  }, [musics, filterText, sort, playlistOrder]);
+  }, [musics, filterText, favoritesOnly, sort, playlistOrder]);
   const visibleMusics = rows.map(({ music }) => music);
   const selection =
     bound !== null && bound.base === musics ? bound.selection : EMPTY_SELECTION;
@@ -234,9 +248,7 @@ export const usePlaylistContent = (routeId: string) => {
     0,
   );
 
-  // Reorder needs the displayed order to be the playlist order: drag
-  // indices are positions only while nothing is filtered out or sorted.
-  const reorderable = ref.kind === "static" && !filterActive && playlistOrder;
+  const reorderable = isReorderable(ref.kind, filterActive, playlistOrder);
 
   // The fixed header sits above the rows inside the scroll container, so
   // the rows start `scrollMargin` below its top; `scrollPaddingStart` keeps

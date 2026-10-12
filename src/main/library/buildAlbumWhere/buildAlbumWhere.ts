@@ -57,6 +57,16 @@ export const buildAlbumWhere = (filter: AlbumFilter): WhereFragment[] => {
     });
   }
 
+  // Album favorites live in their own table keyed by the album identity
+  // (`docs/specs/v1.4/architecture/favorite-filter.md`); the EXISTS keeps
+  // the albums with a row, ANDed with the other kinds like any fragment.
+  if (filter.favoriteOnly === true) {
+    fragments.push({
+      sql: `EXISTS (SELECT 1 FROM album_favorites f WHERE f.artist = ${ALBUM_ARTIST_SQL} AND f.album = m.album)`,
+      params: [],
+    });
+  }
+
   const decades = filter.decades ?? [];
   if (decades.length > 0) {
     const terms = decades.map((decade) =>

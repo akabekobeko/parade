@@ -26,6 +26,7 @@ export const PageContent = () => {
   const t = useT();
   const {
     applied,
+    toolbarFiltered,
     albumsState,
     albums,
     layout,
@@ -49,7 +50,13 @@ export const PageContent = () => {
         </p>
       )}
       {albumsState.status === "success" && albums.length === 0 && (
-        <EmptyState filtered={hasActiveFilter(applied)} />
+        // The toolbar's filters count for the message, while Clear filters
+        // clears the sidebar conditions alone (the toolbar's are switched
+        // off from the toolbar), so it shows only when the sidebar has some.
+        <EmptyState
+          filtered={hasActiveFilter(applied) || toolbarFiltered}
+          clearable={hasActiveFilter(applied)}
+        />
       )}
       <ResizablePanelGroup orientation="vertical" className="min-h-0 flex-1">
         <ResizablePanel className="min-h-0" minSize="25">
