@@ -1,5 +1,10 @@
 {
   "player": {
-    "crop": { "x": 0, "y": 760, "width": 2784, "height": 1064 }
+    "crop": {
+      "x": 0,
+      "y": 816,
+      "width": 2784,
+      "height": 1008
+    }
   }
 }

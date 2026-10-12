@@ -33,9 +33,10 @@ AI が操作する場合は `cmux-cua` の `launch_app` ではなく `pnpm demo`
 | `artists` | Artists ビュー、Milo Ashgrove、再生中 | 起動直後の状態 (Milo Ashgrove が選択済み)。アルバム Modulations の 1 曲目 Test Tone Serenade を再生する。再生位置が 0:30 前後になるまで待つ | 再生できるのはこの曲だけ。他の曲は再生するとエラーになる |
 | `artists-light` | 同上、ライト テーマ | Settings → Theme を Light にしてから `artists` と同じ状態にする | 撮影後に Dark へ戻す |
 | `albums` | Albums ビュー、フィルター適用 | サイドバーのジャンルで Jazz、年代で 1990s を選び、アルバムが 10 - 20 枚程度並ぶ状態にする。再生中のまま | ジャケットは生成した抽象図形なので権利の問題はない |
-| `playlists` | Playlists ビュー、テーブル | My Best を開く。コンテンツ ツールバーのカラム メニューで Album artist と Genre と Year を表示し、ウィンドウ幅に収まるようにカラム幅を縮める (Title 190、Artist 140、Album 140、Album artist 130、Genre 90、Year 60)。1 行目 (Test Tone Serenade) を再生中にする | 右クリック メニューは閉じる |
+| `playlists` | Playlists ビュー、テーブル | My Best を開く。コンテンツ ツールバーのカラム メニューで Album artist と Genre と Year を表示し、ウィンドウ幅に収まるようにカラム幅を縮める (Title 150、Artist 140、Album 140、Album artist 130、Genre 90、Year 60。v1.4 でお気に入りカラムが加わった分、Title を 190 から縮めた)。1 行目 (Test Tone Serenade) を再生中にする。お気に入りカラム (常に表示) には 1 行目のほか、8 行目 Hidden Map と 11 行目 Daydream in Slow Motion の Star を ON にしておく | 右クリック メニューは閉じる |
+| `favorites` | Artists ビュー、お気に入りとフィルター メニュー | `artists` と同じ構図 (Milo Ashgrove、Modulations の見出しが上から 2 行目、Test Tone Serenade を再生中。再生位置は問わない) で、曲リストの Star を 4 曲 (Test Tone Serenade、Electric Engine、The Anchor、Umbrella) クリックして ON にし、アルバム Modulations もアルバム メニューの Album info から Favorite を ON にして Apply する (見出しに Star が出る)。コンテンツ ツールバーの Funnel ボタンでフィルター メニューを開き、「Favorites only」の項目が見える状態にする (チェックは OFF のまま。ON にすると曲が減って Star の意味が伝わりにくい) | `artists` / `artists-light` / `player` の撮影でも同じ曲とアルバムを ON にしておく。`albums` では Jazz / 1990s のアルバムのうち Songs for the Parade、Atlas & Evening、Broken Desert をカードの Star で ON にする。デモ用データにお気に入りの初期値はないので、`pnpm demo:assets` で戻したときは付け直す |
 | `music-info` | 曲情報ダイアログ | Test Tone Serenade の行メニューから Song info を開き、Details タブを表示する | **File タブはファイル パスが出るので撮らない。** Details タブでもファイル名が見える場合はマスクする |
-| `player` | プレーヤー バーとキュー | 再生中にキュー ボタンでキュー ポップオーバーを開く。ウィンドウ全体を撮り、サイト側でプレーヤー バー付近を切り出す | 切り出しの座標はマスクの manifest に書く |
+| `player` | プレーヤー バーとキュー | `artists` と同じ構図で再生中にキュー ボタンでキュー ポップオーバーを開く (開いた直後はゴミ箱ボタンにフォーカスが移るので外す)。ウィンドウ全体を撮り、サイト側でプレーヤー バー付近を切り出す | 切り出しの座標はマスクの manifest に書く。切り出し範囲には曲リストの下半分が入るので、曲リストの見た目が変わる PR ではこのシーンも撮り直す |
 | `settings` | Settings ページ | サイドバーから Settings を開く。Theme が Dark、Language が English の状態 | ライブラリー統計はデモ用データの数値なのでそのままでよい |
 
 - 撮影の前に、トースト通知、ツールチップ、ホバー状態が残っていないことを確認する。再生できる曲は 1:47 で終わり、次の曲へ進むと再生エラーのトースト (ファイル パスを含む) が出るので、撮影のたびに再生し直す

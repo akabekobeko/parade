@@ -10,11 +10,13 @@ import { isScene, parseManifest } from "./screenshotManifest.ts";
  * Usage: `pnpm --filter parade-web screenshots:mask -- <input-dir>`
  *
  * Every `<scene>.png` in the input directory is processed; a file that is
- * not one of the spec's scenes is an error, as is a manifest scene without
- * a capture (its mask would otherwise be skipped unnoticed). Scenes listed
- * in `screenshots.manifest.json` get their `mask` regions pixelated and are
- * then cut to `crop`; the other scenes are re-encoded as they are. The raw
- * captures stay outside the repository; only the output is committed.
+ * not one of the spec's scenes is an error. Scenes listed in
+ * `screenshots.manifest.json` get their `mask` regions pixelated and are
+ * then cut to `crop`; the other scenes are re-encoded as they are. A
+ * manifest scene absent from the input is simply not touched: the spec
+ * retakes only the scenes whose screen changed, so a run usually covers a
+ * subset. The raw captures stay outside the repository; only the output
+ * is committed.
  */
 
 const webRoot = path.join(import.meta.dirname, "..");
@@ -48,25 +50,27 @@ const main = async (): Promise<void> => {
   if (files.length === 0) {
     throw new Error(`No .png files in ${inputDir}`);
   }
-  const scenes = files.map((name) => name.slice(0, -".png".length));
-  const unknown = scenes.filter((scene) => !isScene(scene));
+  const names = files.map((name) => name.slice(0, -".png".length));
+  const unknown = names.filter((name) => !isScene(name));
   if (unknown.length > 0) {
     throw new Error(
       `Not a scene of docs/specs/web/features/screenshots.md: ${unknown.join(", ")}`,
     );
   }
-  const missing = Object.keys(manifest).filter(
-    (scene) => !scenes.includes(scene),
+  const scenes = names.filter(isScene);
+  // A partial retake is the norm; say which cropped / masked scenes it
+  // leaves as they are, so a forgotten one is at least visible in the log.
+  const untouched = Object.keys(manifest).filter(
+    (scene) => !(scenes as readonly string[]).includes(scene),
   );
-  if (missing.length > 0) {
-    throw new Error(
-      `In the manifest but not in ${inputDir}: ${missing.join(", ")}`,
+  if (untouched.length > 0) {
+    console.log(
+      `Not in ${inputDir}, left as committed: ${untouched.join(", ")}`,
     );
   }
   await mkdir(outputDir, { recursive: true });
 
   for (const scene of scenes) {
-    if (!isScene(scene)) continue;
     const name = `${scene}.png`;
     const result = await processCapture(
       await readFile(path.join(inputDir, name)),
