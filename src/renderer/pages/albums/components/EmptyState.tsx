@@ -8,10 +8,16 @@ import { albumFilterStore } from "./albumFilterStore";
 type Props = {
   /** `true` = no filter match, `false` = an entirely empty library. */
   readonly filtered: boolean;
+  /**
+   * The sidebar filter has conditions, so "Clear filters" has something to
+   * clear. Off when only the toolbar's filters narrow the grid: those are
+   * switched off from the toolbar, and the button would do nothing.
+   */
+  readonly clearable: boolean;
 };
 
 /** Empty state: no filter match vs. an entirely empty library. */
-export const EmptyState = ({ filtered }: Props) => {
+export const EmptyState = ({ filtered, clearable }: Props) => {
   const t = useT();
   return (
     <VStack className="gap-4 px-6 py-16">
@@ -19,13 +25,15 @@ export const EmptyState = ({ filtered }: Props) => {
         {filtered ? t("album.noMatch") : t("album.empty")}
       </p>
       {filtered ? (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => albumFilterStore.dispatch({ type: "cleared" })}
-        >
-          <FilterX /> {t("album.filter.clear")}
-        </Button>
+        clearable && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => albumFilterStore.dispatch({ type: "cleared" })}
+          >
+            <FilterX /> {t("album.filter.clear")}
+          </Button>
+        )
       ) : (
         <Button
           variant="outline"

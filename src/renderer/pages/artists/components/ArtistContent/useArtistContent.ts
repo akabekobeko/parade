@@ -13,6 +13,7 @@ import {
   type SelectionState,
 } from "@/features/library/selection/applySelectionClick";
 import { menuTargetsOf } from "@/features/library/selection/menuTargetsOf";
+import { retainSelection } from "@/features/library/selection/retainSelection";
 import { useAlbumFavorites } from "@/features/library/useAlbumFavorites";
 import { useArtistMusics } from "@/features/library/useArtistMusics";
 import { useArtists } from "@/features/library/useArtists";
@@ -27,7 +28,7 @@ import {
   type RowPlayingState,
   rowPlayingStateOf,
 } from "@/features/player/rowPlayingStateOf";
-import { matchesTrackFilter } from "@/features/trackFilter/matchesTrackFilter";
+import { matchesContentFilter } from "@/features/trackFilter/matchesContentFilter";
 import { trackFilterStore } from "@/features/trackFilter/trackFilterStore";
 import { albumRowIndexOf } from "./albumRowIndexOf";
 import { ALBUM_ROW_HEIGHTS, buildAlbumRows } from "./buildAlbumRows";
@@ -47,7 +48,8 @@ export const useArtistContent = (artistName: string) => {
   const playbackState = usePlaybackState();
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const [selection, setSelection] = useState<SelectionState>(EMPTY_SELECTION);
+  const [selectionState, setSelection] =
+    useState<SelectionState>(EMPTY_SELECTION);
   /** Row Star: flip one track's favorite (the clicked row only). */
   const toggleFavorite = useToggleMusicFavorite();
   /** Keys of the favorite albums; each album heading looks its own up. */
@@ -76,15 +78,21 @@ export const useArtistContent = (artistName: string) => {
     [artistName, navigate],
   );
 
-  const { applied: trackFilter } = useSyncExternalStore(
+  const { applied: trackFilter, favoriteOnly } = useSyncExternalStore(
     trackFilterStore.subscribe,
     trackFilterStore.getSnapshot,
   );
 
-  // The toolbar's song filter narrows the artist's tracks; albums regroup
-  // from the filtered list, so albums without a matching track disappear.
+  // The toolbar's filters (song text, favorites only) narrow the artist's
+  // tracks; albums regroup from the filtered list, so albums without a
+  // matching track disappear, and the counts, Play / Shuffle, and the
+  // album index follow the filtered list. Album favorites play no part:
+  // this view filters tracks (`docs/specs/v1.4/architecture/favorite-filter.md`).
   const musics = allMusics.filter((music) =>
-    matchesTrackFilter(music.title, trackFilter.artists),
+    matchesContentFilter(music, {
+      text: trackFilter.artists,
+      favoriteOnly: favoriteOnly.artists,
+    }),
   );
   const groups = groupAlbums(musics);
   const rows = buildAlbumRows(groups);
@@ -92,6 +100,13 @@ export const useArtistContent = (artistName: string) => {
   // (album year order → disc → track), so listening continues across albums.
   const playOrder = flattenAlbumMusics(groups);
   const orderedIds = playOrder.map((music) => music.id);
+  // A selected track the toolbar's filters hide leaves the selection for
+  // good, so it does not come back selected once the filter is lifted. The
+  // state is adjusted while rendering, like the Playlist table's sort.
+  const selection = retainSelection(selectionState, orderedIds);
+  if (selection !== selectionState) {
+    setSelection(selection);
+  }
   const artist =
     artistsState.status === "success"
       ? (artistsState.value.find((entry) => entry.name === artistName) ?? null)

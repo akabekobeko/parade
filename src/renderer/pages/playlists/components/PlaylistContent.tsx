@@ -74,13 +74,11 @@ export const PlaylistContent = ({ routeId }: Props) => {
           {t("library.loadFailed", { message: musicsState.error.message })}
         </p>
       )}
-      {musicsState.status === "success" &&
-        rows.length === 0 &&
-        !filterActive && (
-          <p className="px-6 py-6 text-muted-foreground text-sm">
-            {t("playlist.emptyTracks")}
-          </p>
-        )}
+      {musicsState.status === "success" && rows.length === 0 && (
+        <p className="px-6 py-6 text-muted-foreground text-sm">
+          {filterActive ? t("playlist.noMatch") : t("playlist.emptyTracks")}
+        </p>
+      )}
 
       <div
         ref={table.scrollRef}

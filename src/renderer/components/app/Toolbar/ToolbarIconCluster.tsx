@@ -8,9 +8,7 @@ import { sidebarStore } from "@/features/layout/sidebarStore";
 import { getUiPlatform } from "@/libs/platform";
 import { cn } from "@/libs/utils";
 import { ClusterButton } from "./ClusterButton";
-
-/** Delay before the tooltips show — an instant popup is distracting here. */
-const TOOLTIP_DELAY_MS = 700;
+import { TOOLTIP_DELAY_MS } from "./constants";
 
 type Props = {
   /** Host-specific sizing classes (the cluster has no width of its own). */

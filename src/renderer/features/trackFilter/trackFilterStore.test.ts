@@ -9,11 +9,12 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-it("starts with empty texts everywhere", () => {
+it("starts with empty texts and favorites-only off everywhere", () => {
   const store = new TrackFilterStore();
   expect(store.getSnapshot()).toEqual({
     draft: { artists: "", albums: "", playlists: "" },
     applied: { artists: "", albums: "", playlists: "" },
+    favoriteOnly: { artists: false, albums: false, playlists: false },
   });
 });
 
@@ -52,4 +53,47 @@ it("notifies listeners on draft and applied changes", () => {
   expect(listener).toHaveBeenCalledTimes(1);
   vi.runAllTimers();
   expect(listener).toHaveBeenCalledTimes(2);
+});
+
+it("switches favorites-only at once, per section, and notifies", () => {
+  const store = new TrackFilterStore();
+  const listener = vi.fn();
+  store.subscribe(listener);
+
+  store.setFavoriteOnly("artists", true);
+
+  expect(store.getSnapshot().favoriteOnly).toEqual({
+    artists: true,
+    albums: false,
+    playlists: false,
+  });
+  expect(listener).toHaveBeenCalledTimes(1);
+
+  store.setFavoriteOnly("artists", false);
+  expect(store.getSnapshot().favoriteOnly.artists).toBe(false);
+  expect(listener).toHaveBeenCalledTimes(2);
+});
+
+it("does not notify when favorites-only is set to its current value", () => {
+  const store = new TrackFilterStore();
+  const listener = vi.fn();
+  store.subscribe(listener);
+  const before = store.getSnapshot();
+
+  store.setFavoriteOnly("albums", false);
+
+  expect(listener).not.toHaveBeenCalled();
+  expect(store.getSnapshot()).toBe(before);
+});
+
+it("keeps the texts when favorites-only changes and vice versa", () => {
+  const store = new TrackFilterStore();
+  store.setText("playlists", "rain");
+  vi.runAllTimers();
+  store.setFavoriteOnly("playlists", true);
+  expect(store.getSnapshot().applied.playlists).toBe("rain");
+
+  store.setText("playlists", "");
+  vi.runAllTimers();
+  expect(store.getSnapshot().favoriteOnly.playlists).toBe(true);
 });

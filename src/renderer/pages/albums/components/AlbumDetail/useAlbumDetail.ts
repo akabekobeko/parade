@@ -23,7 +23,7 @@ import {
   type RowPlayingState,
   rowPlayingStateOf,
 } from "@/features/player/rowPlayingStateOf";
-import { matchesTrackFilter } from "@/features/trackFilter/matchesTrackFilter";
+import { matchesContentFilter } from "@/features/trackFilter/matchesContentFilter";
 import { trackFilterStore } from "@/features/trackFilter/trackFilterStore";
 
 /**
@@ -70,9 +70,13 @@ export const useAlbumDetail = (
 
   // The toolbar's song filter narrows the track list to match the grid,
   // which the same text filters through SQL (`AlbumFilter.musicTitle`).
+  // "Favorites only" is not applied here: it restricts the grid to favorite
+  // albums, and an expanded album keeps every track so listening to it is
+  // not cut short (`docs/specs/v1.4/architecture/favorite-filter.md`).
   const fetched = musicsState.status === "success" ? musicsState.value : [];
+  const contentFilter = { text: trackFilter.albums, favoriteOnly: false };
   const musics = fetched.filter((music) =>
-    matchesTrackFilter(music.title, trackFilter.albums),
+    matchesContentFilter(music, contentFilter),
   );
   const discNumbers = [...new Set(musics.map((music) => music.disc))];
   const selection =
