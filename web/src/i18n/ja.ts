@@ -39,7 +39,12 @@ export const ja: Dictionary = {
   "home.feature.playlists.body":
     "手で並べる通常のプレイリストと、条件で自動的に更新されるスマート プレイリストを使えます。曲のテーブルは表示するカラムを選び、幅と並び順を変え、好きなカラムでソートできます。",
   "home.feature.playlists.alt":
-    "プレイリスト My Best を、タイトル、アーティスト、アルバム、アルバム アーティスト、ジャンル、年のカラムでテーブル表示した Playlists ビュー",
+    "プレイリスト My Best を、お気に入り、タイトル、アーティスト、アルバム、アルバム アーティスト、ジャンル、年のカラムでテーブル表示した Playlists ビュー",
+  "home.feature.favorites.title": "お気に入りを手元に",
+  "home.feature.favorites.body":
+    "好きな曲とアルバムに Star を付けると、どのビューでもひと目で分かります。フィルター メニューからワン クリックでお気に入りだけを表示できます。",
+  "home.feature.favorites.alt":
+    "Star の付いた曲が並び、フィルター メニューを開いて「お気に入りのみ表示」が見える Artists ビュー",
   "home.feature.metadata.title": "曲情報を編集して補完する",
   "home.feature.metadata.body":
     "曲情報ダイアログでタイトル、アーティスト、アートワークなどを編集し、ファイルへ書き戻せます。複数の曲をまとめて編集することもできます。不足している情報とカバー アートは MusicBrainz と Cover Art Archive から取得し、項目ごとに採用するかどうかを選べます。",

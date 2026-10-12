@@ -41,7 +41,12 @@ export const en = {
   "home.feature.playlists.body":
     "Arrange songs by hand in a regular playlist, or let a smart playlist keep itself up to date from your conditions. The song table lets you choose the columns, resize and reorder them, and sort by any of them.",
   "home.feature.playlists.alt":
-    "Playlists view showing the My Best playlist as a table with the title, artist, album, album artist, genre and year columns",
+    "Playlists view showing the My Best playlist as a table with the favorite, title, artist, album, album artist, genre and year columns",
+  "home.feature.favorites.title": "Keep your favorites close",
+  "home.feature.favorites.body":
+    "Star the songs and albums you love, spot them at a glance in every view, and show only your favorites with one click from the filter menu.",
+  "home.feature.favorites.alt":
+    "Artists view with starred songs and the filter menu open, offering to show favorites only",
   "home.feature.metadata.title": "Edit and complete metadata",
   "home.feature.metadata.body":
     "Edit the title, artist, artwork and more in the song info dialog and write the changes back to the file, for one song or for many at once. Fetch the missing details and cover art from MusicBrainz and Cover Art Archive and choose, field by field, what to keep.",

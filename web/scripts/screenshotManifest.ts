@@ -10,6 +10,7 @@ export const SCENES = [
   "artists-light",
   "albums",
   "playlists",
+  "favorites",
   "music-info",
   "player",
   "settings",
