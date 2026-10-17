@@ -7,6 +7,7 @@ Parade の仕様書です。
 - [v1.2](v1.2/README.md)
 - [v1.3](v1.3/README.md)
 - [v1.4](v1.4/README.md)
+- [v1.5](v1.5/README.md)
 
 アプリのバージョンとは独立した仕様書です。
 
