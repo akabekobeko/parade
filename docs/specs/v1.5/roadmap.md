@@ -6,7 +6,7 @@ v1.5 の実装フェーズ分割です。v1.4 と同じく「動くものが確�
 Phase 1  基盤          RepeatMode / reducer / cycleRepeat と setRepeat / 終端の判断 / 前後曲の導出
 Phase 2  ボタン        RepeatButton / PlayerBand への配置 / i18n
 Phase 3  メニュー      MenuStateSnapshot と MenuAction の拡張 / Controls の項目 / 状態の同期と経路
-Phase 4  永続化        AppSettings.playback / sanitize と merge / 起動時の復元 / 変更時の保存
+Phase 4  永続化        AppSettings.playback (モードと音量) / sanitize と merge / 起動時の復元 / 変更時の保存
 Phase 5  仕上げ        既存の仕様書の更新 / 実機での QA / 公式サイト
 ```
 
@@ -38,18 +38,18 @@ Phase 5  仕上げ        既存の仕様書の更新 / 実機での QA / 公式
 
 ## Phase 4: 永続化
 
-**ゴール: モードが `settings.json` に残り、次回起動でボタンとメニューに復元される。**
+**ゴール: モードと音量が `settings.json` に残り、次回起動でボタン、メニュー、音量スライダーに復元される。**
 
 - `AppSettings.playback` と `sanitizePlayback`、`mergeSettings` への組み込み、テスト ([再生モードの永続化](architecture/playback-settings.md))
-- `PlayerProvider` の `initialPlayback` と、ブートストラップからの注入
-- モードを変えるコマンドからの保存 (`mp:settings:set`) と、起動時の `mp:menu:setState`
+- `PlayerProvider` の `initialPlayback` と、ブートストラップからの注入 (state の初期値と `createEngineHost` の初期音量)
+- モードと音量を変えるコマンドからの保存 (`mp:settings:set`) と、起動時の `mp:menu:setState`
 
 ## Phase 5: 仕上げ
 
 **ゴール: 仕様書と公式サイトが揃い、配布できる。**
 
 - 既存の仕様書の更新 ([README](README.md) の「既存の仕様書への影響」)
-- 実データでの QA: シャッフル ON / OFF × リピート 3 モード × 曲の終端、キューのクリアと置換、1 曲だけのキュー、メニューとボタンの相互反映、再起動後の復元
+- 実データでの QA: シャッフル ON / OFF × リピート 3 モード × 曲の終端、キューのクリアと置換、1 曲だけのキュー、メニューとボタンの相互反映、再起動後のモードと音量の復元
 - トップ ページの説明とスクリーンショットの更新 ([公式サイトへの反映](features/web-site.md))
 
 ## フェーズ間の依存関係

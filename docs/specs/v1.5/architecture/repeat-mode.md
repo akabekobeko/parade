@@ -43,9 +43,10 @@ readonly cycleRepeat: () => void;
 | `toggleShuffle` | `shuffle` の反転 | メニュー、設定 |
 | `playShuffled` | `shuffle` を ON (すでに ON なら変化なし) | メニュー、設定 |
 | `setRepeat` / `cycleRepeat` | `repeat` の変更 | メニュー、設定 |
+| `setVolume` | 音量の変更 (モードではないが同じ `playback` に保存する) | 設定 |
 
 - メニューへは `menuStateSync.patch({ shuffle })` / `patch({ repeat })` で伝えます。`isPlaying` / `hasTrack` と合わせた snapshot にまとめて `mp:menu:setState` を送るのは `menuStateSync` の役割です
-- 設定へは `savePlayback({ shuffle, repeat })` で伝えます。両方の値をいつも送り、Main が `playback` を丸ごと置き換えます
+- 設定へは `savePlayback({ shuffle, repeat, volume })` で伝えます。3 つの値をいつも送り (音量は engine host の `getVolume()`)、Main が `playback` を丸ごと置き換えます
 - どちらも fire-and-forget で、失敗しても state は戻しません (メニューと設定は state の写しで、次の変更で追いつきます)
 - `playMusic` は `shuffle` を変えないので伝えません (`played` アクションが `shuffle` を運ぶのは既存の形を保つためで、値は `stateRef` の現在値です)
 
