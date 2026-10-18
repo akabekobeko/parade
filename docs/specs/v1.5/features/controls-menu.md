@@ -53,7 +53,7 @@ export type MenuStateSnapshot = {
 現在 `mp:menu:setState` は PlayerProvider の engine host の購読から `isPlaying` / `hasTrack` を送っています。モードが加わると送る場所が 2 つになるため、React の外の小さなモジュール `menuStateSync` (`src/renderer/features/player/menuStateSync.ts`) にまとめます。
 
 - 最後に送った snapshot を持ち、`patch(partial)` で一部の項目を更新して、変化があったときだけ `window.mp.menu.setState` を呼びます (既存の重複排除をここへ移す)
-- `initialize(initial)` で起動時の値 (保存した `shuffle` / `repeat`) を入れて最初の 1 回を送ります。呼ぶのは PlayerProvider の初期化 (`useState` の initializer) で、engine host の購読と同じ場所です
+- `initialize(initial)` で起動時の値 (保存した `shuffle` / `repeat`) を入れて最初の 1 回を送ります。Main の初期値 (すべて off) と同じなら送りません。呼ぶのは PlayerProvider の初期化 (`useState` の initializer) で、engine host の購読と同じ場所です。StrictMode は initializer を 2 回呼びますが、2 回目は変化がないので送りません
 - engine host の購読は `patch({ isPlaying, hasTrack })`、モードを変えるコマンドは `patch({ shuffle })` / `patch({ repeat })` を呼びます ([リピート モード](../architecture/repeat-mode.md))
 - 純関数部分 (patch の結合と変化の判定) を切り出してユニット テストします
 

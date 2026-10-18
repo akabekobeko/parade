@@ -1,4 +1,4 @@
-import type { Music } from "@mp/ipc";
+import type { Music, RepeatMode } from "@mp/ipc";
 
 /**
  * Player-domain types (`docs/specs/v1.0/renderer/state-management.md`).
@@ -9,12 +9,11 @@ import type { Music } from "@mp/ipc";
 
 /**
  * Repeat mode (PlayerBar cycle button,
- * `docs/specs/v1.5/architecture/repeat-mode.md`): what happens when the
- * current track ends on its own, and whether previous / next wrap around the
- * queue ends. `off` stops at the tail, `all` wraps, `one` restarts the
- * current track.
+ * `docs/specs/v1.5/architecture/repeat-mode.md`). Defined with the IPC
+ * types since Main reads it for the Controls menu; re-exported here as the
+ * player domain's own name.
  */
-export type RepeatMode = "off" | "all" | "one";
+export type { RepeatMode } from "@mp/ipc";
 
 /** Which view operation installed the current queue. */
 export type QueueSource = "artist" | "album" | "playlist" | "none";

@@ -27,8 +27,9 @@ export type MenuBuildOptions = {
   /** App display name (the macOS app menu title / about label). */
   readonly appName: string;
   /**
-   * Latest `mp:menu:setState` snapshot — gates the playback items
-   * (Controls > Stop enables only while a track is loaded).
+   * Latest `mp:menu:setState` snapshot: gates the playback items (Controls
+   * > Stop enables only while a track is loaded) and checks the mode items
+   * (Controls > Shuffle, Controls > Repeat > Off / All / One).
    */
   readonly state: MenuStateSnapshot;
   /** Receives the action of a clicked custom item. */
@@ -107,6 +108,40 @@ export const buildMenuTemplate = (
           accelerator: "CmdOrCtrl+.",
           enabled: state.hasTrack,
           click: () => onAction("stop"),
+        },
+        { type: "separator" },
+        // Mode items (docs/specs/v1.5/features/controls-menu.md): always
+        // enabled, and checked from the snapshot rather than toggled
+        // natively, since the menu is rebuilt on every state push and the
+        // Renderer's state is the single source of truth.
+        {
+          label: t("menu.shuffle"),
+          type: "checkbox",
+          checked: state.shuffle,
+          click: () => onAction("toggleShuffle"),
+        },
+        {
+          label: t("menu.repeat"),
+          submenu: [
+            {
+              label: t("menu.repeatOff"),
+              type: "radio",
+              checked: state.repeat === "off",
+              click: () => onAction("setRepeatOff"),
+            },
+            {
+              label: t("menu.repeatAll"),
+              type: "radio",
+              checked: state.repeat === "all",
+              click: () => onAction("setRepeatAll"),
+            },
+            {
+              label: t("menu.repeatOne"),
+              type: "radio",
+              checked: state.repeat === "one",
+              click: () => onAction("setRepeatOne"),
+            },
+          ],
         },
       ],
     },

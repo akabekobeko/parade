@@ -117,6 +117,18 @@ const bootstrap = async (): Promise<void> => {
         // Null-safe: the bridge is set once PlayerProvider mounts.
         getActivePlayer()?.commands.stop();
         break;
+      case "toggleShuffle":
+        getActivePlayer()?.commands.toggleShuffle();
+        break;
+      case "setRepeatOff":
+        getActivePlayer()?.commands.setRepeat("off");
+        break;
+      case "setRepeatAll":
+        getActivePlayer()?.commands.setRepeat("all");
+        break;
+      case "setRepeatOne":
+        getActivePlayer()?.commands.setRepeat("one");
+        break;
     }
   });
 

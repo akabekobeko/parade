@@ -798,10 +798,30 @@ export type PlaylistGetMusicsRequest = {
 };
 
 /**
- * Identifier of a native menu item routed through `mp:menu:action`.
- * Extended in Phase 7 when the application menu is fleshed out.
+ * Repeat mode of the player (`docs/specs/v1.5/architecture/repeat-mode.md`):
+ * what happens when the current track ends on its own, and whether previous
+ * / next wrap around the queue ends. `off` stops at the tail, `all` wraps,
+ * `one` restarts the current track. Shared with Main for the Controls menu
+ * (`MenuStateSnapshot.repeat`) and the persisted playback settings.
  */
-export type MenuAction = "import" | "openSettings" | "showAbout" | "stop";
+export type RepeatMode = "off" | "all" | "one";
+
+/**
+ * Identifier of a native menu item routed through `mp:menu:action`.
+ * Extended in Phase 7 when the application menu is fleshed out, and in v1.5
+ * with the Controls menu's shuffle / repeat items. Repeat is three
+ * payload-free actions rather than one with a mode, to keep the union of
+ * string literals (`docs/specs/v1.5/features/controls-menu.md`).
+ */
+export type MenuAction =
+  | "import"
+  | "openSettings"
+  | "showAbout"
+  | "stop"
+  | "toggleShuffle"
+  | "setRepeatOff"
+  | "setRepeatAll"
+  | "setRepeatOne";
 
 /** Payload of the `mp:menu:action` push channel. */
 export type MenuActionPayload = {
@@ -821,13 +841,17 @@ export type WindowFullScreenChangedPayload = {
 
 /**
  * Snapshot of menu-relevant state pushed by the Renderer through
- * `mp:menu:setState` so Main can enable / disable items.
+ * `mp:menu:setState` so Main can enable / disable and check items.
  */
 export type MenuStateSnapshot = {
-  /** Whether playback is running — gates playback-related items. */
+  /** Whether playback is running; gates playback-related items. */
   readonly isPlaying: boolean;
-  /** Whether a current track is loaded — gates Stop. */
+  /** Whether a current track is loaded; gates Stop. */
   readonly hasTrack: boolean;
+  /** Shuffle mode; checks Controls > Shuffle. */
+  readonly shuffle: boolean;
+  /** Repeat mode; selects the Controls > Repeat radio item. */
+  readonly repeat: RepeatMode;
 };
 
 /**
