@@ -51,6 +51,7 @@ export const usePlayerBar = () => {
     commands,
     snapshot,
     shuffle,
+    repeat,
     previous,
     next,
     hasTrack,

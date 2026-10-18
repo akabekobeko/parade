@@ -3,6 +3,7 @@ import { cn } from "@/libs/utils";
 import { MusicInfo } from "./MusicInfo";
 import { Picture } from "./Picture";
 import { PlayerControls } from "./PlayerControls";
+import { RepeatButton } from "./RepeatButton";
 import { SecondaryControls } from "./SecondaryControls/SecondaryControls";
 import { SeekBar } from "./SeekBar";
 import { ShuffleButton } from "./ShuffleButton";
@@ -14,6 +15,7 @@ type Props = Pick<
   | "commands"
   | "snapshot"
   | "shuffle"
+  | "repeat"
   | "previous"
   | "next"
   | "hasTrack"
@@ -31,14 +33,16 @@ type Props = Pick<
  * The player band itself (`docs/specs/v1.0/features/player-ui.md`), left to
  * right: artwork, two-line track info (title / artist - album) in a
  * fixed-width column, transport controls, seek bar with time labels,
- * shuffle toggle, queue and volume — all vertically centered. `PlayerBar`
- * wraps it with the error alert and the right-click menu.
+ * repeat cycle button, shuffle toggle, queue and volume, all vertically
+ * centered. `PlayerBar` wraps it with the error alert and the right-click
+ * menu.
  */
 export const PlayerBand = ({
   current,
   commands,
   snapshot,
   shuffle,
+  repeat,
   previous,
   next,
   hasTrack,
@@ -75,6 +79,7 @@ export const PlayerBand = ({
       seeking={snapshot.seeking}
       onSeek={commands.seek}
     />
+    <RepeatButton mode={repeat} onCycle={commands.cycleRepeat} />
     <ShuffleButton active={shuffle} onToggle={() => commands.toggleShuffle()} />
     <SecondaryControls
       volume={snapshot.volume}
