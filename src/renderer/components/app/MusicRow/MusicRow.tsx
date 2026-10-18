@@ -172,7 +172,7 @@ export const MusicRow = ({
         </span>
       </button>
       <span className="shrink-0">
-        <RowMenu items={menuItems} />
+        <RowMenu variant="ring" items={menuItems} />
       </span>
     </>
   );

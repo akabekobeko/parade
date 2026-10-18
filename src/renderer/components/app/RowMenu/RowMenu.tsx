@@ -17,10 +17,13 @@ type Props = {
    */
   readonly items: RowMenuItems;
   /**
-   * Trigger look: the plain icon (default, `IconButton`) or an outlined
-   * circle (`CircleIconButton`).
+   * Trigger look. "tint" (default): `IconButton` with the rounded fill on
+   * hover, for the narrow sidebar rows. "ring": `IconButton` with the
+   * circle border and glow on hover, for the track rows, where the trigger
+   * sits at the row's end with room around it. "circle": the always
+   * bordered `CircleIconButton` of the list and album headers.
    */
-  readonly variant?: "ghost" | "circle";
+  readonly variant?: "tint" | "ring" | "circle";
 };
 
 /**
@@ -33,14 +36,14 @@ type Props = {
  * The entries themselves render through `RowMenuEntries`, shared with the
  * track rows' right-click menu (`MusicRow`).
  */
-export const RowMenu = ({ items, variant = "ghost" }: Props) => (
+export const RowMenu = ({ items, variant = "tint" }: Props) => (
   <DropdownMenu>
     <DropdownMenuTrigger
       render={
         variant === "circle" ? (
           <CircleIconButton aria-label="Menu" />
         ) : (
-          <IconButton aria-label="Menu" />
+          <IconButton variant={variant} aria-label="Menu" />
         )
       }
     >

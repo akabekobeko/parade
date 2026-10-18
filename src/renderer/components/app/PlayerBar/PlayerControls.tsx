@@ -46,7 +46,7 @@ export const PlayerControls = ({
   return (
     <HStack className="gap-1">
       <IconButton
-        variant="circle"
+        variant="ring"
         aria-label={t("player.previous")}
         disabled={!hasPrevious}
         onClick={onPrevious}
@@ -68,7 +68,7 @@ export const PlayerControls = ({
         )}
       </CircleIconButton>
       <IconButton
-        variant="circle"
+        variant="ring"
         aria-label={t("player.next")}
         disabled={!hasNext}
         onClick={onNext}

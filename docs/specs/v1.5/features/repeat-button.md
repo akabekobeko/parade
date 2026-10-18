@@ -19,7 +19,7 @@
 
 ## 見た目
 
-`ShuffleButton` と同じ `IconButton` (`variant="circle"`) を使い、点灯は `aria-pressed` で表します。
+`ShuffleButton` と同じ `IconButton` (`variant="ring"`) を使い、点灯は `aria-pressed` で表します。
 
 | モード | アイコン | 点灯 (`aria-pressed`) | 見た目 |
 | --- | --- | --- | --- |

@@ -17,11 +17,12 @@ import { cn } from "@/libs/utils";
  * icon buttons in general. The open-menu state (`aria-expanded`) keeps the
  * same fill.
  *
- * "circle" replaces that fill with a `foreground` circle border lit up by
+ * "ring" replaces that fill with a `foreground` circle border lit up by
  * the blurred `box-shadow` glow of `CircleIconButton` (whose border is
- * always on); the icon stays crisp inside. For the player bar, where the
- * buttons have room around them. The fill is cancelled for both the hover
- * and the open-menu state, in both themes.
+ * always on); the icon stays crisp inside. For the player bar and the
+ * track rows' menu trigger, where the buttons have room around them. The
+ * fill is cancelled for both the hover and the open-menu state, in both
+ * themes.
  *
  * Either way a toggle (`aria-pressed`) colours its icon `pressed` while it
  * is on (the shuffle mode), also while hovered.
@@ -32,8 +33,7 @@ const iconButtonVariants = cva(
     variants: {
       variant: {
         tint: "",
-        circle:
-          "rounded-full duration-200 hover:border-foreground hover:bg-transparent hover:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--foreground)_60%,transparent)] aria-expanded:bg-transparent",
+        ring: "rounded-full duration-200 hover:border-foreground hover:bg-transparent hover:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--foreground)_60%,transparent)] aria-expanded:bg-transparent",
       },
     },
     defaultVariants: {

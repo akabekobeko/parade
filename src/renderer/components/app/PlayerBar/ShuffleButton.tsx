@@ -12,13 +12,13 @@ type Props = {
 /**
  * Shuffle-mode toggle right of the seek bar. `IconButton` renders the on
  * state (`pressed` coloured icon) from `aria-pressed`, so the mode reads at
- * a glance without any styling here; hover is the player's circle border.
+ * a glance without any styling here; hover is the player's ring.
  */
 export const ShuffleButton = ({ active, onToggle }: Props) => {
   const t = useT();
   return (
     <IconButton
-      variant="circle"
+      variant="ring"
       aria-label={t("player.shuffle")}
       title={t("player.shuffle")}
       aria-pressed={active}

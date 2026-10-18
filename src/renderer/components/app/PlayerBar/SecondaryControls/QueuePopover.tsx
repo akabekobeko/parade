@@ -24,7 +24,7 @@ export const QueuePopover = () => {
   return (
     <Popover>
       <PopoverTrigger
-        render={<IconButton variant="circle" aria-label={t("player.queue")} />}
+        render={<IconButton variant="ring" aria-label={t("player.queue")} />}
       >
         <ListMusic />
       </PopoverTrigger>

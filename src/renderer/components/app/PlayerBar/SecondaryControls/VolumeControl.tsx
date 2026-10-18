@@ -36,7 +36,7 @@ export const VolumeControl = ({ volume, onChange }: Props) => {
   return (
     <Popover>
       <PopoverTrigger
-        render={<IconButton variant="circle" aria-label={t("player.volume")} />}
+        render={<IconButton variant="ring" aria-label={t("player.volume")} />}
       >
         {muted ? <VolumeMutedFillIcon /> : <VolumeFillIcon />}
       </PopoverTrigger>
