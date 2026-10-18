@@ -21,8 +21,8 @@ type Props = {
 
 /**
  * Shell of the content toolbar's menus (`ColumnsMenu`, `FilterMenu`): a
- * `ClusterButton` trigger — glowing icon, delayed tooltip, opt-out of the
- * window drag region — opening a `DropdownMenu` aligned to the toolbar's
+ * `ClusterButton` trigger (icon button, delayed tooltip, opt-out of the
+ * window drag region) opening a `DropdownMenu` aligned to the toolbar's
  * right edge. The menus differ only in their entries.
  */
 export const ToolbarMenu = ({ icon, label, active, children }: Props) => (

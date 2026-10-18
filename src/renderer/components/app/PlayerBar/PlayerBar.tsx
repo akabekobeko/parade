@@ -5,7 +5,6 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -13,6 +12,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { useT } from "@/features/i18n/useT";
+import { IconButton } from "../Buttons/IconButton";
 import { PlayerBand } from "./PlayerBand";
 import { usePlayerBar } from "./usePlayerBar";
 
@@ -50,14 +50,9 @@ export const PlayerBar = () => {
             [{visibleError.kind}] {visibleError.message}
           </AlertDescription>
           <AlertAction>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label={t("player.dismiss")}
-              onClick={dismissError}
-            >
+            <IconButton aria-label={t("player.dismiss")} onClick={dismissError}>
               <X />
-            </Button>
+            </IconButton>
           </AlertAction>
         </Alert>
       )}

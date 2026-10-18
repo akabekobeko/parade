@@ -1,11 +1,11 @@
 import { MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CircleIconButton } from "../Buttons/CircleIconButton";
+import { IconButton } from "../Buttons/IconButton";
 import { RowMenuEntries, type RowMenuItems } from "./RowMenuItems";
 
 export type { RowMenuItem, RowMenuItems } from "./RowMenuItems";
@@ -16,8 +16,14 @@ type Props = {
    * (e.g. `AddToPlaylistSubmenu`) rendered as given and keyed by position.
    */
   readonly items: RowMenuItems;
-  /** Trigger look: the plain ghost icon (default) or a filled circle. */
-  readonly variant?: "ghost" | "circle";
+  /**
+   * Trigger look. "tint" (default): `IconButton` with the rounded fill on
+   * hover, for the narrow sidebar rows. "ring": `IconButton` with the
+   * circle border and glow on hover, for the track rows, where the trigger
+   * sits at the row's end with room around it. "circle": the always
+   * bordered `CircleIconButton` of the list and album headers.
+   */
+  readonly variant?: "tint" | "ring" | "circle";
 };
 
 /**
@@ -30,14 +36,14 @@ type Props = {
  * The entries themselves render through `RowMenuEntries`, shared with the
  * track rows' right-click menu (`MusicRow`).
  */
-export const RowMenu = ({ items, variant = "ghost" }: Props) => (
+export const RowMenu = ({ items, variant = "tint" }: Props) => (
   <DropdownMenu>
     <DropdownMenuTrigger
       render={
         variant === "circle" ? (
           <CircleIconButton aria-label="Menu" />
         ) : (
-          <Button variant="ghost" size="icon-sm" aria-label="Menu" />
+          <IconButton variant={variant} aria-label="Menu" />
         )
       }
     >

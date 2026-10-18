@@ -1,7 +1,7 @@
 import type { SmartCondition } from "@mp/ipc";
 import { X } from "lucide-react";
+import { IconButton } from "@/components/app/Buttons/IconButton";
 import { HStack } from "@/components/app/stacks";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -104,14 +104,9 @@ export const ConditionRow = ({ condition, onChange, onRemove }: Props) => {
           )}
         </>
       )}
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        aria-label={t("smart.removeCondition")}
-        onClick={onRemove}
-      >
+      <IconButton aria-label={t("smart.removeCondition")} onClick={onRemove}>
         <X />
-      </Button>
+      </IconButton>
     </HStack>
   );
 };

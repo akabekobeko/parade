@@ -1,7 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { useT } from "@/features/i18n/useT";
 import { CircleIconButton } from "../Buttons/CircleIconButton";
-import { GlowIconButton } from "../Buttons/GlowIconButton";
+import { IconButton } from "../Buttons/IconButton";
 import { PauseFillIcon } from "../Icons/PauseFillIcon";
 import { PlayFillIcon } from "../Icons/PlayFillIcon";
 import { SkipBackFillIcon } from "../Icons/SkipBackFillIcon";
@@ -29,8 +29,10 @@ type Props = {
 
 /**
  * Transport controls: previous, play/pause, next. Stop has no button
- * (Apple Music-style) — it lives in the Controls menu and the bar's
- * right-click menu.
+ * (Apple Music-style): it lives in the Controls menu and the bar's
+ * right-click menu. Previous / next are a step larger than the stock
+ * `IconButton` (32px instead of 28px, icon unchanged) so the hover ring
+ * keeps some air around the glyph instead of hugging it.
  */
 export const PlayerControls = ({
   hasPrevious,
@@ -45,13 +47,15 @@ export const PlayerControls = ({
   const t = useT();
   return (
     <HStack className="gap-1">
-      <GlowIconButton
+      <IconButton
+        variant="ring"
+        className="size-8"
         aria-label={t("player.previous")}
         disabled={!hasPrevious}
         onClick={onPrevious}
       >
         <SkipBackFillIcon />
-      </GlowIconButton>
+      </IconButton>
       <CircleIconButton
         className="size-10"
         aria-label={isPlaying ? t("player.pause") : t("player.play")}
@@ -66,13 +70,15 @@ export const PlayerControls = ({
           <PlayFillIcon />
         )}
       </CircleIconButton>
-      <GlowIconButton
+      <IconButton
+        variant="ring"
+        className="size-8"
         aria-label={t("player.next")}
         disabled={!hasNext}
         onClick={onNext}
       >
         <SkipForwardFillIcon />
-      </GlowIconButton>
+      </IconButton>
     </HStack>
   );
 };

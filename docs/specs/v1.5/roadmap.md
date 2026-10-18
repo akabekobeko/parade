@@ -22,7 +22,7 @@ Phase 5  仕上げ        既存の仕様書の更新 / 実機での QA / 公式
 
 ## Phase 2: ボタン
 
-**ゴール: プレーヤー バーのボタンでモードを切り替えられ、アイコンと glow がモードを表す。**
+**ゴール: プレーヤー バーのボタンでモードを切り替えられ、アイコンと点灯色 (`pressed`) がモードを表す。**
 
 - `RepeatButton` と `PlayerBand` への配置、`usePlayerBar` の `repeat` ([リピート ボタン](features/repeat-button.md))
 - en / ja の文言 (`player.repeat*`)

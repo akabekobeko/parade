@@ -274,7 +274,7 @@ export const PlaylistTableRow = ({
               className={MENU_CELL_CLASS_NAME}
               style={{ ...style, right: PLAYLIST_TABLE_MENU_STICKY_RIGHT }}
             >
-              <RowMenu items={menuItems} />
+              <RowMenu variant="ring" items={menuItems} />
             </td>
           );
         }

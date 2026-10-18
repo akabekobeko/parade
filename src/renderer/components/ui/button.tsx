@@ -10,8 +10,12 @@ import { cn } from "@/libs/utils";
  * affordance reads the same in both themes — `primary` for the filled
  * default, `foreground` for outline / secondary (whose fills sit close to
  * the page background), `destructive` for destructive. `aria-expanded`
- * keeps its background tint as the open-menu state. The unboxed `ghost` /
- * `link` keep the stock shadcn hover / ring.
+ * keeps its background tint as the open-menu state. The unboxed `ghost`
+ * (every icon button of the app, see `IconButton`) tints a rounded
+ * rectangle with a translucent `foreground` on hover: a touch darker than
+ * the page in the light theme, a touch lighter in the dark theme, where the
+ * stock `muted` barely showed against the sidebar. `link` keeps the stock
+ * shadcn hover / ring.
  */
 const buttonVariants = cva(
   "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -25,7 +29,7 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:border-foreground hover:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--foreground)_60%,transparent)] focus-visible:border-foreground focus-visible:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--foreground)_60%,transparent)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
-          "hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+          "hover:bg-foreground/10 hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-expanded:bg-foreground/10 aria-expanded:text-foreground",
         destructive:
           "bg-destructive/10 text-destructive hover:border-destructive hover:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--destructive)_60%,transparent)] focus-visible:border-destructive focus-visible:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--destructive)_60%,transparent)] dark:bg-destructive/20",
         link: "text-primary underline-offset-4 hover:underline focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",

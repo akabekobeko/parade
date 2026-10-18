@@ -58,7 +58,9 @@
 
 /*
  * Lamp glow: the hovered element lights up like a lamp, a mid bloom plus a
- * wide faint halo. Same values as the app's GlowIconButton. Apply as
+ * wide faint halo. Same values as the lamp glow the app's icon buttons had
+ * up to v1.4.0 (the app since moved to a tint or a circle border; the site
+ * keeps the lamp). Apply as
  * `hover:glow-lamp` together with `transition-glow`.
  */
 @utility glow-lamp {

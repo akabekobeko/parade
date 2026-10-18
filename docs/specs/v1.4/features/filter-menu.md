@@ -16,7 +16,7 @@ Playlists
 
 - Playlists ではカラム表示メニュー ([表示カラムの切り替え](../../v1.3/features/column-visibility.md)) と「曲を絞り込む」の間です。並びは「カラム表示メニュー、フィルター メニュー、曲を絞り込む」
 - 表示する条件は「曲を絞り込む」と同じで、Artists / Albums / Playlists のルートで表示し、Settings では表示しません
-- ボタンは `ColumnsMenu` と同じ `ClusterButton` (glow 付きのアイコン ボタン + ツールチップ) で、アイコンは Lucide の `Funnel`。ツールチップは「Filter」(`toolbar.filter`)
+- ボタンは `ColumnsMenu` と同じ `ClusterButton` (アイコン ボタン + ツールチップ) で、アイコンは Lucide の `Funnel`。ツールチップは「Filter」(`toolbar.filter`)
 - 絞り込みが有効なとき、ボタンの Funnel を塗りつぶし (`fill-current`) にして、メニューを開かなくても有効だと分かるようにします。`aria-pressed` ではなく `data-active` で見た目を切り替えます (ボタンの役割はメニューを開くことで、トグルではないため)
 
 ## メニュー

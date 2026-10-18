@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -6,7 +5,7 @@ import {
 } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { useT } from "@/features/i18n/useT";
-import { GlowIconButton } from "../../Buttons/GlowIconButton";
+import { IconButton } from "../../Buttons/IconButton";
 import { VolumeFillIcon } from "../../Icons/VolumeFillIcon";
 import { VolumeMutedFillIcon } from "../../Icons/VolumeMutedFillIcon";
 import { HStack } from "../../stacks";
@@ -37,20 +36,18 @@ export const VolumeControl = ({ volume, onChange }: Props) => {
   return (
     <Popover>
       <PopoverTrigger
-        render={<GlowIconButton aria-label={t("player.volume")} />}
+        render={<IconButton variant="ring" aria-label={t("player.volume")} />}
       >
         {muted ? <VolumeMutedFillIcon /> : <VolumeFillIcon />}
       </PopoverTrigger>
       <PopoverContent className="w-56" align="end">
         <HStack>
-          <Button
-            variant="ghost"
-            size="icon-sm"
+          <IconButton
             aria-label={muted ? t("player.unmute") : t("player.mute")}
             onClick={toggleMute}
           >
             {muted ? <VolumeMutedFillIcon /> : <VolumeFillIcon />}
-          </Button>
+          </IconButton>
           <Slider
             appearance="fused"
             aria-label={t("player.volume")}
