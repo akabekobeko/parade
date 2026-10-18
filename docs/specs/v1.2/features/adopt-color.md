@@ -42,3 +42,30 @@ Details タブ ([取得結果の比較と採用](music-info-compare.md)) と Art
 ## 確認方法
 
 ライト・ダーク両方で、通常・採用・エラー・フォーカスの 4 状態を並べたスクリーンショットを PR に添付して確認します。エラーと採用が同時に立つ (左が invalid、右を採用) 場合は右だけ採用色、左は destructive のままです。
+
+## 改訂 (2026-10-18): green から blue へ
+
+アイコン ボタンの hover 表現を見直した際 (PlayerBar のシャッフル ボタンの ON 状態の色の検討)、採用色も同じ色にそろえました。
+
+- green は赤緑色弱で判別しにくい。候補の blue と orange のうち、色覚の点で安全な blue を採用
+- 上記の検討で blue を退けた理由はフォーカス ring (hue 230) との近さでしたが、ring はほぼ無彩色 (chroma 0.0225) なので、彩度の高い blue なら見分けがつきます
+- シャッフル ON のアイコン色 (`--pressed`) と同じ値にし、アプリの有彩色のアクセントを 1 つにします。トークンは用途ごとに分けたまま (意味が違うため)、`--adopt` を `--pressed` から導出して値が構造的にそろうようにします
+
+```css
+/* src/renderer/App.css */
+:root {
+  --pressed: oklch(0.55 0.16 255);      /* light: 背景 (L 0.94) に対して少し暗め */
+  --adopt: var(--pressed);
+}
+.dark {
+  --pressed: oklch(0.75 0.12 255);      /* dark: 背景 (L 0.145) に対して明るめ */
+  --adopt: var(--pressed);
+}
+@theme inline {
+  --color-adopt: var(--adopt);
+  --color-pressed: var(--pressed);
+}
+```
+
+- クラス名 (`border-adopt` など) は変わりません。用途で名付けたトークンにした効果です
+- `web/src/styles/tokens.css` のコピーも同じ値にします

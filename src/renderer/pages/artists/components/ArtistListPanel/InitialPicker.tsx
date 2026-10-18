@@ -1,6 +1,6 @@
 import { TextInitial } from "lucide-react";
 import { useState } from "react";
-import { GlowIconButton } from "@/components/app/Buttons/GlowIconButton";
+import { IconButton } from "@/components/app/Buttons/IconButton";
 import { InitialGrid } from "@/components/app/InitialGrid/InitialGrid";
 import {
   Popover,
@@ -38,9 +38,9 @@ export const InitialPicker = ({ available, onSelect }: Props) => {
           render={
             <PopoverTrigger
               render={
-                <GlowIconButton className="shrink-0" aria-label={label}>
+                <IconButton className="shrink-0" aria-label={label}>
                   <TextInitial />
-                </GlowIconButton>
+                </IconButton>
               }
             />
           }

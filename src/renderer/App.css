@@ -40,6 +40,7 @@
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-adopt: var(--adopt);
+  --color-pressed: var(--pressed);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
@@ -99,13 +100,21 @@
   --input: oklch(0.835 0.012 225);
   --ring: oklch(0.65 0.0225 230);
   /*
-   * Side that will be saved in the music info dialog's compare view
-   * (docs/specs/v1.2/features/adopt-color.md): a blue-leaning green (hue
-   * 160) so it sits with the cool neutrals yet reads apart from the input
-   * border, the focus ring and the red of errors. Named for its meaning,
-   * not its colour.
+   * Icon of a toggle button while it is on (`aria-pressed`; the shuffle
+   * mode in the player bar): a saturated blue (hue 255), the one chromatic
+   * accent of the palette. Blue is safe for red-green colour vision
+   * deficiency, and its chroma keeps it apart from the near-grey focus
+   * ring. A bit darker on the light theme, lighter on the dark one.
    */
-  --adopt: oklch(0.6 0.15 160);
+  --pressed: oklch(0.55 0.16 255);
+  /*
+   * Side that will be saved in the music info dialog's compare view
+   * (docs/specs/v1.2/features/adopt-color.md). Named for its meaning, not
+   * its colour. Derived from `--pressed` so the app keeps one accent for
+   * "this is in effect"; the earlier green was hard to tell for red-green
+   * colour vision deficiency.
+   */
+  --adopt: var(--pressed);
   --chart-1: oklch(0.8 0.015 225);
   --chart-2: oklch(0.5 0.0225 235);
   --chart-3: oklch(0.4 0.026 240);
@@ -141,7 +150,8 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --adopt: oklch(0.75 0.15 160);
+  --pressed: oklch(0.75 0.12 255);
+  --adopt: var(--pressed);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);

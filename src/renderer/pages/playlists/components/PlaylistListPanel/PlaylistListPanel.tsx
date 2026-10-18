@@ -1,6 +1,6 @@
 import { ListMusic, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
-import { GlowIconButton } from "@/components/app/Buttons/GlowIconButton";
+import { IconButton } from "@/components/app/Buttons/IconButton";
 import { EllipsisText } from "@/components/app/EllipsisText/EllipsisText";
 import { RowMenu } from "@/components/app/RowMenu/RowMenu";
 import { HStack, Stack } from "@/components/app/stacks";
@@ -206,10 +206,7 @@ export const PlaylistListPanel = () => {
 /** Delay before the tooltips show — an instant popup is distracting here. */
 const TOOLTIP_DELAY_MS = 700;
 
-type HeaderButtonProps = Pick<
-  ComponentProps<typeof GlowIconButton>,
-  "onClick"
-> & {
+type HeaderButtonProps = Pick<ComponentProps<typeof IconButton>, "onClick"> & {
   /** Tooltip text, doubling as the accessible name. */
   readonly label: string;
   /** The icon. */
@@ -221,9 +218,9 @@ const HeaderButton = ({ label, children, ...props }: HeaderButtonProps) => (
   <Tooltip>
     <TooltipTrigger
       render={
-        <GlowIconButton className="shrink-0" aria-label={label} {...props}>
+        <IconButton className="shrink-0" aria-label={label} {...props}>
           {children}
-        </GlowIconButton>
+        </IconButton>
       }
     />
     <TooltipContent side="bottom">{label}</TooltipContent>

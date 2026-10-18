@@ -1,11 +1,11 @@
 import { MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CircleIconButton } from "../Buttons/CircleIconButton";
+import { IconButton } from "../Buttons/IconButton";
 import { RowMenuEntries, type RowMenuItems } from "./RowMenuItems";
 
 export type { RowMenuItem, RowMenuItems } from "./RowMenuItems";
@@ -16,7 +16,10 @@ type Props = {
    * (e.g. `AddToPlaylistSubmenu`) rendered as given and keyed by position.
    */
   readonly items: RowMenuItems;
-  /** Trigger look: the plain ghost icon (default) or a filled circle. */
+  /**
+   * Trigger look: the plain icon (default, `IconButton`) or an outlined
+   * circle (`CircleIconButton`).
+   */
   readonly variant?: "ghost" | "circle";
 };
 
@@ -37,7 +40,7 @@ export const RowMenu = ({ items, variant = "ghost" }: Props) => (
         variant === "circle" ? (
           <CircleIconButton aria-label="Menu" />
         ) : (
-          <Button variant="ghost" size="icon-sm" aria-label="Menu" />
+          <IconButton aria-label="Menu" />
         )
       }
     >

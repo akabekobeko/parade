@@ -19,16 +19,16 @@
 
 ## 見た目
 
-`ShuffleButton` と同じ `GlowIconButton` を使い、点灯は `aria-pressed` で表します。
+`ShuffleButton` と同じ `IconButton` (`variant="circle"`) を使い、点灯は `aria-pressed` で表します。
 
 | モード | アイコン | 点灯 (`aria-pressed`) | 見た目 |
 | --- | --- | --- | --- |
-| `off` | Lucide `Repeat` | `false` | 通常色。hover で glow |
-| `all` | Lucide `Repeat` | `true` | primary 色 + glow |
-| `one` | Lucide `Repeat1` | `true` | primary 色 + glow |
+| `off` | Lucide `Repeat` | `false` | 通常色。hover で円の border + glow |
+| `all` | Lucide `Repeat` | `true` | `pressed` 色 (blue) のアイコン |
+| `one` | Lucide `Repeat1` | `true` | `pressed` 色 (blue) のアイコン |
 
-- glow は `GlowIconButton` が `aria-pressed` から描くもので、ボタン側にスタイルは足しません。シャッフル ボタンの ON と同じ見た目になります
-- `all` と `one` の違いはアイコンの形 (`Repeat1` の「1」) だけです。色や glow は同じにし、「有効か」を glow、「どちらか」をアイコンで読めるようにします
+- 点灯色は `IconButton` が `aria-pressed` から描くもので、ボタン側にスタイルは足しません。シャッフル ボタンの ON と同じ見た目になります
+- `all` と `one` の違いはアイコンの形 (`Repeat1` の「1」) だけです。色は同じにし、「有効か」を色、「どちらか」をアイコンで読めるようにします
 - 無効の `Repeat` とシャッフルの OFF が隣り合うので、両方とも通常色の輪郭だけになります。有効なほうだけが点灯します
 - lucide-react の `Repeat` / `Repeat1` はどちらも導入済みのバージョン (1.49.0) にあります
 

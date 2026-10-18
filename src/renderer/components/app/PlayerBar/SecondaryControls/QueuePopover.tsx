@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/popover";
 import { useT } from "@/features/i18n/useT";
 import { usePlayerState } from "@/features/player/PlayerProvider";
-import { GlowIconButton } from "../../Buttons/GlowIconButton";
+import { IconButton } from "../../Buttons/IconButton";
 import { HStack } from "../../stacks";
 import { ClearQueueButton } from "./ClearQueueButton";
 import { QueueList } from "./QueueList";
@@ -24,7 +24,7 @@ export const QueuePopover = () => {
   return (
     <Popover>
       <PopoverTrigger
-        render={<GlowIconButton aria-label={t("player.queue")} />}
+        render={<IconButton variant="circle" aria-label={t("player.queue")} />}
       >
         <ListMusic />
       </PopoverTrigger>

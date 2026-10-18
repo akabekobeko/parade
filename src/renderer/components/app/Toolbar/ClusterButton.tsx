@@ -4,10 +4,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { GlowIconButton } from "../Buttons/GlowIconButton";
+import { IconButton } from "../Buttons/IconButton";
 
 type Props = Pick<
-  ComponentProps<typeof GlowIconButton>,
+  ComponentProps<typeof IconButton>,
   "onClick" | "render" | "nativeButton"
 > & {
   /** Tooltip text, doubling as the accessible name. */
@@ -23,8 +23,9 @@ type Props = Pick<
 };
 
 /**
- * One glowing icon button of `ToolbarIconCluster` with its delayed tooltip
- * (the delay comes from the cluster's `TooltipProvider`).
+ * One icon button of `ToolbarIconCluster` (hover fills a rounded rectangle,
+ * the "tint" look of `IconButton`) with its delayed tooltip (the delay comes
+ * from the cluster's `TooltipProvider`).
  */
 export const ClusterButton = ({
   label,
@@ -35,14 +36,14 @@ export const ClusterButton = ({
   <Tooltip>
     <TooltipTrigger
       render={
-        <GlowIconButton
+        <IconButton
           aria-label={label}
           data-active={active || undefined}
           className="app-region-no-drag data-active:[&_svg]:fill-current"
           {...props}
         >
           {children}
-        </GlowIconButton>
+        </IconButton>
       }
     />
     <TooltipContent side="bottom">{label}</TooltipContent>

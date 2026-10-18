@@ -7,7 +7,7 @@
 - 位置はコンテンツ ツールバー (`ContentToolbar`) の右側、**曲の絞り込みテキストボックスの左隣**です
 - Playlists ビュー (`sectionOf(pathname) === "playlists"`) のときだけ表示します。Artists / Albums ビューと設定画面には出しません
 - プレイリストを選択していないとき (`/playlists`) も表示します。カラムの設定は全プレイリスト共通で、選択の有無で出し入れするとツールバーの配置が揺れるためです
-- アイコンは lucide の `Columns3`、ボタンは `GlowIconButton` です。ツールチップとアクセシブル ネームは i18n `toolbar.columns` (en: `Columns`、ja: `カラム`)
+- アイコンは lucide の `Columns3`、ボタンは `IconButton` です。ツールチップとアクセシブル ネームは i18n `toolbar.columns` (en: `Columns`、ja: `カラム`)
 - ツールバーの背景はウィンドウのドラッグ領域なので、ボタンには `app-region-no-drag` を付けます
 
 ```

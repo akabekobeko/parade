@@ -32,7 +32,7 @@
 
 | 種類 | アプリでの用途 | サイトでの用途 | CSS |
 | --- | --- | --- | --- |
-| Lamp glow (`GlowIconButton`) | プレーヤー バーとツールバーのアイコン ボタン | ヘッダーのアイコン ボタン (テーマ切り替え、GitHub リンク)、ナビゲーション リンク | `filter: drop-shadow(0 0 5px var(--foreground)) drop-shadow(0 0 12px color-mix(in oklch, var(--foreground) 60%, transparent))` を svg (またはテキスト) に適用。`transition: filter 200ms` |
+| Lamp glow (v1.4.0 までの `GlowIconButton`。アプリは v1.4.1 で tint / 円の border へ移行したが、サイトは lamp のまま) | プレーヤー バーとツールバーのアイコン ボタン (当時) | ヘッダーのアイコン ボタン (テーマ切り替え、GitHub リンク)、ナビゲーション リンク | `filter: drop-shadow(0 0 5px var(--foreground)) drop-shadow(0 0 12px color-mix(in oklch, var(--foreground) 60%, transparent))` を svg (またはテキスト) に適用。`transition: filter 200ms` |
 | Border glow (`CircleIconButton`、`Button` の outline / secondary) | 枠線つきのボタン、フォーム部品 | ダウンロード ボタン、カード | `border-color: var(--foreground)` と `box-shadow: 0 0 5px 1px color-mix(in oklch, var(--foreground) 60%, transparent)`。`transition: color, background-color, border-color, box-shadow 200ms` |
 
 - `Button` の `default` variant (塗りつぶし) は `--primary` で光る: `box-shadow: 0 0 5px 1px color-mix(in oklch, var(--primary) 60%, transparent)`。ダウンロード ページの主ボタンに使う
