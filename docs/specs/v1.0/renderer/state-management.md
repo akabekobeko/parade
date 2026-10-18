@@ -56,14 +56,21 @@ audio-player は「2 層 Reducer」でした: 外側の `dispatchWrapper` が非
 ```ts
 // 純粋な状態: エンジンのインスタンスは含めない
 type PlayerState = {
-  queue: Music[];             // カレントキュー
+  queue: Music[];             // カレントキュー (シャッフル中は並べ替え済み)
+  orderedQueue: Music[];      // ビューの並び (シャッフル解除時の復元先)
   queueSource: QueueSource;   // どのビュー操作で設定されたか (artist / album / playlist / none)
   current: Music | null;
-  // previous / next は queue と current からの導出値 (state に持たない)
+  shuffle: boolean;           // シャッフル モード (並びを決める)
+  repeat: RepeatMode;         // リピート モード (終端の挙動を決める。v1.5)
+  // previous / next は queue と current (と repeat) からの導出値 (state に持たない)
 };
 
 type PlayerCommands = {
   playMusic: (music: Music, queue: Music[], source: QueueSource) => Promise<void>;
+  playShuffled: (queue: Music[], source: QueueSource) => Promise<void>;
+  toggleShuffle: () => void;
+  setRepeat: (mode: RepeatMode) => void;  // v1.5。メニューから
+  cycleRepeat: () => void;                // v1.5。off -> all -> one -> off (ボタンから)
   playNext: () => Promise<void>;
   playPrevious: () => Promise<void>;
   togglePlayPause: () => void;
@@ -71,14 +78,20 @@ type PlayerCommands = {
   seek: (timeSec: number) => void;
   setVolume: (volume: number) => void;
   replaceQueue: (queue: Music[], source: QueueSource) => void; // 再生は維持
+  insertNext: (musics: Music[]) => void;     // Play next
+  appendToQueue: (musics: Music[]) => void;  // Add to queue
+  updateMusics: (musics: Music[]) => void;   // 曲情報の編集後に差し替える (v1.1)
 };
 ```
+
+- `shuffle` / `orderedQueue` / `playShuffled` / `toggleShuffle` は v1.0 の実装中に追加したものです
+- `repeat` / `setRepeat` / `cycleRepeat` は v1.5 で追加しました (2026-10-18 改訂)。終端と前後曲の解決、シャッフルとの関係は [リピート モード](../../v1.5/architecture/repeat-mode.md)、モードと音量の保存は [再生モードの永続化](../../v1.5/architecture/playback-settings.md) を参照してください
 
 実装の要点:
 
 - Provider 内部で `useReducer` (queue / current の純粋 reducer) と、オーディオエンジンのインスタンスを `useRef` で保持します。**エンジンは React state に入れません**
 - `playMusic` は「前エンジンの close → `createAudioEngine` → 再生開始 → reducer へ current 更新を dispatch」までを担う async コマンドです。失敗はエンジン store の error に載るため、コマンド自体は throw しません
-- エンジンへの `ended` 購読 (→ `playNext()`) や MediaSession の metadata 更新は、**エンジンを生成するコマンドの中で**行います。useEffect で「current の変化を監視して同期する」形は取りません (変化を起こした場所で副作用も実行する)。audio-player のような「ポーリング再描画への相乗りで終了検知」も行いません
+- エンジンへの `ended` 購読 (→ `naturalEndOutcomeOf` の判断で次曲 / 再開 / 停止。v1.5 以前は「次曲があれば再生、なければ停止」) や MediaSession の metadata 更新は、**エンジンを生成するコマンドの中で**行います。useEffect で「current の変化を監視して同期する」形は取りません (変化を起こした場所で副作用も実行する)。audio-player のような「ポーリング再描画への相乗りで終了検知」も行いません
 - Context は audio-player 同様に **State 用と Commands 用を分離**します。Commands オブジェクトは **Provider マウント時に 1 回だけ生成** (`useState` の initializer で作り、`useReducer` の dispatch と `useRef` のエンジン参照を閉じ込める) するため、useCallback なしで恒久的に安定参照になります。コマンドしか使わないコンポーネントは状態変化で再レンダーされません
 
 ### 再生状態の購読: useAudioPlayer

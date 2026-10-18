@@ -83,7 +83,7 @@ Renderer は `import type { Music } from "@mp/ipc"` と書けます。`import ty
 | チャネル | 用途 |
 | --- | --- |
 | `mp:log:forward` | Renderer のログを Main のログへ転送 |
-| `mp:menu:setState` | メニューの有効・無効状態の同期 (再生中かどうか等) |
+| `mp:menu:setState` | メニューの有効・無効状態とチェック状態の同期 (`isPlaying` / `hasTrack` に加え、v1.5 で `shuffle` / `repeat`。「コントロール」のシャッフルとリピートのチェックに使う。[コントロール メニュー](../../v1.5/features/controls-menu.md)、2026-10-18 改訂) |
 | `mp:menu:popup` | アプリケーションメニューをドロップダウン表示 (Windows / Linux のメニューボタン。[システムメニュー](../cross-platform/system-menu.md)) |
 
 ### Main → Renderer (push)
@@ -94,7 +94,7 @@ audio-player には push チャネルが 1 本もなく、インポート進捗�
 | --- | --- | --- |
 | `mp:library:importProgress` | `{ phase, current, total, filePath, errors }` | インポート進捗。UI のプログレス表示用 |
 | `mp:library:changed` | `{ kind: "imported" \| "removed" }` | ライブラリー変更通知。受信したビューはクエリを再実行する |
-| `mp:menu:action` | `{ action }` | アプリケーションメニューからの操作 (インポート、設定を開く等) |
+| `mp:menu:action` | `{ action }` | アプリケーションメニューからの操作 (インポート、設定を開く、停止。v1.5 で `toggleShuffle` / `setRepeatOff` / `setRepeatAll` / `setRepeatOne` を追加。[コントロール メニュー](../../v1.5/features/controls-menu.md)) |
 | `mp:window:fullScreenChanged` | `{ fullScreen }` | ウィンドウのフルスクリーン開始・終了。ページ読み込み完了時 (`did-finish-load`) にも現在値を送り、フルスクリーン中のリロードでも初期状態がそろうようにする。Renderer は `<html data-fullscreen>` へ反映し、セーフエリアの CSS が参照する ([ルーティング / レイアウト](../renderer/routing-layout.md)) |
 
 ## preload ブリッジ
