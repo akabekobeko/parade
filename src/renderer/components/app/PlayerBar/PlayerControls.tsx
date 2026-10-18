@@ -29,8 +29,10 @@ type Props = {
 
 /**
  * Transport controls: previous, play/pause, next. Stop has no button
- * (Apple Music-style) — it lives in the Controls menu and the bar's
- * right-click menu.
+ * (Apple Music-style): it lives in the Controls menu and the bar's
+ * right-click menu. Previous / next are a step larger than the stock
+ * `IconButton` (32px instead of 28px, icon unchanged) so the hover ring
+ * keeps some air around the glyph instead of hugging it.
  */
 export const PlayerControls = ({
   hasPrevious,
@@ -47,6 +49,7 @@ export const PlayerControls = ({
     <HStack className="gap-1">
       <IconButton
         variant="ring"
+        className="size-8"
         aria-label={t("player.previous")}
         disabled={!hasPrevious}
         onClick={onPrevious}
@@ -69,6 +72,7 @@ export const PlayerControls = ({
       </CircleIconButton>
       <IconButton
         variant="ring"
+        className="size-8"
         aria-label={t("player.next")}
         disabled={!hasNext}
         onClick={onNext}
