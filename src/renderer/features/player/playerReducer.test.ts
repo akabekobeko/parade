@@ -44,6 +44,42 @@ it("played replaces both queues and sets the current track", () => {
   expect(state.current).toBe(queue[1]);
   expect(state.queueSource).toBe("artist");
   expect(state.shuffle).toBe(false);
+  expect(state.repeat).toBe("off");
+});
+
+it("played carries the repeat mode over from the previous state", () => {
+  const queue = [music(1), music(2)];
+  const state = playerReducer(
+    { ...INITIAL_PLAYER_STATE, repeat: "all" },
+    {
+      type: "played",
+      music: queue[0] as Music,
+      queue,
+      orderedQueue: queue,
+      source: "album",
+      shuffle: false,
+    },
+  );
+  expect(state.repeat).toBe("all");
+});
+
+it("repeatChanged swaps the mode and leaves the queue and current track alone", () => {
+  const queue = [music(1), music(2)];
+  const before = {
+    queue,
+    orderedQueue: queue,
+    queueSource: "playlist" as const,
+    current: queue[1] as Music,
+    shuffle: true,
+    repeat: "off" as const,
+  };
+  const state = playerReducer(before, { type: "repeatChanged", repeat: "one" });
+  expect(state.repeat).toBe("one");
+  expect(state.queue).toBe(queue);
+  expect(state.orderedQueue).toBe(queue);
+  expect(state.current).toBe(queue[1]);
+  expect(state.queueSource).toBe("playlist");
+  expect(state.shuffle).toBe(true);
 });
 
 it("played keeps the shuffled and ordered queues apart", () => {
@@ -70,6 +106,7 @@ it("currentChanged moves the current track without touching the queue", () => {
     queueSource: "album" as const,
     current: queue[0] as Music,
     shuffle: false,
+    repeat: "off" as const,
   };
   const state = playerReducer(before, {
     type: "currentChanged",
@@ -89,6 +126,7 @@ it("queueInsertedNext inserts right after the current track in both orders", () 
     queueSource: "artist" as const,
     current: queue[1] as Music,
     shuffle: true,
+    repeat: "off" as const,
   };
   const state = playerReducer(before, {
     type: "queueInsertedNext",
@@ -107,6 +145,7 @@ it("queueInsertedNext goes to the head without a current track", () => {
       queueSource: "none",
       current: null,
       shuffle: false,
+      repeat: "off",
     },
     { type: "queueInsertedNext", musics: [music(9)] },
   );
@@ -122,6 +161,7 @@ it("queueAppended adds to the tail of both orders", () => {
       queueSource: "artist",
       current: music(1),
       shuffle: false,
+      repeat: "off",
     },
     { type: "queueAppended", musics: [music(2), music(3)] },
   );
@@ -137,6 +177,7 @@ it("queueReplaced keeps the current track and resets both orders", () => {
     queueSource: "artist" as const,
     current,
     shuffle: false,
+    repeat: "off" as const,
   };
   const nextQueue = [music(2), music(3)];
   const state = playerReducer(before, {
@@ -158,6 +199,7 @@ it("shuffleChanged swaps the playback order and keeps the ordered queue", () => 
     queueSource: "playlist" as const,
     current: ordered[0] as Music,
     shuffle: false,
+    repeat: "off" as const,
   };
   const shuffled = [music(1), music(3), music(2)];
   const state = playerReducer(before, {
@@ -179,6 +221,7 @@ it("shuffleChanged off restores the ordered queue passed by the command", () => 
     queueSource: "album" as const,
     current: ordered[2] as Music,
     shuffle: true,
+    repeat: "off" as const,
   };
   const state = playerReducer(before, {
     type: "shuffleChanged",
@@ -198,6 +241,7 @@ it("musicsUpdated swaps the edited tracks into both queues and the current track
     queueSource: "artist" as const,
     current: ordered[1] as Music,
     shuffle: true,
+    repeat: "off" as const,
   };
   const edited = { ...music(2), title: "Edited" };
   const state = playerReducer(before, {
@@ -220,6 +264,7 @@ it("musicsUpdated leaves the state alone when no queued track was edited", () =>
     queueSource: "album" as const,
     current: queue[0] as Music,
     shuffle: false,
+    repeat: "off" as const,
   };
   const state = playerReducer(before, {
     type: "musicsUpdated",

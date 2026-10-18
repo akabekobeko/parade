@@ -15,15 +15,16 @@ import { previousOf } from "@/features/player/previousOf";
  * The component only renders what this hook returns.
  */
 export const usePlayerBar = () => {
-  const { queue, current, shuffle } = usePlayerState();
+  const { queue, current, shuffle, repeat } = usePlayerState();
   const commands = usePlayerCommands();
   const snapshot = useAudioPlayer();
   const [dismissedError, setDismissedError] = useState<PlaybackError | null>(
     null,
   );
 
-  const previous = previousOf(queue, current);
-  const next = nextOf(queue, current);
+  // Under repeat `all` the ends wrap, so the buttons stay enabled.
+  const previous = previousOf(queue, current, repeat);
+  const next = nextOf(queue, current, repeat);
   const hasTrack = current !== null;
   const isPlaying = snapshot.state === "playing";
   const isLoading = snapshot.state === "loading";

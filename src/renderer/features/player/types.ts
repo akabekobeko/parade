@@ -7,6 +7,15 @@ import type { Music } from "@mp/ipc";
  * instance never appears here (it lives in the engine host, outside React).
  */
 
+/**
+ * Repeat mode (PlayerBar cycle button,
+ * `docs/specs/v1.5/architecture/repeat-mode.md`): what happens when the
+ * current track ends on its own, and whether previous / next wrap around the
+ * queue ends. `off` stops at the tail, `all` wraps, `one` restarts the
+ * current track.
+ */
+export type RepeatMode = "off" | "all" | "one";
+
 /** Which view operation installed the current queue. */
 export type QueueSource = "artist" | "album" | "playlist" | "none";
 
@@ -28,6 +37,11 @@ export type PlayerState = {
   readonly current: Music | null;
   /** Shuffle mode (PlayerBar toggle); applies to every queue build. */
   readonly shuffle: boolean;
+  /**
+   * Repeat mode (PlayerBar cycle button); decides what happens at the ends.
+   * Survives queue replacements like `shuffle`.
+   */
+  readonly repeat: RepeatMode;
   // previous / next are derived from queue + current — never stored.
 };
 
@@ -38,4 +52,5 @@ export const INITIAL_PLAYER_STATE: PlayerState = {
   queueSource: "none",
   current: null,
   shuffle: false,
+  repeat: "off",
 };

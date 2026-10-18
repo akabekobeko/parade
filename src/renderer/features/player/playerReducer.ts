@@ -5,6 +5,7 @@ import type { PlayedAction } from "./actions/played";
 import type { QueueAppendedAction } from "./actions/queueAppended";
 import type { QueueInsertedNextAction } from "./actions/queueInsertedNext";
 import type { QueueReplacedAction } from "./actions/queueReplaced";
+import type { RepeatChangedAction } from "./actions/repeatChanged";
 import type { ShuffleChangedAction } from "./actions/shuffleChanged";
 import { replaceMusic, replaceMusics } from "./replaceMusics";
 import type { PlayerState } from "./types";
@@ -24,6 +25,7 @@ export type PlayerAction =
   | QueueInsertedNextAction
   | QueueAppendedAction
   | ShuffleChangedAction
+  | RepeatChangedAction
   | MusicsUpdatedAction;
 
 /**
@@ -45,6 +47,9 @@ export const playerReducer = (
         queueSource: action.source,
         current: action.music,
         shuffle: action.shuffle,
+        // The mode is not carried by the action: replacing the queue never
+        // changes how its ends behave.
+        repeat: state.repeat,
       };
     case "currentChanged":
       return { ...state, current: action.music };
@@ -81,6 +86,8 @@ export const playerReducer = (
       };
     case "shuffleChanged":
       return { ...state, shuffle: action.shuffle, queue: action.queue };
+    case "repeatChanged":
+      return { ...state, repeat: action.repeat };
     case "musicsUpdated":
       return {
         ...state,

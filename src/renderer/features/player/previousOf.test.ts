@@ -26,3 +26,30 @@ it("returns null before anything has played", () => {
 it("returns null with an empty queue", () => {
   expect(previousOf([], music(1))).toBeNull();
 });
+
+it("repeat all wraps the head around to the tail", () => {
+  expect(previousOf(queue, music(1), "all")?.id).toBe(3);
+});
+
+it("repeat all keeps the neighbour mid-queue", () => {
+  expect(previousOf(queue, music(3), "all")?.id).toBe(2);
+});
+
+it("repeat all makes a one-track queue its own previous", () => {
+  expect(previousOf([music(1)], music(1), "all")?.id).toBe(1);
+});
+
+it("repeat all gives an outsider no previous (replacement policy wins)", () => {
+  expect(previousOf(queue, music(99), "all")).toBeNull();
+  expect(previousOf(queue, null, "all")).toBeNull();
+});
+
+it("repeat all still has nothing with an empty queue", () => {
+  expect(previousOf([], music(1), "all")).toBeNull();
+});
+
+it("repeat one behaves like off", () => {
+  expect(previousOf(queue, music(2), "one")?.id).toBe(1);
+  expect(previousOf(queue, music(1), "one")).toBeNull();
+  expect(previousOf(queue, music(99), "one")).toBeNull();
+});
