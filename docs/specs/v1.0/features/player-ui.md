@@ -7,16 +7,17 @@
 PlayerBar はウィンドウ最下段・全幅の帯です。タイトルバー相当の役割 (ドラッグ領域、ウィンドウ操作コントロールのセーフエリア) は最上段のツールバー帯が受け持つため、PlayerBar 自体に drag 領域やセーフエリアの調整はありません ([ルーティングとレイアウト](../renderer/routing-layout.md))。
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│ [Art] Title            [⏮][⏯][⏭]  0:42 ───────●─────── 3:28  [キュー][🔊] │ ← 全要素を垂直中央揃え
-│       Artist - Album                                                   │
-└────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [Art] Title        [⏮][⏯][⏭]  0:42 ────────●──────── 3:28  [🔁][🔀] [キュー][🔊] │ ← 全要素を垂直中央揃え
+│       Artist - Album                                                         │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- 左から順に、アートワーク・曲情報・前曲/再生(一時停止)/次曲・SeekBar (再生時間 / 総演奏時間を含む)・キュー ([Playlist](playlist.md) のキュー Popover)・音量を **垂直中央揃え** で並べます
+- 左から順に、アートワーク・曲情報・前曲/再生(一時停止)/次曲・SeekBar (再生時間 / 総演奏時間を含む)・リピート ([リピート ボタン](../../v1.5/features/repeat-button.md)、v1.5)・シャッフル・キュー ([Playlist](playlist.md) のキュー Popover)・音量を **垂直中央揃え** で並べます
+- レイアウト図は 2026-10-18 に改訂しました。v1.0 の図にはシャッフル ボタン (v1.0 の実装中に追加) とリピート ボタン (v1.5) がありませんでした
 - 曲情報は固定幅の縦 2 段 (上: 曲名、下: `アーティスト - アルバム`)。各行は省略記号で切り詰め、ホバーで全文をツールチップ表示します
 - SeekBar が残り幅を最大に使います
-- コンポーネントは `src/renderer/components/app/PlayerBar/` 配下で `Picture` / `MusicInfo` / `PlayerControls` / `SeekBar` / `SecondaryControls` (キュー + 音量) に分割しています
+- コンポーネントは `src/renderer/components/app/PlayerBar/` 配下で `Picture` / `MusicInfo` / `PlayerControls` / `SeekBar` / `RepeatButton` / `ShuffleButton` / `SecondaryControls` (キュー + 音量) に分割しています
 - 停止はボタンを置かず (Apple Music と同様)、以下の導線で提供します
   - アプリメニュー「コントロール > 停止」(`CmdOrCtrl+.`)。現在曲がない間は disabled (`mp:menu:setState` の `hasTrack` で gate)
   - PlayerBar の右クリックメニュー「停止」
@@ -28,12 +29,14 @@ PlayerBar はウィンドウ最下段・全幅の帯です。タイトルバー�
 | --- | --- |
 | アートワーク | 現在曲の `picture` (`media-file://`)。なければ Lucide `Music` アイコン |
 | 曲情報 | タイトル / アーティスト — アルバム。未再生時は「No music playing」相当の文言 (i18n) |
-| 前曲・次曲 | キュー上の前後が null なら disabled ([Playlist](playlist.md) のキュー仕様で決まる) |
+| 前曲・次曲 | キュー上の前後が null なら disabled ([Playlist](playlist.md) のキュー仕様で決まる)。リピート `all` では末尾と先頭がつながる ([リピート モード](../../v1.5/architecture/repeat-mode.md)) |
+| リピート | クリックのたびに `off → all → one → off`。`all` / `one` はアイコンが点灯色になる ([リピート ボタン](../../v1.5/features/repeat-button.md)、v1.5) |
+| シャッフル | ON / OFF のトグル。ON はアイコンが点灯色になる |
 | 再生・一時停止 | `state` に応じてトグル。`loading` 中はスピナー |
 | 停止 | `stop()`。ボタンは置かず、メニュー / 右クリック / MediaSession から呼ぶ (上記レイアウト参照) |
 | SeekBar | shadcn Slider。step 1 秒。`duration` 未確定 (0) の間は disabled |
 | 時間表示 | 経過 / 総時間。`stopped` でも現在曲があれば 0:00 / 総時間を表示 |
-| 音量 | Popover 内 Slider (0-100 表示、内部は 0-1)。ミュートトグルつき |
+| 音量 | Popover 内 Slider (0-100 表示、内部は 0-1)。ミュートトグルつき。シャッフルとリピートのモードとともに `settings.json` に保存し、次回起動時に復元する ([再生モードの永続化](../../v1.5/architecture/playback-settings.md)、v1.5) |
 | バッファリング表示 | `seeking` (シーク先のデータ待ち) の間、SeekBar 上にスピナーまたはパルス表示 |
 
 ## 状態の購読と表示更新
