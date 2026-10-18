@@ -10,19 +10,26 @@
 
 ## 手順
 
-1. `pnpm demo` でアプリを起動する。初回はデモ用データの生成に 30 秒ほどかかる
+1. `pnpm demo` でアプリを起動する。初回はデモ用データの生成に 30 秒ほどかかる。AI が操作する場合は下記の CDP 方式で起動する
 2. 必要なら `pnpm demo:assets` で初期状態に戻す (前回の撮影で設定や選択を変えている場合)
 3. 撮影する画面ごとに [撮影する画面](#撮影する画面) の操作を行う
 4. ウィンドウ単位でキャプチャーする
-   - ウィンドウ ID (CGWindowID) を取得する: AI が操作する場合は `cmux-cua` の `list_windows`。人が撮る場合は `GetWindowID` (Homebrew) で `GetWindowID Electron --list` のように取得する。開発起動のプロセス名は `Electron`
+   - ウィンドウ ID (CGWindowID) を取得する: 人が撮る場合は `GetWindowID` (Homebrew) で `GetWindowID Electron --list` のように取得する。AI が操作する場合は `CGWindowListCopyWindowInfo` を呼ぶ小さな Swift スクリプト (scratchpad に書く) で取得する。開発起動のプロセス名は `Electron`
+   - 撮影の直前に `osascript` でアプリを前面にする。`screencapture -l` は前面にないウィンドウを非アクティブな見た目 (灰色の信号ボタン、小さい影) で撮る
    - `screencapture -l <windowId> <scene>.png` で保存する。影を含めたまま撮る (`-o` を付けない)。サイトでは枠や影を付けない前提 ([テーマとスタイル](../architecture/theme.md))
    - 保存先は Claude Code の scratchpad など、リポジトリーの外。マスク前の画像は commit しない
 5. [マスク](#マスク) を施して `web/src/assets/screenshots/<scene>.png` へ出力する
 6. 画像を目視で確認し、ファイル パス、ユーザー名、実在の人物や作品が写っていないことを確かめる
 
-AI が操作する場合は `cmux-cua` の `launch_app` ではなく `pnpm demo` で起動し (dev server と watch ビルドが必要)、起動後のウィンドウを `list_windows` で見つけて AX (Accessibility) 経由で操作します。Electron の AX ツリーはレンダラーの DOM を反映するので、サイドバーのタブや行はラベルで辿れます。AX で辿れない操作 (ドラッグ、hover) は座標指定のクリックとカーソル移動で行います。
+### AI が操作する場合 (CDP 方式)
 
-`cmux-cua` が使えない場合は、`pnpm build` のあとに `PARADE_USER_DATA_DIR=<demo-N のパス> electron dist/main/main.js --remote-debugging-port=<port>` で起動し、CDP (Chrome DevTools Protocol) の `Runtime.evaluate` と `Input.dispatchMouseEvent` でレンダラーを操作する方法もあります (v1.3 のトップ ページ実装はこの方法で撮影)。ウィンドウ ID は `CGWindowListCopyWindowInfo` を呼ぶ小さな Swift スクリプトで取得できます。`screencapture -l` は前面にないウィンドウを非アクティブな見た目 (灰色の信号ボタン、小さい影) で撮るので、撮影の直前に `osascript` でアプリを前面にします。
+AI (Claude Code) が操作する場合は CDP (Chrome DevTools Protocol) 方式で行います。v1.3 以降の撮影はすべてこの方法で、2026-10-18 にこれを標準にしました (`cmux-cua` による AX 経由の操作は Accessibility と Screen Recording の許可が必要なため使いません)。
+
+- 起動: `pnpm build` のあとに `PARADE_USER_DATA_DIR=<demo-N のパス> ./node_modules/.bin/electron dist/main/main.js --remote-debugging-port=9222` で起動する。`pnpm demo` は dev モードで CDP のポートを渡せないので使わない (デモ用データの生成が必要なら先に `pnpm demo:assets`)
+- 操作: `http://127.0.0.1:9222/json` の page ターゲットへ WebSocket で接続し、`Runtime.evaluate` でレンダラーの DOM を操作する。ボタンは `element.click()`、曲の再生は行への `dblclick` イベント、スクロールは `scrollTop`。仮想スクロールの行は見える位置までスクロールしないと DOM にない。設定で済む状態 (プレイリストのカラムなど) は `window.mp.settings.set` で書いて `location.reload()` すると早い
+- 前面: Electron は背面にあると描画を止める (requestAnimationFrame が走らず仮想スクロールも更新されない) ので、操作と撮影の前に `osascript` でアプリを前面にする
+- hover: 操作の最後に `mousemove` イベントで見出しの空き領域へポインターを移し、行の hover を残さない
+- 撮影とマスクは手順 4 以降と同じ。次の撮影まで時間が空くときはリピートを `one` にしておくと、曲の終端のエラー トーストを避けられる (撮影前に `off` へ戻す)
 
 ## 撮影する画面
 
@@ -36,7 +43,7 @@ AI が操作する場合は `cmux-cua` の `launch_app` ではなく `pnpm demo`
 | `playlists` | Playlists ビュー、テーブル | My Best を開く。コンテンツ ツールバーのカラム メニューで Album artist と Genre と Year を表示し、ウィンドウ幅に収まるようにカラム幅を縮める (Title 150、Artist 140、Album 140、Album artist 130、Genre 90、Year 60。v1.4 でお気に入りカラムが加わった分、Title を 190 から縮めた)。1 行目 (Test Tone Serenade) を再生中にする。お気に入りカラム (常に表示) には 1 行目のほか、8 行目 Hidden Map と 11 行目 Daydream in Slow Motion の Star を ON にしておく | 右クリック メニューは閉じる |
 | `favorites` | Artists ビュー、お気に入りとフィルター メニュー | `artists` と同じ構図 (Milo Ashgrove、Modulations の見出しが上から 2 行目、Test Tone Serenade を再生中。再生位置は問わない) で、曲リストの Star を 4 曲 (Test Tone Serenade、Electric Engine、The Anchor、Umbrella) クリックして ON にし、アルバム Modulations もアルバム メニューの Album info から Favorite を ON にして Apply する (見出しに Star が出る)。コンテンツ ツールバーの Funnel ボタンでフィルター メニューを開き、「Favorites only」の項目が見える状態にする (チェックは OFF のまま。ON にすると曲が減って Star の意味が伝わりにくい) | `artists` / `artists-light` / `player` の撮影でも同じ曲とアルバムを ON にしておく。`albums` では Jazz / 1990s のアルバムのうち Songs for the Parade、Atlas & Evening、Broken Desert をカードの Star で ON にする。デモ用データにお気に入りの初期値はないので、`pnpm demo:assets` で戻したときは付け直す |
 | `music-info` | 曲情報ダイアログ | Test Tone Serenade の行メニューから Song info を開き、Details タブを表示する | **File タブはファイル パスが出るので撮らない。** Details タブでもファイル名が見える場合はマスクする |
-| `player` | プレーヤー バーとキュー | `artists` と同じ構図で再生中にキュー ボタンでキュー ポップオーバーを開く (開いた直後はゴミ箱ボタンにフォーカスが移るので外す)。ウィンドウ全体を撮り、サイト側でプレーヤー バー付近を切り出す | 切り出しの座標はマスクの manifest に書く。切り出し範囲には曲リストの下半分が入るので、曲リストの見た目が変わる PR ではこのシーンも撮り直す |
+| `player` | プレーヤー バーとキュー | `artists` と同じ構図で再生中に、リピート ボタンを押して `all` (点灯) にし、キュー ボタンでキュー ポップオーバーを開く (開いた直後はゴミ箱ボタンにフォーカスが移るので外す)。ウィンドウ全体を撮り、サイト側でプレーヤー バー付近を切り出す | 切り出しの座標はマスクの manifest に書く。切り出し範囲には曲リストの下半分が入るので、曲リストの見た目が変わる PR ではこのシーンも撮り直す。リピートが点灯するのはこのシーンだけで、他のシーンは `off` のまま撮る |
 | `settings` | Settings ページ | サイドバーから Settings を開く。Theme が Dark、Language が English の状態 | ライブラリー統計はデモ用データの数値なのでそのままでよい |
 
 - 撮影の前に、トースト通知、ツールチップ、ホバー状態が残っていないことを確認する。再生できる曲は 1:47 で終わり、次の曲へ進むと再生エラーのトースト (ファイル パスを含む) が出るので、撮影のたびに再生し直す
@@ -54,7 +61,7 @@ AI が操作する場合は `cmux-cua` の `launch_app` ではなく `pnpm demo`
 
 - 撮影する画面の選び方で File タブと取り込みダイアログを避ける
 - モザイクは `web/scripts/maskScreenshots.ts` で掛ける。`sharp` で対象領域を 1/16 に縮小してから最近傍補間で元のサイズに戻し、元画像に合成する (ぼかしではなくモザイク。ぼかしは復元される可能性がある)
-- 領域は `web/screenshots.manifest.json` に scene ごとに記録する (`x`、`y`、`width`、`height`、2x の座標)。切り出し (`player`) も同じ manifest に書く
+- 領域は `web/screenshots.manifest.json` に scene ごとに記録する (`x`、`y`、`width`、`height`、2x の座標)。切り出し (`player`) も同じ manifest に書く。`player` は幅を 2784 のまま高さ 1008 で切り出し、上端は曲リストの再生中の行が枠線ごと入る位置にする (構図が数 px ずれたら撮り直すより `y` を直す)
 - 実行は `pnpm --filter parade-web screenshots:mask -- <input-dir>`。入力はマスク前の画像のディレクトリー、出力は `web/src/assets/screenshots/`
 
 ```json
@@ -63,7 +70,7 @@ AI が操作する場合は `cmux-cua` の `launch_app` ではなく `pnpm demo`
     "mask": [{ "x": 640, "y": 1180, "width": 1280, "height": 48 }]
   },
   "player": {
-    "crop": { "x": 0, "y": 1360, "width": 2560, "height": 240 }
+    "crop": { "x": 0, "y": 796, "width": 2784, "height": 1008 }
   }
 }
 ```
