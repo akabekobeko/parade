@@ -34,7 +34,7 @@ export class MenuStateSync {
    * from Main's default. Called from the PlayerProvider initialiser, which
    * StrictMode runs twice in development: the second call finds nothing
    * changed and sends nothing. The modes come from the persisted playback
-   * settings once those exist (v1.5 Phase 4).
+   * settings (`docs/specs/v1.5/architecture/playback-settings.md`).
    *
    * @param initial - The full snapshot at startup.
    */

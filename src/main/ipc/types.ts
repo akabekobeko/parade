@@ -550,6 +550,23 @@ export type PlaylistRemoveRequest = {
 // Settings
 // ---------------------------------------------------------------------------
 
+/**
+ * Playback modes and volume persisted in `AppSettings.playback` and restored
+ * on next launch (`docs/specs/v1.5/architecture/playback-settings.md`). The
+ * Renderer always saves all three; Main replaces the object wholesale.
+ */
+export type PlaybackSettings = {
+  /** Shuffle mode of the PlayerBar toggle. */
+  readonly shuffle: boolean;
+  /** Repeat mode of the PlayerBar cycle button. */
+  readonly repeat: RepeatMode;
+  /**
+   * App volume in `[0, 1]`; `0` is muted (the level to unmute to is not
+   * saved, so a muted launch unmutes to full volume).
+   */
+  readonly volume: number;
+};
+
 /** Color theme preference persisted in `AppSettings.theme`. */
 export type ThemePreference = "light" | "dark" | "system";
 
@@ -646,6 +663,11 @@ export type AppSettings = {
   readonly lastView?: LastView;
   /** Column layout of the Playlist view's table, restored on next launch. */
   readonly playlistColumns?: PlaylistColumnsSettings;
+  /**
+   * Shuffle / repeat modes and volume, restored on next launch. Unset until
+   * the first change (defaults: shuffle off, repeat off, volume 1).
+   */
+  readonly playback?: PlaybackSettings;
 };
 
 /**

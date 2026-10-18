@@ -144,3 +144,42 @@ it("keeps the current playlistColumns when the patch value is invalid", () => {
     }).playlistColumns,
   ).toEqual({ visibleIds: ["artist"], widths: { title: 320 } });
 });
+
+it("replaces playback wholesale", () => {
+  const current = {
+    ...DEFAULT_SETTINGS,
+    playback: { shuffle: false, repeat: "off" as const, volume: 1 },
+  };
+  const merged = mergeSettings(current, {
+    playback: { shuffle: true, repeat: "all", volume: 0.4 },
+  });
+  expect(merged.playback).toEqual({
+    shuffle: true,
+    repeat: "all",
+    volume: 0.4,
+  });
+  expect(mergeSettings(merged, { theme: "dark" }).playback).toEqual({
+    shuffle: true,
+    repeat: "all",
+    volume: 0.4,
+  });
+});
+
+it("sanitizes the playback of a patch field by field", () => {
+  const merged = mergeSettings(DEFAULT_SETTINGS, {
+    playback: { shuffle: true, repeat: "off", volume: 7 },
+  });
+  expect(merged.playback).toEqual({ shuffle: true, repeat: "off", volume: 1 });
+});
+
+it("keeps the current playback when the patch value is not an object", () => {
+  const current = {
+    ...DEFAULT_SETTINGS,
+    playback: { shuffle: true, repeat: "one" as const, volume: 0.2 },
+  };
+  expect(
+    mergeSettings(current, {
+      playback: null as unknown as undefined,
+    }).playback,
+  ).toEqual({ shuffle: true, repeat: "one", volume: 0.2 });
+});

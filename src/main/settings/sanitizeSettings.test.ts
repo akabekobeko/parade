@@ -96,3 +96,26 @@ it("keeps a non-empty importDialogPath and drops other values", () => {
     sanitizeSettings({ importDialogPath: 42 }).importDialogPath,
   ).toBeUndefined();
 });
+
+it("keeps a valid playback and repairs its broken fields one by one", () => {
+  expect(
+    sanitizeSettings({
+      version: 1,
+      window: {},
+      playback: { shuffle: true, repeat: "one", volume: 0.3 },
+    }).playback,
+  ).toEqual({ shuffle: true, repeat: "one", volume: 0.3 });
+  expect(
+    sanitizeSettings({
+      version: 1,
+      window: {},
+      playback: { shuffle: true, repeat: "twice", volume: 0.5 },
+    }).playback,
+  ).toEqual({ shuffle: true, repeat: "off", volume: 0.5 });
+});
+
+it("drops a non-object playback", () => {
+  expect(
+    sanitizeSettings({ version: 1, window: {}, playback: "loud" }).playback,
+  ).toBeUndefined();
+});

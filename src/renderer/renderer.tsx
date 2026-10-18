@@ -1,6 +1,6 @@
 // First on purpose: must run before any module creates a zod schema.
 import "./libs/configureZod";
-import type { AppSettings } from "@mp/ipc";
+import type { AppSettings, PlaybackSettings } from "@mp/ipc";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { HashRouter } from "react-router";
@@ -54,6 +54,29 @@ const loadInitialSettings = async (): Promise<AppSettings> => {
   }
 
   return FALLBACK_SETTINGS;
+};
+
+/**
+ * Persist the playback modes and volume
+ * (`docs/specs/v1.5/architecture/playback-settings.md`). Straight to
+ * `mp:settings:set` like the sidebar and playlist-columns stores, not via
+ * `SettingsProvider` (nothing there reads `playback`). A failure is only
+ * logged: the modes keep working for the session and the next change saves
+ * again.
+ *
+ * @param playback - The complete modes-and-volume triple.
+ */
+const savePlayback = (playback: PlaybackSettings): void => {
+  window.mp.settings
+    .set({ patch: { playback } })
+    .then((result) => {
+      if (!result.ok) {
+        console.error("Failed to save playback settings", result.error);
+      }
+    })
+    .catch((error: unknown) => {
+      console.error("Failed to save playback settings", error);
+    });
 };
 
 /**
@@ -140,7 +163,10 @@ const bootstrap = async (): Promise<void> => {
   createRoot(root).render(
     <StrictMode>
       <SettingsProvider initialSettings={settings}>
-        <PlayerProvider>
+        <PlayerProvider
+          initialPlayback={settings.playback}
+          savePlayback={savePlayback}
+        >
           <HashRouter>
             <App />
           </HashRouter>

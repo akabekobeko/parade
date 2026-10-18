@@ -1,4 +1,4 @@
-import type { Music } from "@mp/ipc";
+import type { Music, PlaybackSettings } from "@mp/ipc";
 import {
   createContext,
   type ReactNode,
@@ -72,14 +72,16 @@ export type PlayerCommands = {
   /**
    * Toggle shuffle mode: on reshuffles the current queue (current track
    * first), off restores the view order. Playback keeps running; the menu
-   * is told the new mode (`menuStateSync`).
+   * is told the new mode (`menuStateSync`) and the modes are saved
+   * (`savePlayback`).
    */
   readonly toggleShuffle: () => void;
   /**
    * Set the repeat mode (the Controls menu's radio items). Playback keeps
    * running: the engine is not touched and the mode applies from the next
    * track end or previous / next press. The same mode again is a no-op;
-   * otherwise the menu is told the new mode (`menuStateSync`).
+   * otherwise the menu is told the new mode (`menuStateSync`) and the
+   * modes are saved (`savePlayback`).
    */
   readonly setRepeat: (mode: RepeatMode) => void;
   /**
@@ -105,7 +107,10 @@ export type PlayerCommands = {
   readonly stop: () => void;
   /** Seek the active engine (seconds); a no-op before the first track. */
   readonly seek: (timeSec: number) => void;
-  /** Set the app volume (`[0, 1]`); survives across tracks. */
+  /**
+   * Set the app volume (`[0, 1]`); survives across tracks and is saved with
+   * the modes (`savePlayback`).
+   */
   readonly setVolume: (volume: number) => void;
   /** Replace the queue, keeping the current track and playback running. */
   readonly replaceQueue: (queue: readonly Music[], source: QueueSource) => void;
@@ -131,12 +136,14 @@ const EngineHostContext = createContext<EngineHost | null>(null);
  * @param host - Engine host (owns the active engine + volume).
  * @param stateRef - Always-current player state (updated during render).
  * @param dispatch - The reducer dispatch.
+ * @param savePlayback - Persists the modes and volume after a change.
  * @returns The commands; created once per provider mount.
  */
 const createCommands = (
   host: EngineHost,
   stateRef: { readonly current: PlayerState },
   dispatch: (action: PlayerAction) => void,
+  savePlayback: (playback: PlaybackSettings) => void,
 ): PlayerCommands => {
   /**
    * Swap the engine to a new track and start playback.
@@ -204,6 +211,31 @@ const createCommands = (
     dispatch({ type: "currentChanged", music });
   };
 
+  /**
+   * The modes as last saved. Kept here rather than read from `stateRef`,
+   * which only catches up on the next render: two mode commands in the same
+   * tick would otherwise save a stale value for the other mode, and Main
+   * replaces `playback` wholesale. Starts from the restored state.
+   */
+  let savedModes: Pick<PlaybackSettings, "shuffle" | "repeat"> = {
+    shuffle: stateRef.current.shuffle,
+    repeat: stateRef.current.repeat,
+  };
+
+  /**
+   * Save the modes and volume after one of them changed
+   * (`docs/specs/v1.5/architecture/playback-settings.md`): always all three,
+   * since Main replaces `playback` wholesale. The volume is read from the
+   * host, which is updated synchronously. Fire-and-forget: a failed save
+   * never rolls the state back.
+   */
+  const persistPlayback = (
+    changed: Partial<Pick<PlaybackSettings, "shuffle" | "repeat">>,
+  ): void => {
+    savedModes = { ...savedModes, ...changed };
+    savePlayback({ ...savedModes, volume: host.getVolume() });
+  };
+
   const commands: PlayerCommands = {
     playMusic: async (music, queue, source) => {
       const shuffling = stateRef.current.shuffle;
@@ -228,6 +260,7 @@ const createCommands = (
         return;
       }
 
+      const wasShuffling = stateRef.current.shuffle;
       startEngine(first);
       dispatch({
         type: "played",
@@ -237,8 +270,12 @@ const createCommands = (
         source,
         shuffle: true,
       });
-      // Turns shuffle on when it was off; `patch` drops the no-op case.
+      // Turns shuffle on when it was off; `patch` drops the no-op case and
+      // the save is skipped the same way.
       menuStateSync.patch({ shuffle: true });
+      if (!wasShuffling) {
+        persistPlayback({ shuffle: true });
+      }
     },
 
     toggleShuffle: () => {
@@ -250,6 +287,7 @@ const createCommands = (
           queue: orderedQueue,
         });
         menuStateSync.patch({ shuffle: false });
+        persistPlayback({ shuffle: false });
         return;
       }
 
@@ -268,6 +306,7 @@ const createCommands = (
           : shuffle(orderedQueue);
       dispatch({ type: "shuffleChanged", shuffle: true, queue });
       menuStateSync.patch({ shuffle: true });
+      persistPlayback({ shuffle: true });
     },
 
     setRepeat: (mode) => {
@@ -277,6 +316,7 @@ const createCommands = (
 
       dispatch({ type: "repeatChanged", repeat: mode });
       menuStateSync.patch({ repeat: mode });
+      persistPlayback({ repeat: mode });
     },
 
     cycleRepeat: () => {
@@ -326,6 +366,9 @@ const createCommands = (
 
     setVolume: (volume) => {
       host.setVolume(volume);
+      // Every slider move saves; the IPC is cheap and Main's debounce
+      // collapses the disk writes into one.
+      persistPlayback({});
     },
 
     replaceQueue: (queue, source) => {
@@ -359,6 +402,19 @@ const createCommands = (
 };
 
 type Props = {
+  /**
+   * Persisted modes and volume to start from
+   * (`docs/specs/v1.5/architecture/playback-settings.md`); `undefined`
+   * before the first save means shuffle off, repeat off, volume 1.
+   */
+  readonly initialPlayback?: PlaybackSettings;
+  /**
+   * Persists the modes and volume after a change (production:
+   * `mp:settings:set`; tests substitute). Called with all three values.
+   * Read once on mount, like `initialPlayback`: the commands are created
+   * once and keep the first function.
+   */
+  readonly savePlayback: (playback: PlaybackSettings) => void;
   /** Subtree that may use the player hooks. */
   readonly children: ReactNode;
 };
@@ -366,8 +422,24 @@ type Props = {
 /**
  * Provide player state, commands, and the engine host to the app.
  */
-export const PlayerProvider = ({ children }: Props) => {
-  const [state, dispatch] = useReducer(playerReducer, INITIAL_PLAYER_STATE);
+export const PlayerProvider = ({
+  initialPlayback,
+  savePlayback,
+  children,
+}: Props) => {
+  // Lazy initialiser: the restored modes are read once, on mount.
+  const [state, dispatch] = useReducer(
+    playerReducer,
+    initialPlayback,
+    (playback): PlayerState =>
+      playback === undefined
+        ? INITIAL_PLAYER_STATE
+        : {
+            ...INITIAL_PLAYER_STATE,
+            shuffle: playback.shuffle,
+            repeat: playback.repeat,
+          },
+  );
 
   // Commands read the latest state through this ref (a dispatch cannot
   // return state); assigning during render keeps it in sync.
@@ -375,11 +447,13 @@ export const PlayerProvider = ({ children }: Props) => {
   stateRef.current = state;
 
   const [host] = useState(() => {
-    const created = createEngineHost();
+    // The restored volume lives in the host until the first engine exists,
+    // so the volume popover shows it before anything plays.
+    const created = createEngineHost(initialPlayback?.volume);
     // Seed the native menu with the modes the reducer started with (the
-    // persisted ones once v1.5 Phase 4 seeds the reducer), then keep its
-    // playback state in sync; `menuStateSync` drops the pushes where
-    // nothing changed (snapshots also tick on currentTime updates).
+    // persisted ones from `initialPlayback`), then keep its playback state
+    // in sync; `menuStateSync` drops the pushes where nothing changed
+    // (snapshots also tick on currentTime updates).
     menuStateSync.initialize({
       isPlaying: false,
       hasTrack: false,
@@ -395,7 +469,9 @@ export const PlayerProvider = ({ children }: Props) => {
     });
     return created;
   });
-  const [commands] = useState(() => createCommands(host, stateRef, dispatch));
+  const [commands] = useState(() =>
+    createCommands(host, stateRef, dispatch, savePlayback),
+  );
 
   // Publish for React-external listeners (hotkeys, MediaSession handlers).
   // Idempotent pointer assignment — safe under StrictMode double-render.
