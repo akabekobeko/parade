@@ -15,6 +15,7 @@ import { createEngineHost, type EngineHost } from "./engineHost";
 import { registerMediaSessionHandlers } from "./mediaSession/registerMediaSessionHandlers";
 import { syncMediaSessionPlayback } from "./mediaSession/syncMediaSessionPlayback";
 import { updateMediaSessionMetadata } from "./mediaSession/updateMediaSessionMetadata";
+import { menuStateSync } from "./menuStateSync";
 import { isNaturalEnd } from "./naturalEnd";
 import { naturalEndOutcomeOf } from "./naturalEndOutcomeOf";
 import { nextOf } from "./nextOf";
@@ -70,14 +71,15 @@ export type PlayerCommands = {
   ) => Promise<void>;
   /**
    * Toggle shuffle mode: on reshuffles the current queue (current track
-   * first), off restores the view order. Playback keeps running.
+   * first), off restores the view order. Playback keeps running; the menu
+   * is told the new mode (`menuStateSync`).
    */
   readonly toggleShuffle: () => void;
   /**
-   * Set the repeat mode (the Controls menu's radio items, v1.5 Phase 3).
-   * Playback keeps running: the engine is not touched and the mode applies
-   * from the next track end or previous / next press. The same mode again
-   * is a no-op.
+   * Set the repeat mode (the Controls menu's radio items). Playback keeps
+   * running: the engine is not touched and the mode applies from the next
+   * track end or previous / next press. The same mode again is a no-op;
+   * otherwise the menu is told the new mode (`menuStateSync`).
    */
   readonly setRepeat: (mode: RepeatMode) => void;
   /**
@@ -235,6 +237,8 @@ const createCommands = (
         source,
         shuffle: true,
       });
+      // Turns shuffle on when it was off; `patch` drops the no-op case.
+      menuStateSync.patch({ shuffle: true });
     },
 
     toggleShuffle: () => {
@@ -245,6 +249,7 @@ const createCommands = (
           shuffle: false,
           queue: orderedQueue,
         });
+        menuStateSync.patch({ shuffle: false });
         return;
       }
 
@@ -262,6 +267,7 @@ const createCommands = (
             ]
           : shuffle(orderedQueue);
       dispatch({ type: "shuffleChanged", shuffle: true, queue });
+      menuStateSync.patch({ shuffle: true });
     },
 
     setRepeat: (mode) => {
@@ -270,6 +276,7 @@ const createCommands = (
       }
 
       dispatch({ type: "repeatChanged", repeat: mode });
+      menuStateSync.patch({ repeat: mode });
     },
 
     cycleRepeat: () => {
@@ -369,19 +376,22 @@ export const PlayerProvider = ({ children }: Props) => {
 
   const [host] = useState(() => {
     const created = createEngineHost();
-    // Keep the native menu's playback state in sync (mp:menu:setState).
-    // Deduplicated here because snapshots also tick on currentTime updates.
-    let lastIsPlaying = false;
-    let lastHasTrack = false;
+    // Seed the native menu with the modes the reducer started with (the
+    // persisted ones once v1.5 Phase 4 seeds the reducer), then keep its
+    // playback state in sync; `menuStateSync` drops the pushes where
+    // nothing changed (snapshots also tick on currentTime updates).
+    menuStateSync.initialize({
+      isPlaying: false,
+      hasTrack: false,
+      shuffle: stateRef.current.shuffle,
+      repeat: stateRef.current.repeat,
+    });
     created.subscribe(() => {
-      const isPlaying = created.getSnapshot().state === "playing";
-      // An engine exists exactly while a current track is loaded.
-      const hasTrack = created.get() !== null;
-      if (isPlaying !== lastIsPlaying || hasTrack !== lastHasTrack) {
-        lastIsPlaying = isPlaying;
-        lastHasTrack = hasTrack;
-        window.mp.menu.setState({ isPlaying, hasTrack });
-      }
+      menuStateSync.patch({
+        isPlaying: created.getSnapshot().state === "playing",
+        // An engine exists exactly while a current track is loaded.
+        hasTrack: created.get() !== null,
+      });
     });
     return created;
   });

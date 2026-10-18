@@ -13,7 +13,12 @@ import { buildMenuTemplate } from "./menuBuilder";
  */
 
 /** Latest snapshot pushed by the Renderer. */
-let currentState: MenuStateSnapshot = { isPlaying: false, hasTrack: false };
+let currentState: MenuStateSnapshot = {
+  isPlaying: false,
+  hasTrack: false,
+  shuffle: false,
+  repeat: "off",
+};
 
 /**
  * Build and install the application menu from the current inputs.
