@@ -4,6 +4,7 @@ import { isLocalePreference } from "./isLocalePreference";
 import { isThemePreference } from "./isThemePreference";
 import { sanitizeAlbumFilter } from "./sanitizeAlbumFilter";
 import { sanitizeLastView } from "./sanitizeLastView";
+import { sanitizePlayback } from "./sanitizePlayback";
 import { sanitizePlaylistColumns } from "./sanitizePlaylistColumns";
 import { sanitizeSidebar } from "./sanitizeSidebar";
 
@@ -75,6 +76,10 @@ export const mergeSettings = (
       ? (sanitizePlaylistColumns(patch.playlistColumns) ??
         current.playlistColumns)
       : current.playlistColumns;
+  const playback =
+    patch.playback !== undefined
+      ? (sanitizePlayback(patch.playback) ?? current.playback)
+      : current.playback;
   return {
     ...merged,
     ...(albumFilter !== undefined ? { albumFilter } : {}),
@@ -82,5 +87,6 @@ export const mergeSettings = (
     ...(importDialogPath !== undefined ? { importDialogPath } : {}),
     ...(lastView !== undefined ? { lastView } : {}),
     ...(playlistColumns !== undefined ? { playlistColumns } : {}),
+    ...(playback !== undefined ? { playback } : {}),
   };
 };

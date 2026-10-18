@@ -5,6 +5,7 @@ import { isLocalePreference } from "./isLocalePreference";
 import { isThemePreference } from "./isThemePreference";
 import { sanitizeAlbumFilter } from "./sanitizeAlbumFilter";
 import { sanitizeLastView } from "./sanitizeLastView";
+import { sanitizePlayback } from "./sanitizePlayback";
 import { sanitizePlaylistColumns } from "./sanitizePlaylistColumns";
 import { sanitizeSidebar } from "./sanitizeSidebar";
 
@@ -27,6 +28,7 @@ export const sanitizeSettings = (raw: unknown): AppSettings => {
   }
 
   const source = raw as Record<string, unknown>;
+  const playback = sanitizePlayback(source.playback);
   const window =
     typeof source.window === "object" && source.window !== null
       ? (source.window as Record<string, unknown>)
@@ -60,5 +62,6 @@ export const sanitizeSettings = (raw: unknown): AppSettings => {
     ...(sanitizePlaylistColumns(source.playlistColumns)
       ? { playlistColumns: sanitizePlaylistColumns(source.playlistColumns) }
       : {}),
+    ...(playback !== undefined ? { playback } : {}),
   };
 };
