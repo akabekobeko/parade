@@ -31,6 +31,7 @@ export const PlayerBar = () => {
     commands,
     snapshot,
     shuffle,
+    repeat,
     previous,
     next,
     hasTrack,
@@ -66,6 +67,7 @@ export const PlayerBar = () => {
               commands={commands}
               snapshot={snapshot}
               shuffle={shuffle}
+              repeat={repeat}
               previous={previous}
               next={next}
               hasTrack={hasTrack}
