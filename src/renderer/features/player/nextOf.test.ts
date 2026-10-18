@@ -31,3 +31,27 @@ it("returns null with an empty queue", () => {
 it("matches by id, not by object identity", () => {
   expect(nextOf(queue, { ...music(1) })?.id).toBe(2);
 });
+
+it("repeat all wraps the tail around to the head", () => {
+  expect(nextOf(queue, music(3), "all")?.id).toBe(1);
+});
+
+it("repeat all keeps the neighbour mid-queue and the head for an outsider", () => {
+  expect(nextOf(queue, music(1), "all")?.id).toBe(2);
+  expect(nextOf(queue, music(99), "all")?.id).toBe(1);
+  expect(nextOf(queue, null, "all")?.id).toBe(1);
+});
+
+it("repeat all makes a one-track queue its own next", () => {
+  expect(nextOf([music(1)], music(1), "all")?.id).toBe(1);
+});
+
+it("repeat all still has nothing with an empty queue", () => {
+  expect(nextOf([], music(1), "all")).toBeNull();
+});
+
+it("repeat one behaves like off", () => {
+  expect(nextOf(queue, music(2), "one")?.id).toBe(3);
+  expect(nextOf(queue, music(3), "one")).toBeNull();
+  expect(nextOf(queue, music(99), "one")?.id).toBe(1);
+});

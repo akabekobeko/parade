@@ -30,7 +30,7 @@ readonly cycleRepeat: () => void;
 ```
 
 - `setRepeat` が本体で、`repeatChanged` を dispatch したあとメニューと設定へ新しいモードを伝えます (下記)。同じモードを指定したときは何もしません
-- `cycleRepeat` は純関数 `nextRepeatMode(mode: RepeatMode): RepeatMode` (`repeatMode.ts`) で `stateRef` の現在値から次のモードを求め、`setRepeat` を呼びます
+- `cycleRepeat` は純関数 `nextRepeatMode(mode: RepeatMode): RepeatMode` (`nextRepeatMode.ts`) で `stateRef` の現在値から次のモードを求め、`setRepeat` を呼びます
 - `off → all → one → off` の順です。クリックのたびに 1 段進み、戻る操作はありません ([リピート ボタン](../features/repeat-button.md))
 - モードの切り替えは再生に影響しません。エンジンには触れず、次の終端や前後曲の操作から新しいモードが効きます
 
@@ -73,7 +73,7 @@ export const naturalEndOutcomeOf = (state: PlayerState): NaturalEndOutcome => { 
 - 「次曲」は `nextOf(queue, current, repeat)` です (下記)。現在曲がキューにない場合はキュー先頭が次曲になる、という既存の置換時の規則 ([プレイリスト](../../v1.0/features/playlist.md)) はそのままです
 - `all` で 1 曲だけのキューは、先頭 = 現在曲なので同じ曲を繰り返します。結果は `one` と同じですが、判断は `advance` のままにし、特別扱いしません
 - `one` は現在曲がキューに含まれなくても繰り返します。キューはスナップショットで、現在曲は常に `current` にあるためです。`current` が `null` のときは終端が起きないので考慮しません
-- `advance` は既存どおり `playMusic(music, queue, queueSource)` で、キューはそのまま現在曲だけを差し替えます
+- `advance` は `playNext` と同じ経路 (エンジンの差し替えと `currentChanged`) で、キューはそのまま現在曲だけを差し替えます。`playMusic` は使いません。`playMusic` はキューを組み直すコマンドで、シャッフル中は残りを再シャッフルし `orderedQueue` も上書きしてしまうためです (v1.4 までの終端処理はこれを使っていたので、シャッフル中の自然な曲送りで並びが変わっていました)
 - `restart` は `startEngine(current)` で **エンジンを作り直し** ます。曲の切り替えと同じ経路にし、`advanced` の一度きりのガードもそのままにします。`HTMLMediaElement.loop` は使いません。`loop` だと `ended` が発火せず終端の判断を通らないうえ、再生中にモードを変えたときエンジンの属性を書き換える API が必要になるためです。`state` は変わらないので dispatch はせず、MediaSession のメタデータは `startEngine` が同じ曲で更新し直します
 - `stop` は既存どおり `engine.stop()` で、現在曲を末尾に残します
 

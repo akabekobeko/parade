@@ -16,7 +16,9 @@ import { registerMediaSessionHandlers } from "./mediaSession/registerMediaSessio
 import { syncMediaSessionPlayback } from "./mediaSession/syncMediaSessionPlayback";
 import { updateMediaSessionMetadata } from "./mediaSession/updateMediaSessionMetadata";
 import { isNaturalEnd } from "./naturalEnd";
+import { naturalEndOutcomeOf } from "./naturalEndOutcomeOf";
 import { nextOf } from "./nextOf";
+import { nextRepeatMode } from "./nextRepeatMode";
 import { setActivePlayer } from "./playerBridge";
 import { type PlayerAction, playerReducer } from "./playerReducer";
 import { previousOf } from "./previousOf";
@@ -25,6 +27,7 @@ import {
   INITIAL_PLAYER_STATE,
   type PlayerState,
   type QueueSource,
+  type RepeatMode,
 } from "./types";
 
 /**
@@ -71,12 +74,26 @@ export type PlayerCommands = {
    */
   readonly toggleShuffle: () => void;
   /**
-   * Start the next track (`nextOf`); a no-op at the queue tail. Swaps the
+   * Set the repeat mode (the Controls menu's radio items, v1.5 Phase 3).
+   * Playback keeps running: the engine is not touched and the mode applies
+   * from the next track end or previous / next press. The same mode again
+   * is a no-op.
+   */
+  readonly setRepeat: (mode: RepeatMode) => void;
+  /**
+   * Cycle the repeat mode off, all, one, off (the PlayerBar's repeat
+   * button); one step per call, through `setRepeat`.
+   */
+  readonly cycleRepeat: () => void;
+  /**
+   * Start the next track (`nextOf` with the repeat mode); a no-op at the
+   * queue tail unless repeat is `all`, which wraps to the head. Swaps the
    * engine and leaves the queue untouched.
    */
   readonly playNext: () => Promise<void>;
   /**
-   * Start the previous track (`previousOf`); a no-op at the head or when
+   * Start the previous track (`previousOf` with the repeat mode); a no-op
+   * at the head (unless repeat is `all`, which wraps to the tail) or when
    * the current track is outside the queue.
    */
   readonly playPrevious: () => Promise<void>;
@@ -122,9 +139,10 @@ const createCommands = (
   /**
    * Swap the engine to a new track and start playback.
    *
-   * The `ended` follow-up (advance or stop at the tail) is registered here,
-   * in the command that creates the engine — never via useEffect watching
-   * `current` (`docs/specs/v1.0/renderer/state-management.md`).
+   * The `ended` follow-up (advance, restart under repeat `one`, or stop at
+   * the tail; `naturalEndOutcomeOf`) is registered here, in the command
+   * that creates the engine, never via useEffect watching `current`
+   * (`docs/specs/v1.0/renderer/state-management.md`).
    */
   const startEngine = (music: Music): void => {
     const engine = createAudioEngine(toMediaStreamUrl(music.filePath), {
@@ -141,23 +159,47 @@ const createCommands = (
       }
 
       advanced = true;
-      const next = nextOf(stateRef.current.queue, stateRef.current.current);
-      if (next !== null) {
-        void commands.playMusic(
-          next,
-          stateRef.current.queue,
-          stateRef.current.queueSource,
-        );
-      } else {
-        // Queue tail: rewind to 0:00 / stopped, keep the current track
-        // (repeat is v1.x).
-        engine.stop();
+      const outcome = naturalEndOutcomeOf(stateRef.current);
+      switch (outcome.type) {
+        case "advance":
+          // Like next / previous: the queue stays as it is and only the
+          // current track moves. Not `playMusic`, which rebuilds the queue
+          // and under shuffle would reshuffle it on every advance.
+          switchTo(outcome.music);
+          break;
+        case "restart": {
+          // Repeat one: a fresh engine for the same track, like a track
+          // switch (not `HTMLMediaElement.loop`, which never fires `ended`
+          // and so would bypass this decision). The state does not change,
+          // so nothing is dispatched; the current track is read back from
+          // the state in case its metadata was edited meanwhile.
+          const current = stateRef.current.current;
+          if (current !== null) {
+            startEngine(current);
+          } else {
+            engine.stop();
+          }
+          break;
+        }
+        case "stop":
+          // Queue tail: rewind to 0:00 / stopped, keep the current track.
+          engine.stop();
+          break;
       }
     });
     host.set(engine); // Closes the previous engine.
     updateMediaSessionMetadata(music);
     syncMediaSessionPlayback(engine.getSnapshot());
     void engine.play(); // Failures surface via snapshot.error; no auto-skip.
+  };
+
+  /**
+   * Move to another track of the existing queue (next / previous / natural
+   * end advance): swap the engine and update `current` only.
+   */
+  const switchTo = (music: Music): void => {
+    startEngine(music);
+    dispatch({ type: "currentChanged", music });
   };
 
   const commands: PlayerCommands = {
@@ -222,27 +264,36 @@ const createCommands = (
       dispatch({ type: "shuffleChanged", shuffle: true, queue });
     },
 
+    setRepeat: (mode) => {
+      if (mode === stateRef.current.repeat) {
+        return;
+      }
+
+      dispatch({ type: "repeatChanged", repeat: mode });
+    },
+
+    cycleRepeat: () => {
+      commands.setRepeat(nextRepeatMode(stateRef.current.repeat));
+    },
+
     playNext: async () => {
-      const next = nextOf(stateRef.current.queue, stateRef.current.current);
+      const { queue, current, repeat } = stateRef.current;
+      const next = nextOf(queue, current, repeat);
       if (next === null) {
         return;
       }
 
-      startEngine(next);
-      dispatch({ type: "currentChanged", music: next });
+      switchTo(next);
     },
 
     playPrevious: async () => {
-      const previous = previousOf(
-        stateRef.current.queue,
-        stateRef.current.current,
-      );
+      const { queue, current, repeat } = stateRef.current;
+      const previous = previousOf(queue, current, repeat);
       if (previous === null) {
         return;
       }
 
-      startEngine(previous);
-      dispatch({ type: "currentChanged", music: previous });
+      switchTo(previous);
     },
 
     togglePlayPause: () => {
