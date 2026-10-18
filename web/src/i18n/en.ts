@@ -54,7 +54,7 @@ export const en = {
     "Song info dialog with the Details tab showing the editable title, artist, album, genre and year fields",
   "home.feature.player.title": "Play your way",
   "home.feature.player.body":
-    "Queue songs up, shuffle them and control playback from the media keys of your OS. Parade plays mp3, flac, m4a / mp4, ogg / opus, wav, aiff, wma and ape.",
+    "Queue songs up, shuffle them, repeat an album or a single song, and control playback from the media keys of your OS. Parade plays mp3, flac, m4a / mp4, ogg / opus, wav, aiff, wma and ape.",
   "home.feature.player.alt":
     "Player bar with a song playing and the queue popover listing the upcoming songs",
   "home.feature.theme.title": "Light and dark",

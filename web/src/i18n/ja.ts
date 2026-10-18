@@ -52,7 +52,7 @@ export const ja: Dictionary = {
     "Details タブでタイトル、アーティスト、アルバム、ジャンル、年の入力欄を表示した曲情報ダイアログ",
   "home.feature.player.title": "好きなように再生する",
   "home.feature.player.body":
-    "再生キューに曲を並べ、シャッフルし、OS のメディア キーから操作できます。対応形式は mp3、flac、m4a / mp4、ogg / opus、wav、aiff、wma、ape です。",
+    "再生キューに曲を並べ、シャッフルし、アルバムや 1 曲をリピートし、OS のメディア キーから操作できます。対応形式は mp3、flac、m4a / mp4、ogg / opus、wav、aiff、wma、ape です。",
   "home.feature.player.alt":
     "曲を再生中のプレーヤー バーと、次に再生する曲を並べたキューのポップオーバー",
   "home.feature.theme.title": "ライトとダーク",
