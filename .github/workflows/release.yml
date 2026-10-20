@@ -96,6 +96,7 @@ jobs:
         shell: bash
         env:
           # CI にはコード署名の証明書がないため、署名の自動検出を無効化する (macOS)
+          # scripts/after-pack.ts ad-hoc signs the macOS bundle instead
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
         run: |
           pnpm run build

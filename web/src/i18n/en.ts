@@ -100,10 +100,10 @@ export const en = {
     "Not sure which Mac you have? Open the Apple menu, choose About This Mac and look at the Chip line. The Intel build runs on Apple Silicon through Rosetta, but slower.",
   "download.notes.title": "Before you run it",
   "download.notes.intro":
-    "The binaries are not code-signed: an Apple Developer Program membership and a code-signing certificate cost money, and Parade is run at no cost. Each OS therefore warns on the first launch.",
+    "The binaries are not signed with an Apple or Microsoft certificate (macOS gets an ad-hoc signature only): an Apple Developer Program membership and a code-signing certificate cost money, and Parade is run at no cost. Each OS therefore warns on the first launch.",
   "download.notes.mac.title": "macOS",
   "download.notes.mac.body":
-    "Gatekeeper blocks the app. Right-click Parade.app and choose Open the first time. On macOS 15 or later you may also have to allow it under System Settings, Privacy & Security, Open Anyway. If it still does not open, run this in Terminal:",
+    "The first launch says Apple could not verify that Parade is free of malware. Choose Done, then open System Settings, Privacy & Security and choose Open Anyway. If it still does not open, run this in Terminal:",
   "download.notes.windows.title": "Windows",
   "download.notes.windows.body":
     "SmartScreen shows a warning. Choose More info, then Run anyway.",
