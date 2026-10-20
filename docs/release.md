@@ -98,7 +98,7 @@ macOS は `electron-builder.yml` の `mac.target` で arm64 と x64 の両方を
   - Publish 時点では main の HEAD にタグが打たれ、その後 `version` job がバージョン更新 commit へ force 移動する。タグの位置は最終的に `package.json` の version と一致した状態になる
 - **リリースが失敗した場合は Actions から再実行する**
   - `version` job はバージョンが一致していれば commit をスキップし、アセットは `--clobber` で上書きされるため、再実行は冪等
-- **バイナリーは未署名**
-  - macOS: Gatekeeper にブロックされるため、初回起動はアプリを右クリック →「開く」(または `xattr -d com.apple.quarantine`) が必要
+- **バイナリーは証明書で署名していない**
+  - macOS: `scripts/after-pack.ts` (electron-builder の `afterPack` hook) が bundle 全体を ad-hoc 署名する。未署名のままだと Electron バイナリーの linker-signed 署名との不整合を Gatekeeper が「改変」とみなし、「壊れているため開けません」で起動できなくなる (macOS 15 以降は右クリック →「開く」の回避も不可)。ad-hoc 署名により判定は「未確認の開発元」になり、初回起動は「システム設定」→「プライバシーとセキュリティ」→「このまま開く」で許可する (または `xattr -d com.apple.quarantine`)
   - Windows: SmartScreen の警告が出るため「詳細情報」→「実行」で起動する
   - コード署名 (Apple Developer Program、コードサイニング証明書) は有償のため、無償運用の間はこの案内で対応する

@@ -34,9 +34,9 @@ GitHub Releases の最新リリースを、プラットフォームごとにわ�
 
 ### 3. インストール時の注意
 
-`docs/release.md` の「バイナリーは未署名」の案内を利用者向けに書き直します。
+`docs/release.md` の「バイナリーは証明書で署名していない」の案内を利用者向けに書き直します。
 
-- **macOS**: 署名も notarize もしていないため Gatekeeper にブロックされる。初回はアプリを右クリックして「開く」を選ぶ。それでも開けない場合はターミナルで `xattr -d com.apple.quarantine /Applications/Parade.app` を実行する。macOS 15 以降は「システム設定」→「プライバシーとセキュリティ」の「このまま開く」が必要な場合がある
+- **macOS**: ad-hoc 署名のみで Developer ID 署名も notarize もしていないため、初回起動は「Apple は "Parade" にマルウェアが含まれていないことを検証できません」で止まる。「完了」を押してから「システム設定」→「プライバシーとセキュリティ」の「このまま開く」で許可する。それでも開けない場合はターミナルで `xattr -d com.apple.quarantine /Applications/Parade.app` を実行する
 - **Windows**: SmartScreen の警告が出る。「詳細情報」→「実行」で起動する
 - **Linux**: AppImage は `chmod +x` してから実行する。`.deb` は `sudo apt install ./Parade-<version>-linux-amd64.deb`
 - 署名していない理由 (Apple Developer Program とコードサイニング証明書が有償で、無償運用のため) を一文で添える

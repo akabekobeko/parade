@@ -7,6 +7,11 @@ files:
   - dist/**/*
   - "!node_modules/**/*"
 asar: true
+# Ad-hoc sign the macOS bundle so Gatekeeper reports "unidentified developer"
+# instead of "damaged". See the comment in the script. electron-builder loads
+# the .ts file with a plain require(), which relies on the type stripping of
+# the Node version pinned in mise.toml (24 or later).
+afterPack: ./scripts/after-pack.ts
 mac:
   # Build for both Apple Silicon (arm64) and Intel (x64). The app ships no
   # native modules, so both architectures can be built on a single host.

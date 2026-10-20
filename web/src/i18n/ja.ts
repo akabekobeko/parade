@@ -99,10 +99,10 @@ export const ja: Dictionary = {
     "どちらかわからない場合は、Apple メニューの「この Mac について」で「チップ」の表記を確認してください。Apple Silicon の Mac でも Intel 版は Rosetta で動きますが、速度は落ちます。",
   "download.notes.title": "起動する前に",
   "download.notes.intro":
-    "バイナリーはコード署名していません。Apple Developer Program とコードサイニング証明書が有償で、Parade を無償で運用しているためです。そのため各 OS で初回起動時に警告が出ます。",
+    "バイナリーは Apple や Microsoft の証明書で署名していません (macOS は ad-hoc 署名のみ)。Apple Developer Program とコードサイニング証明書が有償で、Parade を無償で運用しているためです。そのため各 OS で初回起動時に警告が出ます。",
   "download.notes.mac.title": "macOS",
   "download.notes.mac.body":
-    "Gatekeeper にブロックされます。初回は Parade.app を右クリックして「開く」を選んでください。macOS 15 以降では「システム設定」→「プライバシーとセキュリティ」の「このまま開く」が必要な場合があります。それでも開けないときはターミナルで次を実行してください。",
+    '初回起動時に「Apple は "Parade" にマルウェアが含まれていないことを検証できません」と表示されます。「完了」を押してから「システム設定」→「プライバシーとセキュリティ」を開き、「このまま開く」で許可してください。それでも開けないときはターミナルで次を実行してください。',
   "download.notes.windows.title": "Windows",
   "download.notes.windows.body":
     "SmartScreen の警告が出ます。「詳細情報」→「実行」で起動してください。",
