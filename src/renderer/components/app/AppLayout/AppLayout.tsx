@@ -16,6 +16,7 @@ import { ImportConfirmDialog } from "../ImportConfirmDialog/ImportConfirmDialog"
 import { AlbumInfoDialog } from "../InfoDialog/AlbumInfoDialog/AlbumInfoDialog";
 import { ArtistEditDialog } from "../InfoDialog/ArtistEditDialog/ArtistEditDialog";
 import { MusicInfoDialog } from "../InfoDialog/MusicInfoDialog/MusicInfoDialog";
+import { PlaylistInfoDialog } from "../InfoDialog/PlaylistInfoDialog/PlaylistInfoDialog";
 import { LibraryRemoveDialog } from "../LibraryRemoveDialog/LibraryRemoveDialog";
 import { PlayerBar } from "../PlayerBar/PlayerBar";
 import { Sidebar } from "../Sidebar/Sidebar";
@@ -74,6 +75,7 @@ export const AppLayout = () => {
       <ArtistEditDialog />
       <MusicInfoDialog />
       <AlbumInfoDialog />
+      <PlaylistInfoDialog />
       <LibraryRemoveDialog />
       <AboutDialog />
       <Toaster />

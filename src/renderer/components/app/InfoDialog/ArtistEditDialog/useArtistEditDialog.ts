@@ -58,13 +58,14 @@ export const useArtistEditDialog = () => {
   const initialChanged =
     target !== null && nextStoredInitial !== target.initial;
 
-  const selectFile = (next: File): void => {
+  /** Keep the picked file, or drop it when the picker was cancelled. */
+  const selectFile = (next: File | null): void => {
     if (previewUrl !== null) {
       URL.revokeObjectURL(previewUrl);
     }
 
     setFile(next);
-    setPreviewUrl(URL.createObjectURL(next));
+    setPreviewUrl(next !== null ? URL.createObjectURL(next) : null);
     setError(null);
   };
 

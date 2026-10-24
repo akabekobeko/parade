@@ -5,13 +5,13 @@ import { useFetchMusicInfoItem } from "@/components/app/RowMenu/useFetchMusicInf
 import { Stack } from "@/components/app/stacks";
 import { useLocale } from "@/features/i18n/useLocale";
 import { useT } from "@/features/i18n/useT";
+import { playlistInfoStore } from "@/features/playlist/playlistInfoStore";
 import { PlaylistHeader } from "./PlaylistHeader";
 import { PLAYLIST_TABLE_PADDING_X } from "./PlaylistTable/constants";
 import { PlaylistTable } from "./PlaylistTable/PlaylistTable";
 import { PlaylistTableBody } from "./PlaylistTable/PlaylistTableBody";
 import { PlaylistTableHeader } from "./PlaylistTable/PlaylistTableHeader";
 import { PlaylistTableRow } from "./PlaylistTable/PlaylistTableRow";
-import { SmartRulesDialog } from "./SmartRulesDialog/SmartRulesDialog";
 import { usePlaylistContent } from "./usePlaylistContent";
 
 type Props = {
@@ -45,7 +45,6 @@ export const PlaylistContent = ({ routeId }: Props) => {
     playback,
     menu,
     toggleFavorite,
-    rulesEditor,
   } = usePlaylistContent(routeId);
 
   return (
@@ -57,17 +56,10 @@ export const PlaylistContent = ({ routeId }: Props) => {
         totalDurationMs={totalDurationMs}
         onPlayAll={playback.playAll}
         onPlayShuffled={playback.playShuffled}
-        onEditRules={rulesEditor.show}
+        onOpenInfo={
+          playlist !== null ? () => playlistInfoStore.open(playlist) : null
+        }
       />
-
-      {rulesEditor.open && playlist !== null && (
-        <SmartRulesDialog
-          title={t("smart.editRules")}
-          initialRules={playlist.rules}
-          onClose={rulesEditor.close}
-          onSubmit={(rules) => rulesEditor.submit(rules)}
-        />
-      )}
 
       {musicsState.status === "error" && (
         <p className="break-all px-6 py-3 text-destructive text-sm">

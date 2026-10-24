@@ -1,4 +1,5 @@
 import { FolderInput } from "lucide-react";
+import { FormSection } from "@/components/app/FormSection/FormSection";
 import { Stack } from "@/components/app/stacks";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +13,6 @@ import { useT } from "@/features/i18n/useT";
 import { importStore } from "@/features/import/importStore/importStore";
 import { formatTime } from "@/libs/formatTime";
 import { SettingsRow } from "./SettingsRow";
-import { SettingsSection } from "./SettingsSection";
 import { StatRow } from "./StatRow";
 import { usePageContent } from "./usePageContent";
 
@@ -29,7 +29,7 @@ export const PageContent = () => {
     <Stack className="max-w-2xl gap-6 p-6">
       <h1 className="font-semibold text-lg">{t("settings.title")}</h1>
 
-      <SettingsSection label={t("settings.appearance")}>
+      <FormSection label={t("settings.appearance")}>
         <SettingsRow label={t("settings.theme")}>
           <Select
             value={settings.theme ?? "system"}
@@ -76,9 +76,9 @@ export const PageContent = () => {
             </SelectContent>
           </Select>
         </SettingsRow>
-      </SettingsSection>
+      </FormSection>
 
-      <SettingsSection label={t("settings.library")}>
+      <FormSection label={t("settings.library")}>
         {statsState.status === "error" && (
           <p className="break-all text-destructive text-sm">
             {t("library.loadFailed", { message: statsState.error.message })}
@@ -116,7 +116,7 @@ export const PageContent = () => {
         <p className="text-muted-foreground text-xs">
           {t("settings.library.removeHint")}
         </p>
-      </SettingsSection>
+      </FormSection>
     </Stack>
   );
 };
