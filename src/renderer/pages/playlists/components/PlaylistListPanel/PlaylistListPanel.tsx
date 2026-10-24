@@ -1,15 +1,6 @@
-import {
-  ListMusic,
-  NotepadText,
-  Pencil,
-  Plus,
-  Sparkles,
-  Trash2,
-} from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { IconButton } from "@/components/app/Buttons/IconButton";
-import { EllipsisText } from "@/components/app/EllipsisText/EllipsisText";
-import { RowMenu } from "@/components/app/RowMenu/RowMenu";
 import { HStack, Stack } from "@/components/app/stacks";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,19 +19,18 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useT } from "@/features/i18n/useT";
-import { playlistInfoStore } from "@/features/playlist/playlistInfoStore";
 import { playlistRouteId } from "@/features/playlist/playlistRouteId";
-import { cn } from "@/libs/utils";
 import { SmartRulesDialog } from "../SmartRulesDialog/SmartRulesDialog";
+import { PlaylistRow } from "./PlaylistRow";
 import { usePlaylistListPanel } from "./usePlaylistListPanel";
 
 /**
  * Playlist list in the Sidebar's secondary area
  * (`docs/specs/v1.0/features/playlist.md`): a fixed header (name filter,
  * icon-only "New playlist" / "New smart playlist" with delayed tooltips),
- * every playlist of both kinds, inline rename, and deletion behind a
- * confirmation dialog. The selected playlist lives in the URL
- * (`/playlists/<routeId>`).
+ * every playlist of both kinds as `PlaylistRow`s (inline rename included),
+ * and deletion behind a confirmation dialog. The selected playlist lives in
+ * the URL (`/playlists/<routeId>`).
  */
 export const PlaylistListPanel = () => {
   const t = useT();
@@ -95,85 +85,21 @@ export const PlaylistListPanel = () => {
             {t("playlist.empty")}
           </p>
         )}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto px-2">
         {playlists.map((playlist) => {
           const routeId = playlistRouteId(playlist);
-          const selected = routeId === selectedRouteId;
           return (
-            <HStack
+            <PlaylistRow
               key={routeId}
-              className={cn(
-                "group w-full px-2 py-1",
-                selected
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50",
-              )}
-            >
-              {playlist.kind === "smart" ? (
-                <Sparkles
-                  aria-hidden
-                  className="size-4 shrink-0 text-muted-foreground"
-                />
-              ) : (
-                <ListMusic
-                  aria-hidden
-                  className="size-4 shrink-0 text-muted-foreground"
-                />
-              )}
-              {editingRouteId === routeId ? (
-                <Input
-                  autoFocus
-                  defaultValue={playlist.name}
-                  className="h-6 flex-1 text-sm"
-                  onFocus={(event) => event.target.select()}
-                  onBlur={(event) => void rename(playlist, event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      void rename(playlist, event.currentTarget.value);
-                    } else if (event.key === "Escape") {
-                      setEditingRouteId(null);
-                    }
-                  }}
-                />
-              ) : (
-                <button
-                  type="button"
-                  className="min-w-0 flex-1 py-1 text-left text-sm"
-                  onClick={() => openPlaylist(routeId)}
-                  onDoubleClick={() => setEditingRouteId(routeId)}
-                >
-                  <EllipsisText text={playlist.name} />
-                </button>
-              )}
-              <span
-                className={cn(
-                  "shrink-0",
-                  !selected && "opacity-0 group-hover:opacity-100",
-                )}
-              >
-                <RowMenu
-                  items={[
-                    {
-                      label: t("playlistInfo.menu"),
-                      icon: <NotepadText />,
-                      onSelect: () => playlistInfoStore.open(playlist),
-                    },
-                    {
-                      label: t("menu.rename"),
-                      icon: <Pencil />,
-                      onSelect: () => setEditingRouteId(routeId),
-                    },
-                    {
-                      label: t("playlist.delete"),
-                      icon: <Trash2 />,
-                      onSelect: () => setDeleting(playlist),
-                      destructive: true,
-                      separatorBefore: true,
-                    },
-                  ]}
-                />
-              </span>
-            </HStack>
+              playlist={playlist}
+              selected={routeId === selectedRouteId}
+              editing={editingRouteId === routeId}
+              onOpen={() => openPlaylist(routeId)}
+              onStartRename={() => setEditingRouteId(routeId)}
+              onRename={(name) => void rename(playlist, name)}
+              onCancelRename={() => setEditingRouteId(null)}
+              onDelete={() => setDeleting(playlist)}
+            />
           );
         })}
       </div>
