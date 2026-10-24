@@ -132,6 +132,7 @@ CREATE TABLE artist_pictures (
 
 - アートワークは DB に BLOB で入れず、内容の SHA-256 をファイル名として `userData/images/` に保存します (重複排除。audio-player の方式を継承)
 - `artist_pictures` は audio-player では書き込みコードが存在せず常に空でした。v1.0 では**インポート時に「そのアーティストの最初に見つかったアートワーク」を自動登録**し、UI からの差し替えは v1.x とします
+- `pictures` の孤児 GC (`deleteOrphanedPictures`) は、`musics.picture_id`、`artist_pictures.picture_id`、そして v1.6 からは `playlists.picture_id` / `smart_playlists.picture_id` のどこからも参照されない行とファイルを消します (2026-10-24 改訂。[v1.6 のデータベース](../../v1.6/architecture/database.md))。プレイリストが参照する画像は、その曲やアーティストが消えても残ります
 
 ### artist_initials (004_artist_initials.sql)
 
@@ -172,11 +173,16 @@ CREATE TABLE smart_playlists (
   created_at TEXT    NOT NULL,
   updated_at TEXT    NOT NULL
 );
+
+-- 006_playlist_pictures.sql (v1.6)
+ALTER TABLE playlists       ADD COLUMN picture_id INTEGER REFERENCES pictures(id);
+ALTER TABLE smart_playlists ADD COLUMN picture_id INTEGER REFERENCES pictures(id);
 ```
 
 - 静的プレイリストは `playlist_musics.position` で並び順を保持します。並べ替えは対象プレイリストの行を全削除 → 再挿入 (1 トランザクション) で単純に実装します
 - 動的プレイリストのルール JSON のスキーマは [Playlist](../features/playlist.md) で定義します。評価は Main 側で SQL に変換して実行します
 - 曲がライブラリーから削除されたら `ON DELETE CASCADE` でプレイリストからも消えます
+- `picture_id` はプレイリストの画像で、v1.6 のマイグレーション 006 で両テーブルに足しました (2026-10-24 改訂)。`musics.picture_id` と同じ `pictures` への参照で、NULL が「画像なし」です。更新は `mp:playlist:setPicture` だけが行い、差し替えとプレイリストの削除 (`removePlaylist`) は同じトランザクションの中で孤児 GC を呼びます。一覧 (`listPlaylists` / `readPlaylist`) は `pictures` を LEFT JOIN した `picturePath` と、曲数の集計 `musicCount` を返します。詳細は [v1.6 のデータベース](../../v1.6/architecture/database.md) を参照してください
 
 ## インポート時の upsert
 
