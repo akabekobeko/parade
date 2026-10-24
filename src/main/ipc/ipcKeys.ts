@@ -38,6 +38,7 @@ export const IpcKeys = {
   PlaylistUpdate: "mp:playlist:update",
   PlaylistRemove: "mp:playlist:remove",
   PlaylistGetMusics: "mp:playlist:getMusics",
+  PlaylistSetPicture: "mp:playlist:setPicture",
   GetSettings: "mp:settings:get",
   SetSettings: "mp:settings:set",
   // Renderer → Main (send)

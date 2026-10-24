@@ -31,6 +31,7 @@ import { onSetAlbumFavorite } from "./onSetAlbumFavorite";
 import { onSetArtistInitial } from "./onSetArtistInitial";
 import { onSetArtistPicture } from "./onSetArtistPicture";
 import { onSetMusicFavorite } from "./onSetMusicFavorite";
+import { onSetPlaylistPicture } from "./onSetPlaylistPicture";
 import { onSetSettings } from "./onSetSettings/onSetSettings";
 import { onUpdateMusics } from "./onUpdateMusics/onUpdateMusics";
 
@@ -88,6 +89,7 @@ export const initializeIpcEvents = (): void => {
   ipcMain.handle(IpcKeys.PlaylistUpdate, onPlaylistUpdate);
   ipcMain.handle(IpcKeys.PlaylistRemove, onPlaylistRemove);
   ipcMain.handle(IpcKeys.PlaylistGetMusics, onPlaylistGetMusics);
+  ipcMain.handle(IpcKeys.PlaylistSetPicture, onSetPlaylistPicture);
   ipcMain.on(IpcKeys.MenuSetState, onMenuSetState);
   ipcMain.on(IpcKeys.MenuPopup, onMenuPopup);
 };
@@ -135,6 +137,7 @@ export const releaseIpcEvents = (): void => {
   ipcMain.removeHandler(IpcKeys.PlaylistUpdate);
   ipcMain.removeHandler(IpcKeys.PlaylistRemove);
   ipcMain.removeHandler(IpcKeys.PlaylistGetMusics);
+  ipcMain.removeHandler(IpcKeys.PlaylistSetPicture);
   ipcMain.removeAllListeners(IpcKeys.MenuSetState);
   ipcMain.removeAllListeners(IpcKeys.MenuPopup);
   isInitialized = false;

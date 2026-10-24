@@ -32,4 +32,15 @@ export const playlistSchema = z.object({
    * visible so the user can remove or re-edit it.
    */
   rules: smartPlaylistRulesSchema.optional(),
+  /**
+   * Absolute path of the playlist picture under `userData/images/`, or
+   * `null` when none is set. Renderer turns this into a `media-file://` URL.
+   */
+  picturePath: z.string().nullable(),
+  /**
+   * Number of tracks: entries of a static playlist (duplicates counted), or
+   * the rule evaluation's row count of a smart playlist (0 when the stored
+   * rules are corrupted).
+   */
+  musicCount: z.number().int(),
 });

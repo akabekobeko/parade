@@ -6,8 +6,11 @@ import { idRowSchema } from "../db/idRowSchema";
 const orphanRowSchema = idRowSchema.extend({ file_path: z.string() });
 
 /**
- * Drop `pictures` rows referenced by neither `musics.picture_id` nor
- * `artist_pictures.picture_id`, collecting their file paths.
+ * Drop `pictures` rows referenced by none of `musics.picture_id`,
+ * `artist_pictures.picture_id`, `playlists.picture_id` and
+ * `smart_playlists.picture_id`, collecting their file paths
+ * (`docs/specs/v1.6/architecture/database.md`). A picture referenced only
+ * by a playlist therefore survives the removal of its tracks or artist.
  *
  * Runs inside the caller's transaction — this function never opens or
  * commits one itself. The caller deletes the returned files only after the
@@ -23,7 +26,9 @@ export const deleteOrphanedPictures = (db: DatabaseSync): string[] => {
       .prepare(
         `SELECT id, file_path FROM pictures
          WHERE id NOT IN (SELECT picture_id FROM musics WHERE picture_id IS NOT NULL)
-           AND id NOT IN (SELECT picture_id FROM artist_pictures)`,
+           AND id NOT IN (SELECT picture_id FROM artist_pictures)
+           AND id NOT IN (SELECT picture_id FROM playlists WHERE picture_id IS NOT NULL)
+           AND id NOT IN (SELECT picture_id FROM smart_playlists WHERE picture_id IS NOT NULL)`,
       )
       .all(),
   );

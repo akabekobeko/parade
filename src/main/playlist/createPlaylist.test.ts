@@ -27,7 +27,14 @@ it("creates static playlists with incrementing sort order", () => {
   const first = createPlaylist(db, { kind: "static", name: "One" }, NOW);
   const second = createPlaylist(db, { kind: "static", name: "Two" }, NOW);
 
-  expect(first).toEqual({ id: 1, kind: "static", name: "One", sortOrder: 0 });
+  expect(first).toEqual({
+    id: 1,
+    kind: "static",
+    name: "One",
+    sortOrder: 0,
+    picturePath: null,
+    musicCount: 0,
+  });
   expect(second.sortOrder).toBe(1);
 });
 
@@ -43,6 +50,8 @@ it("creates a smart playlist with its rules and rejects missing rules", () => {
     name: "S",
     sortOrder: 0,
     rules: RULES,
+    picturePath: null,
+    musicCount: 0,
   });
 
   expect(() => createPlaylist(db, { kind: "smart", name: "Bad" }, NOW)).toThrow(

@@ -140,7 +140,7 @@ it("adds the favorite flag and the album_favorites table when migrating from v4"
      VALUES ('/m/a.mp3', 'mp3', 'T', '', '')`,
   );
 
-  runMigrations(db);
+  runMigrations(db, migrations.slice(0, 5));
 
   expect(getUserVersion(db)).toBe(5);
   // Existing tracks start with the flag off; the column never holds NULL.
@@ -177,4 +177,47 @@ it("adds the favorite flag and the album_favorites table when migrating from v4"
     { name: "artist", pk: 1, notnull: 1 },
     { name: "album", pk: 2, notnull: 1 },
   ]);
+});
+
+it("adds picture_id to both playlist tables when migrating from v5", () => {
+  db = new DatabaseSync(":memory:");
+  runMigrations(db, migrations.slice(0, 5));
+  db.exec(
+    `INSERT INTO playlists (name, sort_order, created_at, updated_at)
+     VALUES ('P', 0, '', '');
+     INSERT INTO smart_playlists (name, rules, sort_order, created_at, updated_at)
+     VALUES ('S', '{}', 0, '', '')`,
+  );
+
+  runMigrations(db);
+
+  expect(getUserVersion(db)).toBe(6);
+  for (const table of ["playlists", "smart_playlists"]) {
+    const column = (
+      db.prepare(`PRAGMA table_info(${table})`).all() as Array<{
+        name: string;
+        type: string;
+        notnull: number;
+        dflt_value: string | null;
+      }>
+    ).find((entry) => entry.name === "picture_id");
+    // Nullable without a default: NULL is "no picture".
+    expect(column).toMatchObject({
+      type: "INTEGER",
+      notnull: 0,
+      dflt_value: null,
+    });
+    const foreignKey = (
+      db.prepare(`PRAGMA foreign_key_list(${table})`).all() as Array<{
+        from: string;
+        table: string;
+        to: string;
+      }>
+    ).find((entry) => entry.from === "picture_id");
+    expect(foreignKey).toMatchObject({ table: "pictures", to: "id" });
+    // Existing rows start without a picture.
+    expect(db.prepare(`SELECT picture_id FROM ${table}`).all()).toEqual([
+      { picture_id: null },
+    ]);
+  }
 });

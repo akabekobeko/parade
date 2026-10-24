@@ -1,4 +1,5 @@
 import type { Artist, IpcError } from "@mp/ipc";
+import { readImageFile } from "@/libs/readImageFile";
 import { libraryStore } from "./queryStore/libraryStore";
 import { queryKeys } from "./queryStore/queryKeys";
 
@@ -15,11 +16,9 @@ export const setArtistPicture = async (
   artist: string,
   file: File,
 ): Promise<IpcError | null> => {
-  const data = new Uint8Array(await file.arrayBuffer());
   const result = await window.mp.library.setArtistPicture({
     artist,
-    mimeType: file.type,
-    data,
+    ...(await readImageFile(file)),
   });
   if (!result.ok) {
     return result.error;
