@@ -27,9 +27,9 @@ export const COLUMN_TEXT_ALIGN_CLASS_NAMES: Record<
 export const PLAYLIST_TABLE_HEADER_HEIGHT = 32;
 
 /**
- * Horizontal padding of the table's scroll container in px. Leaves room for
- * the playing row's glow, and is subtracted from the container's width to
- * get the width available to the columns.
+ * Horizontal padding of the table's scroll container in px. Keeps the rows'
+ * rounded rectangles off the container edges, and is subtracted from the
+ * container's width to get the width available to the columns.
  */
 export const PLAYLIST_TABLE_PADDING_X = 24;
 
@@ -45,6 +45,6 @@ export const PLAYLIST_TABLE_MENU_STICKY_RIGHT = -PLAYLIST_TABLE_PADDING_X;
 
 /**
  * Vertical padding in px before the first and after the last row, inside
- * the table body. Keeps the first row's glow clear of the fixed header.
+ * the table body. Keeps the first row's fill clear of the fixed header.
  */
 export const PLAYLIST_TABLE_PADDING_Y = 8;

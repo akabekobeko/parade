@@ -21,24 +21,20 @@ const NAV_ITEMS = [
 ] as const;
 
 /**
- * Classes for the horizontal mode-switch tabs. Hover lights the border up
- * with a blurred glow like `CircleIconButton`: a 1px spread ring on top of
- * the border plus the blur, so it reads as a thicker, stronger lamp. The
- * active tab is filled with the glow colour (`foreground`) and keeps the
- * plain border but no glow of its own: the solid fill already marks it, and
- * fill plus glow together looked overdone. Hovering the active tab still
- * gets the hover glow. Its icon switches to the inverse (`background`) to
- * stay readable on the fill, and keeps that inverse colour on hover, where
- * the plain hover text colour would vanish into the fill.
+ * Classes for the horizontal mode-switch tabs, filled like the sidebar rows
+ * (`sidebarRowClassName`). The active tab is filled with `foreground` and
+ * its icon switches to the inverse (`background`) to stay readable on the
+ * fill. Hover fills an inactive tab with `fill-hover`, the active fill
+ * pulled about 70% of the way, and gives the icon the same inverse colour;
+ * hovering the active tab changes nothing. The fill switches without a
+ * transition: an eased one flickered.
  */
 const tabClassName = (isActive: boolean): string =>
   cn(
-    "flex items-center justify-center rounded-md border border-transparent py-1.5 transition-[color,background-color,border-color,box-shadow] duration-200",
-    "hover:border-foreground hover:text-foreground",
-    "hover:shadow-[0_0_0_1px_var(--foreground),0_0_5px_1px_color-mix(in_oklch,var(--foreground)_60%,transparent)]",
+    "flex items-center justify-center rounded-md py-1.5",
     isActive
-      ? "border-foreground bg-foreground text-background hover:text-background"
-      : "text-muted-foreground",
+      ? "bg-foreground text-background"
+      : "text-muted-foreground hover:bg-fill-hover hover:text-background",
   );
 
 /**

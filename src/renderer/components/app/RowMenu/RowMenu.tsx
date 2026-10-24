@@ -24,6 +24,13 @@ type Props = {
    * bordered `CircleIconButton` of the list and album headers.
    */
   readonly variant?: "tint" | "ring" | "circle";
+  /**
+   * Whether the trigger rests on a `foreground` fill (the selected sidebar
+   * row, the playing track row) and takes the inverse colours, or
+   * "group-hover" for a row filled only while hovered (`IconButton`'s
+   * `inverse`). Ignored by "circle".
+   */
+  readonly inverse?: boolean | "group-hover";
   /** Extra classes of the trigger button (e.g. a row's show / hide rules). */
   readonly className?: string;
 };
@@ -38,7 +45,12 @@ type Props = {
  * The entries themselves render through `RowMenuEntries`, shared with the
  * track rows' right-click menu (`MusicRow`).
  */
-export const RowMenu = ({ items, variant = "tint", className }: Props) => (
+export const RowMenu = ({
+  items,
+  variant = "tint",
+  inverse = false,
+  className,
+}: Props) => (
   <DropdownMenu>
     <DropdownMenuTrigger
       render={
@@ -47,6 +59,7 @@ export const RowMenu = ({ items, variant = "tint", className }: Props) => (
         ) : (
           <IconButton
             variant={variant}
+            inverse={inverse}
             aria-label="Menu"
             className={className}
           />

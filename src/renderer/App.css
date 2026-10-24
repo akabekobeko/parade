@@ -40,6 +40,7 @@
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-adopt: var(--adopt);
+  --color-fill-hover: var(--fill-hover);
   --color-pressed: var(--pressed);
   --color-smart: var(--smart);
   --color-border: var(--border);
@@ -123,6 +124,14 @@
    * must not follow the theme. Same hue as `--pressed`.
    */
   --smart: oklch(0.62 0.16 255);
+  /*
+   * Fill of a hovered sidebar row or tab: the selected fill (`foreground`)
+   * pulled about 70% of the way, so hover reads as a lighter preview of
+   * the selection and the text can take the same inverse colour
+   * (`background`). Tuned per theme: a lighter dark here, a darker light
+   * in `.dark`.
+   */
+  --fill-hover: oklch(0.42 0.017 240);
   --chart-1: oklch(0.8 0.015 225);
   --chart-2: oklch(0.5 0.0225 235);
   --chart-3: oklch(0.4 0.026 240);
@@ -160,6 +169,8 @@
   --ring: oklch(0.556 0 0);
   --pressed: oklch(0.75 0.12 255);
   --adopt: var(--pressed);
+  /* About 70% of the white `foreground` fill. */
+  --fill-hover: oklch(0.69 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);

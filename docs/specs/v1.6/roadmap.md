@@ -38,7 +38,7 @@ Phase 5  仕上げ        既存の仕様書の更新 / 実機での QA / 公式
 - `ArtistRow` の行クラスを `sidebarRowClassName` として共有化し、`PlaylistRow` を切り出す ([サイドバーの項目](features/sidebar-rows.md))
 - Playlists の項目: 画像 (角丸矩形)、プレースホルダー、スマートのバッジ (`--smart` トークン)、名前と曲数の 2 段、インライン名前変更の維持
 - Artists の項目: `ContextMenu` を外し、`RowMenu` を hover か選択中に表示する (Playlists と同じ)。選択中の反転色をメニューのアイコンにも適用する
-- 両方の項目で、hover の発光、選択中の塗り、メニューの hover の塗りをライト / ダークで確認
+- 両方の項目で、hover の塗り、選択中の塗り、メニューの hover の塗りをライト / ダークで確認
 
 ## Phase 4: ヘッダー
 

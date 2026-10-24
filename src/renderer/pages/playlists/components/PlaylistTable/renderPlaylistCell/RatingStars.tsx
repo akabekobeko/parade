@@ -1,5 +1,6 @@
 import { Star } from "lucide-react";
 import { RATING_SCALE } from "@/components/app/InfoDialog/MusicInfoDialog/formValuesOf";
+import { cn } from "@/libs/utils";
 
 /** Positions of the stars, left to right (0-based). */
 const STAR_POSITIONS = Array.from(
@@ -10,6 +11,8 @@ const STAR_POSITIONS = Array.from(
 type Props = {
   /** Stars to light up, from 0 to `RATING_SCALE` in half steps. */
   readonly stars: number;
+  /** Extra classes (the playing row's inverse colour). */
+  readonly className?: string;
 };
 
 /**
@@ -17,11 +20,14 @@ type Props = {
  * the rated part filled in, muted like the other cells. A half star clips the filled star to its left
  * half. Stars that do not fit a narrowed column are cut off.
  */
-export const RatingStars = ({ stars }: Props) => (
+export const RatingStars = ({ stars, className }: Props) => (
   <span
     role="img"
     aria-label={`${stars} / ${RATING_SCALE}`}
-    className="flex items-center overflow-hidden text-muted-foreground"
+    className={cn(
+      "flex items-center overflow-hidden text-muted-foreground",
+      className,
+    )}
   >
     {STAR_POSITIONS.map((position) => {
       const fill = Math.min(1, Math.max(0, stars - position));

@@ -3,6 +3,15 @@ import { StarFillIcon } from "@/components/app/Icons/StarFillIcon";
 import { useT } from "@/features/i18n/useT";
 import { cn } from "@/libs/utils";
 
+/**
+ * Classes of a Star resting on a `foreground` fill (the playing track row):
+ * on and off take the inverse colour (`background`), the off outline toned
+ * down the same way as on the page. Passed through `className`, where the
+ * text colours override the defaults.
+ */
+export const INVERSE_STAR_CLASS_NAME =
+  "text-background/40 aria-pressed:text-background hover:text-background";
+
 type Props = {
   /** Current flag value. */
   readonly favorite: boolean;
@@ -22,10 +31,12 @@ type Props = {
  * cards (`docs/specs/v1.4/features/favorite-star-button.md`).
  *
  * Off is an outline in a faint colour that reads as "not a favorite yet",
- * on is the solid star in the normal colour; hovering either lights the icon
- * up with the same blurred `drop-shadow` glow as `HoverIconButton` (and
- * brings the faint outline to the normal colour). Unlike `HoverIconButton`
- * the star is always visible, and it has no tooltip: hovering it on every
+ * on is the solid star in the normal colour. Hovering the off star brings
+ * the faint outline to the normal colour, nothing more: the earlier
+ * `drop-shadow` glow was dropped, and the colour switches without a
+ * transition like the row fills. Hovering the on star changes nothing.
+ * Unlike `HoverIconButton` the star is always visible, and it has no
+ * tooltip: hovering it on every
  * row would keep popping one up, so the state is told by `aria-pressed` and
  * the `aria-label` alone.
  *
@@ -49,8 +60,7 @@ export const FavoriteStarButton = ({
       aria-disabled={disabled || undefined}
       aria-label={favorite ? t("favorite.remove") : t("favorite.add")}
       className={cn(
-        "inline-flex size-4 items-center justify-center transition-[color,filter] duration-200",
-        "hover:drop-shadow-[0_0_3px_color-mix(in_oklch,currentColor_60%,transparent)]",
+        "inline-flex size-4 items-center justify-center",
         favorite
           ? "text-foreground"
           : "text-muted-foreground/40 hover:text-foreground",

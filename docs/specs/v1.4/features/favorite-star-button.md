@@ -8,10 +8,10 @@ Lucide の `Star` を使い、塗りつぶしは既存の `PlayFillIcon` と同�
 
 | 状態 | 通常 | hover |
 | --- | --- | --- |
-| OFF | 輪郭のみ。薄い色 (`text-muted-foreground/40` 程度) | 通常色 (`text-foreground`) にし、glow を付ける |
-| ON | 塗りつぶし (`fill-current`)。通常色 | glow を付ける |
+| OFF | 輪郭のみ。薄い色 (`text-muted-foreground/40` 程度) | 通常色 (`text-foreground`) にする |
+| ON | 塗りつぶし (`fill-current`)。通常色 | 変化なし |
 
-- glow は既存の `HoverIconButton` と同じ `drop-shadow` です (`hover:drop-shadow-[0_0_3px_color-mix(in_oklch,currentColor_60%,transparent)]`)。塗りつぶしの有無にかかわらず同じ効果にします
+- 当初は `HoverIconButton` と同じ `drop-shadow` の glow を hover に付けていましたが、v1.6 で廃止しました (2026-10-24)。hover の変化は OFF の色だけです
 - サイズは曲リスト行とセルでは `size-4` (既存の再生ボタンと同じ)、Albums 一覧のカードでも `size-4` です
 - 色の遷移は `transition-[color,filter]` で短く (既存の 200ms 以内) 付けます
 - ライト / ダーク両テーマで OFF の薄さと ON の塗りつぶしが見分けられることを確認します
