@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { smartPlaylistRowSchema } from "./playlistRowSchema";
 
-const ROW = { id: 1, name: "S", sortOrder: 0 };
+const ROW = { id: 1, name: "S", sortOrder: 0, picturePath: null };
 
 it("decodes the stored rule JSON into the rule document", () => {
   expect(

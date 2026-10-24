@@ -1,11 +1,8 @@
 import { PictureKind } from "@akabeko/music-metadata-editor";
-import { IMAGE_EXTENSION_BY_MIME } from "../../shared/constants";
 import { getDatabase } from "../db/connection";
 import { deleteArtworkFiles } from "../library/deleteArtworkFiles";
-import { getOrCreatePictureId } from "../library/getOrCreatePictureId";
-import { saveArtwork } from "../library/saveArtwork";
 import { setArtistPicture } from "../library/setArtistPicture";
-import { imagesDirectory } from "../protocol/imagesDirectory";
+import { storeUserPicture } from "../library/storeUserPicture";
 import type {
   IpcResult,
   SetArtistPictureOk,
@@ -24,21 +21,12 @@ export const onSetArtistPicture = async (
   request: SetArtistPictureRequest,
 ): Promise<IpcResult<SetArtistPictureOk>> => {
   try {
-    if (request.data.byteLength === 0) {
-      throw new Error("The selected image is empty.");
-    }
-
-    if (IMAGE_EXTENSION_BY_MIME[request.mimeType.toLowerCase()] === undefined) {
-      throw new Error(`Unsupported image type: ${request.mimeType}`);
-    }
-
-    const picturePath = await saveArtwork(imagesDirectory(), {
-      mimeType: request.mimeType,
-      kind: PictureKind.Artist,
-      data: request.data,
-    });
     const db = getDatabase();
-    const pictureId = getOrCreatePictureId(db, picturePath);
+    const { picturePath, pictureId } = await storeUserPicture(
+      db,
+      request,
+      PictureKind.Artist,
+    );
     const orphaned = setArtistPicture(db, request.artist, pictureId);
     await deleteArtworkFiles(orphaned);
     return { ok: true, value: { picturePath } };

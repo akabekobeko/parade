@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { smartPlaylistRulesSchema } from "../../shared/schemas/smartPlaylistRulesSchema";
 
-/** Row of the `playlists` SELECTs. */
+/**
+ * Columns shared by the `playlists` and `smart_playlists` SELECTs
+ * (`docs/specs/v1.6/architecture/database.md`).
+ */
 export const playlistRowSchema = z.object({
   /** Row id; unique only within the table the SELECT ran against. */
   id: z.number().int(),
@@ -9,6 +12,21 @@ export const playlistRowSchema = z.object({
   name: z.string(),
   /** `sort_order` column: position within the kind's list, ascending. */
   sortOrder: z.number().int(),
+  /**
+   * `pictures.file_path` joined through `picture_id`; `null` when the
+   * playlist has no picture.
+   */
+  picturePath: z.string().nullable(),
+});
+
+/**
+ * Row of the `playlists` SELECTs. The track count is a subquery over
+ * `playlist_musics`; a smart playlist's count is computed by evaluating its
+ * rules instead, so it is not part of {@link smartPlaylistRowSchema}.
+ */
+export const staticPlaylistRowSchema = playlistRowSchema.extend({
+  /** `COUNT(*)` of the playlist's `playlist_musics` rows (duplicates counted). */
+  musicCount: z.number().int(),
 });
 
 /**

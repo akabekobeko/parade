@@ -546,6 +546,24 @@ export type PlaylistRemoveRequest = {
   readonly kind: PlaylistKind;
 };
 
+/** Request payload for `mp:playlist:setPicture`. */
+export type SetPlaylistPictureRequest = {
+  /** Row id within the table of `kind`; an unknown id fails the request. */
+  readonly id: number;
+  /** Which table the playlist lives in. */
+  readonly kind: PlaylistKind;
+  /** MIME type of the image (`"image/jpeg"`, `"image/png"`, ...). */
+  readonly mimeType: string;
+  /** Raw image bytes read from the user-selected file. */
+  readonly data: Uint8Array;
+};
+
+/** Successful payload of `mp:playlist:setPicture`. */
+export type SetPlaylistPictureOk = {
+  /** Absolute path of the stored image under `userData/images/`. */
+  readonly picturePath: string;
+};
+
 // ---------------------------------------------------------------------------
 // Settings
 // ---------------------------------------------------------------------------
@@ -1069,6 +1087,13 @@ export type MpBridge = {
     readonly getMusics: (
       request: PlaylistGetMusicsRequest,
     ) => Promise<IpcResult<readonly Music[]>>;
+    /**
+     * Set (or replace) a playlist's picture. No list refetch follows; the
+     * Renderer patches its cache with the returned path.
+     */
+    readonly setPicture: (
+      request: SetPlaylistPictureRequest,
+    ) => Promise<IpcResult<SetPlaylistPictureOk>>;
   };
   /** Persisted-settings channels. */
   readonly settings: {

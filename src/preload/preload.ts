@@ -100,6 +100,8 @@ const buildBridge = (): MpBridge => ({
     remove: (request) => ipcRenderer.invoke(IpcKeys.PlaylistRemove, request),
     getMusics: (request) =>
       ipcRenderer.invoke(IpcKeys.PlaylistGetMusics, request),
+    setPicture: (request) =>
+      ipcRenderer.invoke(IpcKeys.PlaylistSetPicture, request),
   },
   settings: {
     get: () => ipcRenderer.invoke(IpcKeys.GetSettings),

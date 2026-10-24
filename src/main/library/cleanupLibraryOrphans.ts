@@ -13,8 +13,10 @@ import { deleteOrphanedPictures } from "./deleteOrphanedPictures";
  * 1. Drop `artist_pictures` / `artist_initials` rows whose artist no longer
  *    has any track, and `album_favorites` rows whose album no longer has
  *    any track.
- * 2. Drop `pictures` rows referenced by neither `musics.picture_id` nor
- *    `artist_pictures.picture_id`, collecting their file paths.
+ * 2. Drop `pictures` rows referenced by none of `musics.picture_id`,
+ *    `artist_pictures.picture_id` and the playlist tables' `picture_id`,
+ *    collecting their file paths. A playlist's picture therefore survives
+ *    the removal of its tracks or artist.
  *
  * Callers that already hold a transaction call the step functions
  * directly instead (this wrapper would nest a `BEGIN`).

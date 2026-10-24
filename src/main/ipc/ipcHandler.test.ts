@@ -49,6 +49,10 @@ it("registers every implemented invoke handler", () => {
     IpcKeys.GetAlbumFavorites,
     expect.any(Function),
   );
+  expect(handle).toHaveBeenCalledWith(
+    IpcKeys.PlaylistSetPicture,
+    expect.any(Function),
+  );
 });
 
 it("is idempotent — a second call registers nothing", () => {
