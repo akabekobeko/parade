@@ -31,7 +31,15 @@ import { cn } from "@/libs/utils";
  * sidebar row, the playing track row): the icon, and for "ring" the circle
  * border and its glow, take the inverse colour (`background`), so the
  * button reads in both themes. The `foreground` tint of "tint" would vanish
- * on that fill, so it becomes a faint `background` tint instead.
+ * on that fill, so it becomes a faint `background` tint instead. The
+ * "group-hover" value is for a row (the `group`) that is filled only while
+ * hovered (the unselected sidebar rows): the same look, applied under
+ * `group-hover`. The icon colour is repeated for the button's own hover and
+ * open-menu state, because the `ghost` Button's `hover:text-foreground` /
+ * `aria-expanded:text-foreground` would otherwise win over the plain
+ * `group-hover` rule. Either way the colours switch without a transition
+ * (only the ring's border and glow keep easing), so the icon never fades
+ * on a row whose fill has just snapped.
  */
 const iconButtonVariants = cva(
   "text-foreground aria-pressed:text-pressed aria-pressed:hover:text-pressed",
@@ -42,7 +50,9 @@ const iconButtonVariants = cva(
         ring: "rounded-full duration-200 hover:border-foreground hover:bg-transparent hover:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--foreground)_60%,transparent)] aria-expanded:bg-transparent",
       },
       inverse: {
-        true: "text-background hover:text-background aria-expanded:text-background",
+        true: "transition-[border-color,box-shadow] text-background hover:text-background aria-expanded:text-background",
+        "group-hover":
+          "transition-[border-color,box-shadow] group-hover:text-background group-hover:hover:text-background group-hover:aria-expanded:text-background",
         false: "",
       },
     },
@@ -53,10 +63,22 @@ const iconButtonVariants = cva(
         class: "hover:bg-background/15 aria-expanded:bg-background/15",
       },
       {
+        variant: "tint",
+        inverse: "group-hover",
+        class:
+          "group-hover:hover:bg-background/15 group-hover:aria-expanded:bg-background/15",
+      },
+      {
         variant: "ring",
         inverse: true,
         class:
           "hover:border-background hover:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--background)_60%,transparent)]",
+      },
+      {
+        variant: "ring",
+        inverse: "group-hover",
+        class:
+          "group-hover:hover:border-background group-hover:hover:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--background)_60%,transparent)]",
       },
     ],
     defaultVariants: {

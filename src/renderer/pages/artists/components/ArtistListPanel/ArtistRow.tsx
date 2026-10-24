@@ -6,7 +6,7 @@ import { RowMenu } from "@/components/app/RowMenu/RowMenu";
 import {
   sidebarRowClassName,
   sidebarRowCountClassName,
-  sidebarRowMenuClassName,
+  sidebarRowMenuProps,
 } from "@/components/app/Sidebar/sidebarRowClassName";
 import { useT } from "@/features/i18n/useT";
 import { artistEditStore } from "@/features/library/artistEditStore";
@@ -73,8 +73,7 @@ export const ArtistRow = ({ artist, selected, top, height }: Props) => {
       </button>
       <RowMenu
         variant="ring"
-        inverse={selected}
-        className={sidebarRowMenuClassName(selected)}
+        {...sidebarRowMenuProps(selected)}
         items={[
           ...(artist.name !== ""
             ? [

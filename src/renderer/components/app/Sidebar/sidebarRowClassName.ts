@@ -1,24 +1,6 @@
 import { cn } from "@/libs/utils";
 
 /**
- * Classes of the menu trigger (`RowMenu`, `variant="ring"`) of a row whose
- * fill is `foreground` while the row (the `group`) is hovered: the icon,
- * the circle border and its hover glow take the inverse colour
- * (`background`), so the hover reads in both themes. The icon colour is
- * repeated for the trigger's own hover and open-menu state, because the
- * `ghost` Button's `hover:text-foreground` / `aria-expanded:text-foreground`
- * would otherwise win over the plain `group-hover` rule. For rows whose
- * fill is permanent (the selected sidebar row, the playing track row),
- * `RowMenu`'s `inverse` prop does the same without the `group-hover`
- * condition.
- */
-export const GROUP_HOVER_INVERSE_MENU_CLASS_NAME = cn(
-  "group-hover:text-background group-hover:hover:text-background group-hover:aria-expanded:text-background",
-  "group-hover:hover:border-background",
-  "group-hover:hover:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--background)_60%,transparent)]",
-);
-
-/**
  * Classes of a sidebar list row (Artists and Playlists,
  * `docs/specs/v1.6/features/sidebar-rows.md`), without its positioning:
  * the artist list positions rows absolutely for the virtualiser, the
@@ -63,28 +45,30 @@ export const sidebarRowCountClassName = (selected: boolean): string =>
   );
 
 /**
- * Classes of a sidebar row's menu trigger (`RowMenu`, `variant="ring"`):
- * shown while the row is hovered, while the trigger has keyboard focus
- * (`focus-visible`), and always on the selected row; it also stays while
- * its menu is open, when focus has moved into the portaled menu. Closing
- * the menu returns focus to the trigger; a plain `focus` rule would then
- * keep the trigger visible after the pointer left the row, so only a
+ * Props of a sidebar row's menu trigger (`RowMenu`, `variant="ring"`),
+ * spread onto it: the row decides the trigger's look in one place.
+ *
+ * The trigger is shown while the row is hovered, while it has keyboard
+ * focus (`focus-visible`), and always on the selected row; it also stays
+ * while its menu is open, when focus has moved into the portaled menu.
+ * Closing the menu returns focus to the trigger; a plain `focus` rule would
+ * then keep the trigger visible after the pointer left the row, so only a
  * keyboard-visible focus (which also draws the focus ring) keeps it shown.
  *
- * On the selected row the trigger is `inverse` (see `RowMenu`); on any
- * other row the hover fill makes the row just as dark (or light), so the
- * trigger takes the inverse look while the row is hovered
- * (`GROUP_HOVER_INVERSE_MENU_CLASS_NAME`).
+ * On the selected row the trigger is `inverse`; on any other row the hover
+ * fill makes the row just as dark (or light), so the trigger takes the
+ * inverse look while the row is hovered (`inverse="group-hover"`).
  *
  * @param selected - Whether the row is selected.
- * @returns The class list.
+ * @returns The `inverse` and `className` props.
  */
-export const sidebarRowMenuClassName = (selected: boolean): string =>
-  cn(
+export const sidebarRowMenuProps = (
+  selected: boolean,
+): { inverse: true | "group-hover"; className: string } => ({
+  inverse: selected ? true : "group-hover",
+  className: cn(
     "shrink-0",
     !selected &&
-      cn(
-        "opacity-0 focus-visible:opacity-100 group-hover:opacity-100 aria-expanded:opacity-100",
-        GROUP_HOVER_INVERSE_MENU_CLASS_NAME,
-      ),
-  );
+      "opacity-0 focus-visible:opacity-100 group-hover:opacity-100 aria-expanded:opacity-100",
+  ),
+});

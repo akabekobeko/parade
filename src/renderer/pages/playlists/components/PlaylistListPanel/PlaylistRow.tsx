@@ -6,7 +6,7 @@ import { RowMenu } from "@/components/app/RowMenu/RowMenu";
 import {
   sidebarRowClassName,
   sidebarRowCountClassName,
-  sidebarRowMenuClassName,
+  sidebarRowMenuProps,
 } from "@/components/app/Sidebar/sidebarRowClassName";
 import { SmartBadge } from "@/components/app/SmartBadge/SmartBadge";
 import { Input } from "@/components/ui/input";
@@ -116,8 +116,7 @@ export const PlaylistRow = ({
       )}
       <RowMenu
         variant="ring"
-        inverse={selected}
-        className={sidebarRowMenuClassName(selected)}
+        {...sidebarRowMenuProps(selected)}
         items={[
           {
             label: t("playlistInfo.menu"),

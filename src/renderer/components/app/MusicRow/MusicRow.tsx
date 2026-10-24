@@ -76,7 +76,10 @@ type Props = {
  * Contiguous selected rows merge into one rounded rectangle like Apple
  * Music: a selected row squares off the corners it shares with a selected
  * neighbour (`selected-above` / `selected-below` in `App.css` look at the
- * sibling row or, in virtualised lists, the sibling wrapper).
+ * sibling row or, in virtualised lists, the sibling wrapper). The playing
+ * row stays out of that merge (it neither squares its corners nor counts as
+ * a selected neighbour, see `data-selected`): its `foreground` slab would
+ * otherwise be cut flush into the `accent` block.
  */
 const rowClassName = (playing: boolean, selected: boolean): string =>
   cn(
@@ -86,7 +89,9 @@ const rowClassName = (playing: boolean, selected: boolean): string =>
       : selected
         ? "bg-accent text-accent-foreground"
         : "hover:bg-accent/50 data-popup-open:bg-accent/50",
-    selected && "selected-above:rounded-t-none selected-below:rounded-b-none",
+    selected &&
+      !playing &&
+      "selected-above:rounded-t-none selected-below:rounded-b-none",
   );
 
 /**
@@ -163,10 +168,7 @@ export const MusicRow = ({
         onDoubleClick={onPlay}
       >
         <EllipsisText
-          className={cn(
-            "min-w-0 flex-1",
-            current && "font-medium text-background",
-          )}
+          className={cn("min-w-0 flex-1", current && "font-medium")}
           text={music.title}
         />
         {columns}
@@ -188,7 +190,7 @@ export const MusicRow = ({
   return (
     <ContextMenu>
       <ContextMenuTrigger
-        data-selected={selected || undefined}
+        data-selected={(selected && !current) || undefined}
         className={rowClassName(current, selected)}
       >
         {cells}

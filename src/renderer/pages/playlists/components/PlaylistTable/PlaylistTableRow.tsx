@@ -115,10 +115,12 @@ const isRowEvent = (event: MouseEvent<HTMLTableRowElement>): boolean =>
  * cell, the Star, and the menu). The fills switch without a transition:
  * an eased one flickered. Contiguous selected rows merge into one
  * rounded rectangle (`selected-above` / `selected-below` in `App.css` look
- * at the sibling row). A drop target draws the insertion line at its top
- * edge with a pseudo element, so the line takes no space; it is raised
- * above the menu cell. Text is unselectable so Shift-clicks and drags never
- * start a text selection.
+ * at the sibling row); the playing row stays out of that merge like in
+ * `MusicRow`. A drop target draws the insertion line at its top edge with
+ * a pseudo element, so the line takes no space; it is raised above the
+ * menu cell, and on the playing row it takes the inverse colour, since
+ * `primary` would vanish on the `foreground` fill. Text is unselectable so
+ * Shift-clicks and drags never start a text selection.
  */
 const rowClassName = (
   playing: boolean,
@@ -132,9 +134,14 @@ const rowClassName = (
       : selected
         ? "text-accent-foreground [--row-bg:var(--accent)]"
         : "data-popup-open:[--row-bg:color-mix(in_srgb,var(--accent)_50%,var(--background))] hover:[--row-bg:color-mix(in_srgb,var(--accent)_50%,var(--background))]",
-    selected && "selected-above:rounded-t-none selected-below:rounded-b-none",
+    selected &&
+      !playing &&
+      "selected-above:rounded-t-none selected-below:rounded-b-none",
     dropTarget &&
-      "before:absolute before:inset-x-0 before:top-0 before:z-[1] before:h-0.5 before:bg-primary",
+      cn(
+        "before:absolute before:inset-x-0 before:top-0 before:z-[1] before:h-0.5",
+        playing ? "before:bg-background" : "before:bg-primary",
+      ),
   );
 
 /**
@@ -198,7 +205,7 @@ export const PlaylistTableRow = ({
         <tr
           // biome-ignore lint/a11y/noRedundantRoles: the display override drops the implicit role.
           role="row"
-          data-selected={selected || undefined}
+          data-selected={(selected && playing === null) || undefined}
           draggable={draggable}
           className={rowClassName(playing !== null, selected, dropTarget)}
           style={{ transform: `translateY(${offset}px)` }}

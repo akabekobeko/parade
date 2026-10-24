@@ -28,9 +28,9 @@ type Args = {
   readonly music: Music;
   /**
    * Whether the row is the current track (playing or paused): the row is
-   * filled with `foreground`, so the title is emphasised and every text
-   * takes the inverse colour (`background`, toned down for the muted
-   * columns).
+   * filled with `foreground` and sets the inverse text colour
+   * (`background`), so the title is only emphasised, and the muted columns
+   * take a toned-down inverse colour instead of `muted-foreground`.
    */
   readonly current: boolean;
   /** BCP 47 tag of the UI locale, used for the added date. */
@@ -62,7 +62,7 @@ export const renderPlaylistCell = ({
     case "title":
       return (
         <EllipsisText
-          className={cn(current && "font-medium text-background")}
+          className={cn(current && "font-medium")}
           text={music.title}
         />
       );

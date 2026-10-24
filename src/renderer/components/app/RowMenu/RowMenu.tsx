@@ -26,10 +26,11 @@ type Props = {
   readonly variant?: "tint" | "ring" | "circle";
   /**
    * Whether the trigger rests on a `foreground` fill (the selected sidebar
-   * row, the playing track row) and takes the inverse colours
-   * (`IconButton`'s `inverse`). Ignored by "circle".
+   * row, the playing track row) and takes the inverse colours, or
+   * "group-hover" for a row filled only while hovered (`IconButton`'s
+   * `inverse`). Ignored by "circle".
    */
-  readonly inverse?: boolean;
+  readonly inverse?: boolean | "group-hover";
   /** Extra classes of the trigger button (e.g. a row's show / hide rules). */
   readonly className?: string;
 };
