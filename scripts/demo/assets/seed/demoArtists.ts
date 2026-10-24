@@ -46,7 +46,15 @@ export const DEMO_ARTISTS: readonly DemoArtistSeed[] = [
   },
   { name: "birdsong radio", genre: "Ambient", startYear: 2011, albumCount: 3 },
   { name: "The Blue Lanterns", genre: "Rock", startYear: 1972, albumCount: 15 },
-  { name: "BRASSWORKS", genre: "Jazz", startYear: 1994, albumCount: 5 },
+  {
+    name: "BRASSWORKS",
+    genre: "Jazz",
+    startYear: 1994,
+    albumCount: 5,
+    // The Jazz smart playlist's picture: the album the `albums` screenshot
+    // stars (docs/specs/v1.6/features/web-site.md).
+    smartPicture: { albumIndex: 1, albumTitle: "Songs for the Parade" },
+  },
   {
     name: "Bruno Halloway",
     person: true,

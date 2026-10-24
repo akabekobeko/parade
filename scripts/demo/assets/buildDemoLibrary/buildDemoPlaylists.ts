@@ -1,6 +1,7 @@
 import { SeededRandom } from "../SeededRandom.ts";
 import type {
   DemoGenre,
+  DemoPictureAlbum,
   DemoPlaylist,
   DemoSmartPlaylist,
   DemoTrack,
@@ -24,17 +25,23 @@ type Result = {
  * Build the demo playlists.
  *
  * "My Best" opens with the playable track and continues with highly rated
- * tracks, one per artist. Every smart playlist collects one genre; the one
- * for the playable track's genre sorts by import date, newest first, which
- * puts the playable track on its first row.
+ * tracks, one per artist; its picture is the playable track's album cover,
+ * the same artwork the Artist view shows. Every smart playlist collects one
+ * genre; the one for the playable track's genre sorts by import date,
+ * newest first, which puts the playable track on its first row. A smart
+ * playlist shows the cover declared for its genre (the seeds'
+ * `smartPicture`); the others stay without a picture, so the placeholder
+ * tile is in the same list.
  *
  * @param tracks - Every track of the library.
  * @param playableTrack - The one track with a real audio file.
+ * @param smartPictureAlbums - Cover album per genre, from the seeds.
  * @returns The playlists.
  */
 export const buildDemoPlaylists = (
   tracks: readonly DemoTrack[],
   playableTrack: DemoTrack,
+  smartPictureAlbums: Partial<Record<DemoGenre, DemoPictureAlbum>> = {},
 ): Result => {
   const rng = new SeededRandom("playlists");
   const artists = new Set([playableTrack.albumArtist]);
@@ -55,7 +62,16 @@ export const buildDemoPlaylists = (
   }
 
   return {
-    playlists: [{ name: "My Best", tracks: favorites }],
+    playlists: [
+      {
+        name: "My Best",
+        tracks: favorites,
+        pictureAlbum: {
+          artist: playableTrack.albumArtist,
+          title: playableTrack.album,
+        },
+      },
+    ],
     smartPlaylists: [
       {
         name: playableTrack.genre,
@@ -67,6 +83,7 @@ export const buildDemoPlaylists = (
           ],
           sort: { field: "addedAt", order: "desc" },
         },
+        pictureAlbum: smartPictureAlbums[playableTrack.genre],
       },
       ...SMART_GENRES.filter((genre) => genre !== playableTrack.genre).map(
         (genre) => ({
@@ -76,6 +93,7 @@ export const buildDemoPlaylists = (
             match: "all",
             conditions: [{ field: "genre", operator: "is", value: genre }],
           },
+          pictureAlbum: smartPictureAlbums[genre],
         }),
       ),
     ],

@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, rmSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { smartPlaylistRulesSchema } from "../../../src/shared/schemas/smartPlaylistRulesSchema.ts";
-import type { DemoLibrary } from "./types.ts";
+import type { DemoLibrary, DemoPictureAlbum } from "./types.ts";
 
 /** Timestamp of the playlist rows. */
 const PLAYLIST_TIMESTAMP = "2026-10-01T09:00:00.000Z";
@@ -32,7 +32,8 @@ type Params = {
  * cannot be loaded here; `writeDemoDatabase.test.ts` checks that both
  * agree. The app expects absolute paths in the platform's notation, so the
  * paths of the library, which are relative to the demo directory, are
- * stored resolved against `demoDir`.
+ * stored resolved against `demoDir`. A playlist picture references the
+ * `pictures` row of an album cover (`docs/specs/v1.6/architecture/database.md`).
  *
  * @param params - See {@link Params}.
  * @returns void.
@@ -82,11 +83,35 @@ export const writeDemoDatabase = ({
 
     // `musics.id` per track, to resolve the playlist entries below.
     const musicIds = new Map<string, number | bigint>();
+    // `pictures.id` per album cover, to resolve the playlist pictures below.
+    const coverPictureIds = new Map<string, number | bigint>();
+    const coverKey = (album: DemoPictureAlbum): string =>
+      `${album.artist}\u0000${album.title}`;
+    const pictureIdOf = (
+      album: DemoPictureAlbum | undefined,
+    ): number | bigint | null => {
+      if (album === undefined) {
+        return null;
+      }
+
+      const pictureId = coverPictureIds.get(coverKey(album));
+      if (pictureId === undefined) {
+        throw new Error(
+          `Playlist picture album is not in the library: ${album.artist} - ${album.title}`,
+        );
+      }
+
+      return pictureId;
+    };
     for (const artist of library.artists) {
       for (const album of artist.albums) {
         const pictureId = insertPicture.run(
           toAbsolute(album.coverPath),
         ).lastInsertRowid;
+        coverPictureIds.set(
+          coverKey({ artist: album.artist, title: album.title }),
+          pictureId,
+        );
         for (const track of album.tracks) {
           const { lastInsertRowid } = insertMusic.run(
             toAbsolute(track.filePath),
@@ -122,7 +147,7 @@ export const writeDemoDatabase = ({
     }
 
     const insertPlaylist = db.prepare(
-      "INSERT INTO playlists (name, sort_order, created_at, updated_at) VALUES (?, ?, ?, ?)",
+      "INSERT INTO playlists (name, sort_order, picture_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
     );
     const insertPlaylistMusic = db.prepare(
       "INSERT INTO playlist_musics (playlist_id, position, music_id) VALUES (?, ?, ?)",
@@ -131,6 +156,7 @@ export const writeDemoDatabase = ({
       const playlistId = insertPlaylist.run(
         playlist.name,
         order,
+        pictureIdOf(playlist.pictureAlbum),
         PLAYLIST_TIMESTAMP,
         PLAYLIST_TIMESTAMP,
       ).lastInsertRowid;
@@ -147,7 +173,7 @@ export const writeDemoDatabase = ({
     }
 
     const insertSmartPlaylist = db.prepare(
-      "INSERT INTO smart_playlists (name, rules, sort_order, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO smart_playlists (name, rules, sort_order, picture_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
     );
     for (const [order, playlist] of library.smartPlaylists.entries()) {
       insertSmartPlaylist.run(
@@ -156,6 +182,7 @@ export const writeDemoDatabase = ({
         // here instead of at demo time.
         JSON.stringify(smartPlaylistRulesSchema.parse(playlist.rules)),
         order,
+        pictureIdOf(playlist.pictureAlbum),
         PLAYLIST_TIMESTAMP,
         PLAYLIST_TIMESTAMP,
       );
@@ -163,7 +190,15 @@ export const writeDemoDatabase = ({
 
     db.exec("COMMIT");
     db.exec("VACUUM");
-  } finally {
+  } catch (error) {
+    // The previous file is already gone; do not leave a schema-only (or
+    // half-written) database that `pnpm demo` would load as an empty library.
     db.close();
+    rmSync(dbPath, { force: true });
+    throw error;
+  } finally {
+    if (db.isOpen) {
+      db.close();
+    }
   }
 };

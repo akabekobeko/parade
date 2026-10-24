@@ -24,6 +24,19 @@ export type DemoPlayableSeed = {
   readonly trackTitle: string;
 };
 
+/**
+ * An album whose cover is the picture of the smart playlist of the album's
+ * genre (`docs/specs/v1.6/features/web-site.md`). Declared on the seed like
+ * {@link DemoPlayableSeed}, with the title pinned so a re-rolled title fails
+ * loudly instead of silently moving the picture to another album.
+ */
+export type DemoSmartPictureSeed = {
+  /** Zero-based index of the album, oldest first. */
+  readonly albumIndex: number;
+  /** Expected title of that album. */
+  readonly albumTitle: string;
+};
+
 /** Hand-written definition of one fictional artist. */
 export type DemoArtistSeed = {
   /** Display name. Also the album artist of every album. */
@@ -46,6 +59,11 @@ export type DemoArtistSeed = {
   readonly albumCount: number;
   /** Set on the artist that owns the playable track. */
   readonly playable?: DemoPlayableSeed;
+  /**
+   * Set on the artist whose album cover is the picture of the smart
+   * playlist of that album's genre (at most one artist per genre).
+   */
+  readonly smartPicture?: DemoSmartPictureSeed;
 };
 
 /** One row of the `musics` table. */
@@ -129,12 +147,26 @@ export type DemoArtist = {
   readonly albums: readonly DemoAlbum[];
 };
 
+/**
+ * Album whose cover a playlist shows as its picture
+ * (`docs/specs/v1.6/architecture/database.md`). Resolved to the cover's
+ * `pictures` row when the database is written, so no image file is added.
+ */
+export type DemoPictureAlbum = {
+  /** Album artist of the album. */
+  readonly artist: string;
+  /** Album title. */
+  readonly title: string;
+};
+
 /** A static playlist. */
 export type DemoPlaylist = {
   /** Playlist name. */
   readonly name: string;
   /** Tracks in playlist order. */
   readonly tracks: readonly DemoTrack[];
+  /** Album whose cover is the playlist picture; omitted for no picture. */
+  readonly pictureAlbum?: DemoPictureAlbum;
 };
 
 /** A smart playlist. */
@@ -146,6 +178,8 @@ export type DemoSmartPlaylist = {
    * (`src/shared/schemas/smartPlaylistRulesSchema.ts`).
    */
   readonly rules: unknown;
+  /** Album whose cover is the playlist picture; omitted for no picture. */
+  readonly pictureAlbum?: DemoPictureAlbum;
 };
 
 /** Everything the demo database holds. */

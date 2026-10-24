@@ -1,20 +1,32 @@
 import type { Music } from "@mp/ipc";
-import { ListMusic, NotepadText, Shuffle as ShuffleIcon } from "lucide-react";
+import {
+  ListMusic,
+  NotepadText,
+  Shuffle as ShuffleIcon,
+  Sparkles,
+} from "lucide-react";
 import { AddToPlaylistSubmenu } from "@/components/app/AddToPlaylistSubmenu/AddToPlaylistSubmenu";
 import { CircleIconButton } from "@/components/app/Buttons/CircleIconButton";
 import { EllipsisText } from "@/components/app/EllipsisText/EllipsisText";
 import { PlayFillIcon } from "@/components/app/Icons/PlayFillIcon";
 import { RowMenu } from "@/components/app/RowMenu/RowMenu";
+import { SmartBadge } from "@/components/app/SmartBadge/SmartBadge";
 import { HStack, Spacer, VStack } from "@/components/app/stacks";
 import { Badge } from "@/components/ui/badge";
 import { useT } from "@/features/i18n/useT";
 import { formatTime } from "@/libs/formatTime";
+import { toMediaFileUrl } from "@/libs/toMediaFileUrl";
 
 type Props = {
   /** Playlist name; `""` until the playlist entry has loaded. */
   readonly name: string;
-  /** Whether this is a smart playlist (badge). */
+  /** Whether this is a smart playlist (text badge, picture badge, placeholder icon). */
   readonly smart: boolean;
+  /**
+   * Playlist picture path, or `null` for the placeholder tile; also `null`
+   * until the playlist entry has loaded.
+   */
+  readonly picturePath: string | null;
   /** Visible tracks in play order; also the "Add to playlist" target. */
   readonly musics: readonly Music[];
   /** Sum of the visible tracks' durations in ms (shown via `formatTime`). */
@@ -31,16 +43,20 @@ type Props = {
 };
 
 /**
- * Playlist area laid out like `ArtistHeader`: icon tile with a hover play
- * overlay, name and counts on the left; shuffle / menu circles on the
- * right. The right padding matches the table's horizontal padding (24px)
- * plus the menu cell's `px-2`, so the menu lines up with the track menus.
- * The menu ends with "Playlist Info" for both kinds
- * (`docs/specs/v1.6/features/playlist-header.md`).
+ * Playlist area laid out like `ArtistHeader`
+ * (`docs/specs/v1.6/features/playlist-header.md`): picture tile (or the
+ * kind's placeholder icon) with a hover play overlay, name and counts on
+ * the left; shuffle / menu circles on the right. A smart playlist with a
+ * picture carries the `SmartBadge` on the tile's corner, below the overlay;
+ * the tile does not clip, so the badge may stick out of the rounded square.
+ * The right padding matches the table's horizontal padding (24px) plus the
+ * menu cell's `px-2`, so the menu lines up with the track menus. The menu
+ * ends with "Playlist Info" for both kinds.
  */
 export const PlaylistHeader = ({
   name,
   smart,
+  picturePath,
   musics,
   totalDurationMs,
   onPlayAll,
@@ -52,16 +68,34 @@ export const PlaylistHeader = ({
 
   return (
     <HStack className="gap-4 border-b py-4 pr-8 pl-6">
-      <div className="group relative shrink-0">
-        <VStack className="size-16 rounded-md bg-muted">
-          <ListMusic aria-hidden className="size-7 text-muted-foreground" />
-        </VStack>
+      <div className="group relative size-16 shrink-0">
+        {picturePath !== null ? (
+          <img
+            src={toMediaFileUrl(picturePath)}
+            alt=""
+            className="size-16 rounded-md object-cover"
+          />
+        ) : (
+          <VStack className="size-16 rounded-md bg-muted">
+            {smart ? (
+              <Sparkles aria-hidden className="size-7 text-muted-foreground" />
+            ) : (
+              <ListMusic aria-hidden className="size-7 text-muted-foreground" />
+            )}
+          </VStack>
+        )}
+        {smart && picturePath !== null && (
+          <SmartBadge
+            className="-right-2 -bottom-1.5 absolute z-0 size-5 ring-background"
+            iconClassName="size-3.5"
+          />
+        )}
         <button
           type="button"
           aria-label={t("menu.playPlaylist")}
           title={t("menu.playPlaylist")}
           disabled={musicCount === 0}
-          className="absolute inset-0 m-auto flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground opacity-0 shadow-md transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
+          className="absolute inset-0 z-10 m-auto flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground opacity-0 shadow-md transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
           onClick={onPlayAll}
         >
           <PlayFillIcon className="size-4" />
