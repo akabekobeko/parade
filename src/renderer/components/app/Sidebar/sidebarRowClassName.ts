@@ -49,14 +49,14 @@ export const sidebarRowCountClassName = (selected: boolean): string =>
   );
 
 /**
- * Classes of a sidebar row's menu trigger (`RowMenu`, `variant="tint"`):
+ * Classes of a sidebar row's menu trigger (`RowMenu`, `variant="ring"`):
  * shown while the row is hovered, while the trigger has keyboard focus, and
  * always on the selected row; it also stays while its menu is open, when
- * focus has moved into the portaled menu. On the selected row the icon
- * takes the inverse colour like the text (also while open, where the ghost
- * button would switch it back to `foreground`), and the hover / open fill
- * becomes a translucent `background` because the tint's translucent
- * `foreground` is invisible on the `foreground` fill.
+ * focus has moved into the portaled menu. Hovering lights the circle border
+ * up with the glow of the `ring` variant. On the selected row, whose fill is
+ * `foreground`, the icon, the circle and the glow take the inverse colour
+ * (`background`), so the hover reads in both themes: light on the dark fill
+ * of the light theme, dark on the light fill of the dark theme.
  *
  * @param selected - Whether the row is selected.
  * @returns The class list.
@@ -65,6 +65,9 @@ export const sidebarRowMenuClassName = (selected: boolean): string =>
   cn(
     "shrink-0",
     selected
-      ? "text-background hover:bg-background/15 hover:text-background aria-expanded:bg-background/15 aria-expanded:text-background"
+      ? cn(
+          "text-background hover:border-background hover:text-background aria-expanded:text-background",
+          "hover:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--background)_60%,transparent)]",
+        )
       : "opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 aria-expanded:opacity-100",
   );

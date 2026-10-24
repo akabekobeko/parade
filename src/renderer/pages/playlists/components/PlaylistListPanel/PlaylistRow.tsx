@@ -113,6 +113,7 @@ export const PlaylistRow = ({
         </button>
       )}
       <RowMenu
+        variant="ring"
         className={sidebarRowMenuClassName(selected)}
         items={[
           {

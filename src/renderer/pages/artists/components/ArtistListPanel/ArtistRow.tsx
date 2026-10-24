@@ -72,6 +72,7 @@ export const ArtistRow = ({ artist, selected, top, height }: Props) => {
         </span>
       </button>
       <RowMenu
+        variant="ring"
         className={sidebarRowMenuClassName(selected)}
         items={[
           ...(artist.name !== ""
