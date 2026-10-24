@@ -24,6 +24,8 @@ type Props = {
    * bordered `CircleIconButton` of the list and album headers.
    */
   readonly variant?: "tint" | "ring" | "circle";
+  /** Extra classes of the trigger button (e.g. a row's show / hide rules). */
+  readonly className?: string;
 };
 
 /**
@@ -36,14 +38,18 @@ type Props = {
  * The entries themselves render through `RowMenuEntries`, shared with the
  * track rows' right-click menu (`MusicRow`).
  */
-export const RowMenu = ({ items, variant = "tint" }: Props) => (
+export const RowMenu = ({ items, variant = "tint", className }: Props) => (
   <DropdownMenu>
     <DropdownMenuTrigger
       render={
         variant === "circle" ? (
-          <CircleIconButton aria-label="Menu" />
+          <CircleIconButton aria-label="Menu" className={className} />
         ) : (
-          <IconButton variant={variant} aria-label="Menu" />
+          <IconButton
+            variant={variant}
+            aria-label="Menu"
+            className={className}
+          />
         )
       }
     >

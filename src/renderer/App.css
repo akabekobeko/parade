@@ -41,6 +41,7 @@
   --color-input: var(--input);
   --color-adopt: var(--adopt);
   --color-pressed: var(--pressed);
+  --color-smart: var(--smart);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
@@ -115,6 +116,13 @@
    * colour vision deficiency.
    */
   --adopt: var(--pressed);
+  /*
+   * Fill of the smart-playlist badge (`SmartBadge`) on playlist pictures.
+   * One fixed colour for both themes, with a white glyph on it: the badge
+   * sits on pictures and on the selected row's fill, not on the page, so it
+   * must not follow the theme. Same hue as `--pressed`.
+   */
+  --smart: oklch(0.62 0.16 255);
   --chart-1: oklch(0.8 0.015 225);
   --chart-2: oklch(0.5 0.0225 235);
   --chart-3: oklch(0.4 0.026 240);
