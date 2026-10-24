@@ -30,6 +30,10 @@ const countRowSchema = z.object({ count: z.number() });
 const versionRowSchema = z.object({ user_version: z.number() });
 const modeRowSchema = z.object({ journal_mode: z.string() });
 const pathRowSchema = z.object({ file_path: z.string() });
+const picturePathRowSchema = z.object({
+  name: z.string(),
+  file_path: z.string().nullable(),
+});
 
 let tempDir: string;
 let dbPath: string;
@@ -150,4 +154,76 @@ it("replaces a database that already exists", () => {
   writeDemoDatabase({ library, dbPath, migrationsDir, demoDir: tempDir });
 
   expect(count("artist_pictures")).toBe(library.artists.length);
+});
+
+it("points the playlist pictures at the album covers and keeps the rest NULL", () => {
+  const jazzTitle =
+    buildDemoLibrary([
+      ...seeds,
+      { name: "Jazz Artist", genre: "Jazz", startYear: 1990, albumCount: 1 },
+    ]).artists.find((artist) => artist.name === "Jazz Artist")?.albums[0]
+      ?.title ?? "";
+  const library = buildDemoLibrary([
+    ...seeds,
+    {
+      name: "Jazz Artist",
+      genre: "Jazz",
+      startYear: 1990,
+      albumCount: 1,
+      smartPicture: { albumIndex: 0, albumTitle: jazzTitle },
+    },
+  ]);
+  writeDemoDatabase({ library, dbPath, migrationsDir, demoDir: tempDir });
+
+  const rows = read((db) =>
+    picturePathRowSchema.array().parse(
+      db
+        .prepare(
+          `SELECT x.name, p.file_path FROM playlists x LEFT JOIN pictures p ON p.id = x.picture_id
+           UNION ALL
+           SELECT x.name, p.file_path FROM smart_playlists x LEFT JOIN pictures p ON p.id = x.picture_id`,
+        )
+        .all(),
+    ),
+  );
+  /** Absolute path of an album cover, as the database stores it. */
+  const coverPathOf = (artist: string, title: string): string => {
+    const album = library.artists
+      .flatMap((entry) => entry.albums)
+      .find((entry) => entry.artist === artist && entry.title === title);
+    expect(album).toBeDefined();
+    return path.join(tempDir, ...(album?.coverPath ?? "").split("/"));
+  };
+  const byName = new Map(rows.map((row) => [row.name, row.file_path]));
+  const playable = library.playableTrack;
+  expect(byName.get("My Best")).toBe(
+    coverPathOf(playable.albumArtist, playable.album),
+  );
+  expect(byName.get("Jazz")).toBe(coverPathOf("Jazz Artist", jazzTitle));
+  expect(byName.get("Rock")).toBeNull();
+  // The covers are shared rows, so no picture row was added for playlists.
+  const albums = library.artists.flatMap((artist) => artist.albums);
+  expect(count("pictures")).toBe(albums.length + library.artists.length);
+});
+
+it("rejects a playlist picture album that is not in the library", () => {
+  const library = buildDemoLibrary(seeds);
+  expect(() =>
+    writeDemoDatabase({
+      library: {
+        ...library,
+        playlists: [
+          {
+            ...(library.playlists[0] as (typeof library.playlists)[number]),
+            pictureAlbum: { artist: "Nobody", title: "Nothing" },
+          },
+        ],
+      },
+      dbPath,
+      migrationsDir,
+      demoDir: tempDir,
+    }),
+  ).toThrow(/not in the library/);
+  // No schema-only database is left behind for `pnpm demo` to load.
+  expect(readdirSync(tempDir)).toEqual([]);
 });

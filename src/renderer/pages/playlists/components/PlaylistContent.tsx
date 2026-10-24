@@ -52,6 +52,7 @@ export const PlaylistContent = ({ routeId }: Props) => {
       <PlaylistHeader
         name={playlist?.name ?? ""}
         smart={ref.kind === "smart"}
+        picturePath={playlist?.picturePath ?? null}
         musics={rows.map((row) => row.music)}
         totalDurationMs={totalDurationMs}
         onPlayAll={playback.playAll}

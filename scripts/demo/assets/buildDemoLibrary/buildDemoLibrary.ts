@@ -1,7 +1,46 @@
 import { DEMO_ARTISTS } from "../seed/demoArtists.ts";
-import type { DemoArtist, DemoArtistSeed, DemoLibrary } from "../types.ts";
+import type {
+  DemoArtist,
+  DemoArtistSeed,
+  DemoGenre,
+  DemoLibrary,
+  DemoPictureAlbum,
+} from "../types.ts";
 import { buildDemoArtist } from "./buildDemoArtist.ts";
 import { buildDemoPlaylists } from "./buildDemoPlaylists.ts";
+
+/**
+ * Resolve the seeds' `smartPicture` declarations to albums, keyed by the
+ * album's genre. Throws when the declared title does not match (the title
+ * generation drifted) or two seeds claim the same genre.
+ */
+const smartPictureAlbumsOf = (
+  seeds: readonly DemoArtistSeed[],
+  artists: readonly DemoArtist[],
+): Partial<Record<DemoGenre, DemoPictureAlbum>> => {
+  const result: Partial<Record<DemoGenre, DemoPictureAlbum>> = {};
+  seeds.forEach((seed, index) => {
+    if (seed.smartPicture === undefined) {
+      return;
+    }
+
+    const album = artists[index]?.albums[seed.smartPicture.albumIndex];
+    if (album === undefined || album.title !== seed.smartPicture.albumTitle) {
+      throw new Error(
+        `${seed.name}: album ${seed.smartPicture.albumIndex} is not "${seed.smartPicture.albumTitle}" (got "${album?.title ?? "none"}").`,
+      );
+    }
+
+    if (result[album.genre] !== undefined) {
+      throw new Error(
+        `Two seeds declare the smart playlist picture of ${album.genre}.`,
+      );
+    }
+
+    result[album.genre] = { artist: album.artist, title: album.title };
+  });
+  return result;
+};
 
 /**
  * Build the whole demo library from the seed data.
@@ -39,7 +78,11 @@ export const buildDemoLibrary = (
 
   return {
     artists,
-    ...buildDemoPlaylists(tracks, playableTrack),
+    ...buildDemoPlaylists(
+      tracks,
+      playableTrack,
+      smartPictureAlbumsOf(seeds, artists),
+    ),
     playableTrack,
   };
 };
