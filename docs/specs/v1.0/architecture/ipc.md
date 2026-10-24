@@ -73,9 +73,10 @@ Renderer は `import type { Music } from "@mp/ipc"` と書けます。`import ty
 | `mp:library:getFilterOptions` | `void → { genres, decades, unknownYearCount }` | フィルター UI の選択肢 (ジャンル・年代とも件数つき) |
 | `mp:library:setArtistPicture` | `{ artist, mimeType, data } → { picturePath }` | アーティスト画像の設定・差し替え |
 | `mp:library:setArtistInitial` | `{ artist, initial } → void` | アーティストの頭文字の設定 (`initial` は A–Z の 1 文字、`null` で選択を消去して自動判定へ戻す) |
-| `mp:playlist:list` | `void → Playlist[]` | プレイリスト一覧 (静的・動的とも) |
-| `mp:playlist:create` / `update` / `remove` | 各 CRUD | 静的・動的プレイリストの管理 |
+| `mp:playlist:list` | `void → Playlist[]` | プレイリスト一覧 (静的・動的とも)。v1.6 で `Playlist` に `picturePath` と `musicCount` を追加 ([v1.6 の IPC](../../v1.6/architecture/ipc.md)、2026-10-24 改訂) |
+| `mp:playlist:create` / `update` / `remove` | 各 CRUD | 静的・動的プレイリストの管理。`remove` は v1.6 から画像の孤児ファイルも消す |
 | `mp:playlist:getMusics` | `{ playlistId } → Music[]` | 内容取得。動的はルール評価結果を返す |
+| `mp:playlist:setPicture` | `{ id, kind, mimeType, data } → { picturePath }` | プレイリスト画像の設定・差し替え (v1.6。`mp:library:setArtistPicture` と同じ形。[v1.6 の IPC](../../v1.6/architecture/ipc.md)、2026-10-24 改訂) |
 | `mp:settings:get` / `set` | `void → AppSettings` / `patch → AppSettings` | 設定。set は**マージ後の全体**を返し Renderer はそれを正とする |
 
 ### Renderer → Main (send)
@@ -115,7 +116,7 @@ contextBridge.exposeInMainWorld("mp", {
     onImportProgress, // (listener) => unsubscribe
     onChanged,        // (listener) => unsubscribe
   },
-  playlist: { list, create, update, remove, getMusics },
+  playlist: { list, create, update, remove, getMusics, setPicture }, // setPicture は v1.6
   settings: { get, set },
   menu: { onAction, setState },
   window: { onFullScreenChanged }, // (listener) => unsubscribe
