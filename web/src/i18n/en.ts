@@ -39,7 +39,7 @@ export const en = {
     "Albums view with the sidebar filtering by the Jazz genre and the 1990s, showing a grid of album covers",
   "home.feature.playlists.title": "Playlists and smart playlists",
   "home.feature.playlists.body":
-    "Arrange songs by hand in a regular playlist, or let a smart playlist keep itself up to date from your conditions. The song table lets you choose the columns, resize and reorder them, and sort by any of them.",
+    "Arrange songs by hand in a regular playlist, or let a smart playlist keep itself up to date from your conditions. Give each one a picture, and shape the song table with the columns you want: choose, resize, reorder and sort them.",
   "home.feature.playlists.alt":
     "Playlists view showing the My Best playlist as a table with the favorite, title, artist, album, album artist, genre and year columns",
   "home.feature.favorites.title": "Keep your favorites close",
