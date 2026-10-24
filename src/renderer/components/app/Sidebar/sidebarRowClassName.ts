@@ -50,9 +50,12 @@ export const sidebarRowCountClassName = (selected: boolean): string =>
 
 /**
  * Classes of a sidebar row's menu trigger (`RowMenu`, `variant="ring"`):
- * shown while the row is hovered, while the trigger has keyboard focus, and
- * always on the selected row; it also stays while its menu is open, when
- * focus has moved into the portaled menu. Hovering lights the circle border
+ * shown while the row is hovered, while the trigger has keyboard focus
+ * (`focus-visible`), and always on the selected row; it also stays while
+ * its menu is open, when focus has moved into the portaled menu. Closing
+ * the menu returns focus to the trigger; a plain `focus` rule would then
+ * keep the trigger visible after the pointer left the row, so only a
+ * keyboard-visible focus (which also draws the focus ring) keeps it shown. Hovering lights the circle border
  * up with the glow of the `ring` variant. On the selected row, whose fill is
  * `foreground`, the icon, the circle and the glow take the inverse colour
  * (`background`), so the hover reads in both themes: light on the dark fill
@@ -69,5 +72,5 @@ export const sidebarRowMenuClassName = (selected: boolean): string =>
           "text-background hover:border-background hover:text-background aria-expanded:text-background",
           "hover:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--background)_60%,transparent)]",
         )
-      : "opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 aria-expanded:opacity-100",
+      : "opacity-0 focus-visible:opacity-100 group-hover:opacity-100 aria-expanded:opacity-100",
   );
