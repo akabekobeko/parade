@@ -1,5 +1,5 @@
 import type { Music } from "@mp/ipc";
-import { ListMusic, Shuffle as ShuffleIcon, Sparkles } from "lucide-react";
+import { ListMusic, NotepadText, Shuffle as ShuffleIcon } from "lucide-react";
 import { AddToPlaylistSubmenu } from "@/components/app/AddToPlaylistSubmenu/AddToPlaylistSubmenu";
 import { CircleIconButton } from "@/components/app/Buttons/CircleIconButton";
 import { EllipsisText } from "@/components/app/EllipsisText/EllipsisText";
@@ -13,7 +13,7 @@ import { formatTime } from "@/libs/formatTime";
 type Props = {
   /** Playlist name; `""` until the playlist entry has loaded. */
   readonly name: string;
-  /** Whether this is a smart playlist (badge + "Edit rules" menu entry). */
+  /** Whether this is a smart playlist (badge). */
   readonly smart: boolean;
   /** Visible tracks in play order; also the "Add to playlist" target. */
   readonly musics: readonly Music[];
@@ -23,16 +23,20 @@ type Props = {
   readonly onPlayAll: () => void;
   /** Shuffle circle / menu "Shuffle play"; plays `musics` shuffled. */
   readonly onPlayShuffled: () => void;
-  /** Opens the smart-rules editor; only used when `smart` is true. */
-  readonly onEditRules: () => void;
+  /**
+   * Menu "Playlist Info": opens the playlist info dialog; `null` disables
+   * the item until the playlist entry has loaded.
+   */
+  readonly onOpenInfo: (() => void) | null;
 };
 
 /**
  * Playlist area laid out like `ArtistHeader`: icon tile with a hover play
  * overlay, name and counts on the left; shuffle / menu circles on the
  * right. The right padding matches the table's horizontal padding (24px)
- * plus the menu cell's `px-2`, so the menu lines up with the track menus. Smart playlists expose
- * "Edit rules" from the menu.
+ * plus the menu cell's `px-2`, so the menu lines up with the track menus.
+ * The menu ends with "Playlist Info" for both kinds
+ * (`docs/specs/v1.6/features/playlist-header.md`).
  */
 export const PlaylistHeader = ({
   name,
@@ -41,7 +45,7 @@ export const PlaylistHeader = ({
   totalDurationMs,
   onPlayAll,
   onPlayShuffled,
-  onEditRules,
+  onOpenInfo,
 }: Props) => {
   const t = useT();
   const musicCount = musics.length;
@@ -100,16 +104,13 @@ export const PlaylistHeader = ({
               onSelect: onPlayShuffled,
             },
             <AddToPlaylistSubmenu key="playlist" musics={musics} />,
-            ...(smart
-              ? [
-                  {
-                    label: t("smart.editRules"),
-                    icon: <Sparkles />,
-                    onSelect: onEditRules,
-                    separatorBefore: true,
-                  },
-                ]
-              : []),
+            {
+              label: t("playlistInfo.menu"),
+              icon: <NotepadText />,
+              onSelect: onOpenInfo ?? undefined,
+              disabled: onOpenInfo === null,
+              separatorBefore: true,
+            },
           ]}
         />
       </HStack>

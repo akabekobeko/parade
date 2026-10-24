@@ -1,4 +1,11 @@
-import { ListMusic, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
+import {
+  ListMusic,
+  NotepadText,
+  Pencil,
+  Plus,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { IconButton } from "@/components/app/Buttons/IconButton";
 import { EllipsisText } from "@/components/app/EllipsisText/EllipsisText";
@@ -21,6 +28,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useT } from "@/features/i18n/useT";
+import { playlistInfoStore } from "@/features/playlist/playlistInfoStore";
 import { playlistRouteId } from "@/features/playlist/playlistRouteId";
 import { cn } from "@/libs/utils";
 import { SmartRulesDialog } from "../SmartRulesDialog/SmartRulesDialog";
@@ -145,6 +153,11 @@ export const PlaylistListPanel = () => {
               >
                 <RowMenu
                   items={[
+                    {
+                      label: t("playlistInfo.menu"),
+                      icon: <NotepadText />,
+                      onSelect: () => playlistInfoStore.open(playlist),
+                    },
                     {
                       label: t("menu.rename"),
                       icon: <Pencil />,

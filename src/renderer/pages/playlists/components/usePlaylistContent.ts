@@ -1,4 +1,4 @@
-import type { Music, Playlist, SmartPlaylistRules } from "@mp/ipc";
+import type { Music, Playlist } from "@mp/ipc";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { MUSIC_ROW_HEIGHT } from "@/components/app/MusicRow/MusicRow";
@@ -25,7 +25,6 @@ import {
 } from "@/features/player/rowPlayingStateOf";
 import { parsePlaylistRouteId } from "@/features/playlist/parsePlaylistRouteId";
 import { replacePlaylistMusics } from "@/features/playlist/playlistCommands/replacePlaylistMusics";
-import { updatePlaylist } from "@/features/playlist/playlistCommands/updatePlaylist";
 import { PLAYLIST_COLUMNS } from "@/features/playlistColumns/constants";
 import { fitTitleWidth } from "@/features/playlistColumns/fitTitleWidth";
 import { minResizeWidthOf } from "@/features/playlistColumns/minResizeWidthOf";
@@ -110,8 +109,6 @@ export const usePlaylistContent = (routeId: string) => {
   const [bound, setBound] = useState<BoundSelection | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
-  /** Whether the smart-rules editor is open (smart playlists only). */
-  const [editingRules, setEditingRules] = useState(false);
   /** Favorite cell's Star: flip one track's favorite (the clicked row only). */
   const toggleFavorite = useToggleMusicFavorite();
   /**
@@ -357,20 +354,6 @@ export const usePlaylistContent = (routeId: string) => {
   const isDropTarget = (index: number): boolean =>
     dragIndex !== null && overIndex === index;
 
-  const openRulesEditor = (): void => {
-    setEditingRules(true);
-  };
-
-  const closeRulesEditor = (): void => {
-    setEditingRules(false);
-  };
-
-  /** Persist edited smart-playlist rules and close the editor. */
-  const submitRules = (rules: SmartPlaylistRules): void => {
-    setEditingRules(false);
-    void updatePlaylist({ id: ref.id, kind: "smart", rules });
-  };
-
   const playingStateOf = (music: Music): RowPlayingState =>
     rowPlayingStateOf(current, playbackState, music);
 
@@ -421,12 +404,5 @@ export const usePlaylistContent = (routeId: string) => {
     menu: { targetsOf: menuTargetsOfRow, openMusicInfo, removeRowAt },
     /** Favorite cell: flip the row's track. */
     toggleFavorite,
-    /** Smart-rules editor dialog (smart playlists only). */
-    rulesEditor: {
-      open: editingRules,
-      show: openRulesEditor,
-      close: closeRulesEditor,
-      submit: submitRules,
-    },
   };
 };

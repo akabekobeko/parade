@@ -1,28 +1,22 @@
 import type { SmartCondition, SmartPlaylistRules } from "@mp/ipc";
 import { useState } from "react";
 import { defaultCondition } from "./defaultCondition";
-import { fromDraft } from "./fromDraft";
 import { EMPTY_DRAFT, type RulesDraft } from "./rulesDraft";
 import { toDraft } from "./toDraft";
 
 /**
- * Logic of `SmartRulesDialog`: the editable rules draft, the optional name
- * field, and every draft mutation. The component only renders what this
- * hook returns.
+ * The editable rules draft and every draft mutation, shared by the
+ * smart-playlist creation dialog and the playlist info dialog
+ * (`docs/specs/v1.6/features/playlist-info-dialog.md`). `SmartRulesForm`
+ * renders what this hook returns; the owner converts the draft back with
+ * `fromDraft` when it submits.
+ *
+ * @param initialRules - Rules to edit; omit to start from the empty draft.
  */
-export const useSmartRulesDialog = ({
-  initialRules,
-  initialName,
-  onSubmit,
-}: {
-  readonly initialRules?: SmartPlaylistRules;
-  readonly initialName?: string;
-  readonly onSubmit: (rules: SmartPlaylistRules, name: string) => void;
-}) => {
+export const useRulesDraft = (initialRules?: SmartPlaylistRules) => {
   const [draft, setDraft] = useState<RulesDraft>(() =>
     initialRules !== undefined ? toDraft(initialRules) : EMPTY_DRAFT,
   );
-  const [name, setName] = useState(initialName ?? "");
 
   const setMatch = (match: string | null): void => {
     setDraft({ ...draft, match: match as RulesDraft["match"] });
@@ -65,15 +59,8 @@ export const useSmartRulesDialog = ({
     setDraft({ ...draft, limit });
   };
 
-  /** Convert the draft back to rules and hand it to the caller. */
-  const submit = (): void => {
-    onSubmit(fromDraft(draft), name.trim());
-  };
-
   return {
     draft,
-    name,
-    setName,
     setMatch,
     setCondition,
     addCondition,
@@ -81,6 +68,8 @@ export const useSmartRulesDialog = ({
     setSort,
     setOrder,
     setLimit,
-    submit,
   };
 };
+
+/** What {@link useRulesDraft} returns: the props of `SmartRulesForm`. */
+export type RulesDraftController = ReturnType<typeof useRulesDraft>;
