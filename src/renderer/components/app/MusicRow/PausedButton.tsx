@@ -14,7 +14,8 @@ type Props = {
 
 /**
  * Leading cell of the paused row: the speaker icon, swapped for a resume
- * play button on row hover.
+ * play button on row hover. The row is filled with `foreground`, so both
+ * take the inverse colour (`background`).
  */
 export const PausedButton = ({ onResume }: Props) => {
   const t = useT();
@@ -23,14 +24,14 @@ export const PausedButton = ({ onResume }: Props) => {
       <VolumeFillIcon
         aria-hidden
         className={cn(
-          "size-4 text-primary",
+          "size-4 text-background",
           onResume !== undefined && "group-hover:hidden",
         )}
       />
       {onResume !== undefined && (
         <HoverIconButton
           aria-label={t("player.play")}
-          className="text-primary"
+          className="text-background"
           onClick={onResume}
         >
           <PlayFillIcon className="size-4" />

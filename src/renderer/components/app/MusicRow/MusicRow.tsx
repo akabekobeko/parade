@@ -8,7 +8,10 @@ import {
 import { formatTime } from "@/libs/formatTime";
 import { cn } from "@/libs/utils";
 import { EllipsisText } from "../EllipsisText/EllipsisText";
-import { FavoriteStarButton } from "../FavoriteStarButton/FavoriteStarButton";
+import {
+  FavoriteStarButton,
+  INVERSE_STAR_CLASS_NAME,
+} from "../FavoriteStarButton/FavoriteStarButton";
 import { RowMenu, type RowMenuItems } from "../RowMenu/RowMenu";
 import { RowMenuEntries } from "../RowMenu/RowMenuItems";
 import { PausedButton } from "./PausedButton";
@@ -62,16 +65,14 @@ type Props = {
  * Classes for the row container. The hovered and the selected row show the
  * rounded accent rectangle, as does the row whose right-click menu is open
  * (`data-popup-open`, set by the context-menu trigger) so the menu's target
- * stays visible while the pointer is inside the menu; the playing / paused
- * row lights that rectangle's border up with a blurred glow like the album
- * artwork in `AlbumCard` / `AlbumHeaderRow` (plain border plus blur, no
- * spread ring, so it reads as a calm lamp next to the hovered artwork),
- * whatever its selection. Every row
- * keeps a transparent border so lighting it never shifts the content. Rows
- * abut each other, so the glow reaches into the neighbouring rows: the row
- * is `relative` so that in a plain-flow list it paints above the following
- * row's opaque accent background; virtualised lists raise the wrapper of the
- * playing row instead (their transformed wrappers are stacking contexts).
+ * stays visible while the pointer is inside the menu. The playing / paused
+ * row is filled with `foreground` like the selected sidebar row, whatever
+ * its selection or hover, and its texts and icons take the inverse colour
+ * (`background`; see the leading cell, the title, the duration, the Star,
+ * and the menu). The fills switch without a transition: an eased one
+ * flickered.
+ * Every row keeps a transparent border so the content sits where it did
+ * when the border carried a highlight.
  * Contiguous selected rows merge into one rounded rectangle like Apple
  * Music: a selected row squares off the corners it shares with a selected
  * neighbour (`selected-above` / `selected-below` in `App.css` look at the
@@ -79,12 +80,13 @@ type Props = {
  */
 const rowClassName = (playing: boolean, selected: boolean): string =>
   cn(
-    "group relative flex h-9 w-full flex-row items-center gap-2 rounded-md border border-transparent px-2 text-sm transition-[border-color,box-shadow] duration-200",
-    selected
-      ? "bg-accent text-accent-foreground selected-above:rounded-t-none selected-below:rounded-b-none"
-      : "hover:bg-accent/50 data-popup-open:bg-accent/50",
-    playing &&
-      "border-foreground shadow-[0_0_5px_1px_color-mix(in_oklch,var(--foreground)_60%,transparent)]",
+    "group flex h-9 w-full flex-row items-center gap-2 rounded-md border border-transparent px-2 text-sm",
+    playing
+      ? "bg-foreground text-background"
+      : selected
+        ? "bg-accent text-accent-foreground"
+        : "hover:bg-accent/50 data-popup-open:bg-accent/50",
+    selected && "selected-above:rounded-t-none selected-below:rounded-b-none",
   );
 
 /**
@@ -114,9 +116,9 @@ const rowClassName = (playing: boolean, selected: boolean): string =>
  * (stopped) row. Left of it sits the favorite Star (`FavoriteStarButton`),
  * always visible; like the leading cell it lies outside the title button,
  * so a click on it never selects or plays the row, and the row height is
- * unchanged. The playing / paused row also lights its rounded border up
- * with a blurred glow (see `rowClassName`), like the album artwork in the
- * Artists / Albums views.
+ * unchanged. The playing / paused row is filled with `foreground` (see
+ * `rowClassName`), so its Star and menu are `inverse` like the selected
+ * sidebar row's menu.
  */
 export const MusicRow = ({
   music,
@@ -132,11 +134,12 @@ export const MusicRow = ({
 }: Props) => {
   const number =
     ordinal !== undefined ? ordinal : music.track > 0 ? music.track : "-";
+  const current = playing !== null;
 
   const cells = (
     <>
       <FavoriteStarButton
-        className="shrink-0"
+        className={cn("shrink-0", current && INVERSE_STAR_CLASS_NAME)}
         favorite={music.favorite}
         onToggle={onToggleFavorite}
       />
@@ -162,17 +165,22 @@ export const MusicRow = ({
         <EllipsisText
           className={cn(
             "min-w-0 flex-1",
-            playing !== null && "font-medium text-primary",
+            current && "font-medium text-background",
           )}
           text={music.title}
         />
         {columns}
-        <span className="shrink-0 font-mono text-muted-foreground text-xs tabular-nums">
+        <span
+          className={cn(
+            "shrink-0 font-mono text-xs tabular-nums",
+            current ? "text-background/70" : "text-muted-foreground",
+          )}
+        >
           {formatTime(music.durationMs / 1000)}
         </span>
       </button>
       <span className="shrink-0">
-        <RowMenu variant="ring" items={menuItems} />
+        <RowMenu variant="ring" inverse={current} items={menuItems} />
       </span>
     </>
   );
@@ -181,7 +189,7 @@ export const MusicRow = ({
     <ContextMenu>
       <ContextMenuTrigger
         data-selected={selected || undefined}
-        className={rowClassName(playing !== null, selected)}
+        className={rowClassName(current, selected)}
       >
         {cells}
       </ContextMenuTrigger>

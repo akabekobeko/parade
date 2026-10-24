@@ -11,7 +11,8 @@ type Props = {
 
 /**
  * Leading cell of the playing row: animated equalizer bars, swapped for a
- * pause button on row hover.
+ * pause button on row hover. The row is filled with `foreground`, so both
+ * take the inverse colour (`background`).
  */
 export const PlayingButton = ({ onPause }: Props) => {
   const t = useT();
@@ -19,14 +20,14 @@ export const PlayingButton = ({ onPause }: Props) => {
     <>
       <AudioLinesIcon
         className={cn(
-          "size-4 text-primary",
+          "size-4 text-background",
           onPause !== undefined && "group-hover:hidden",
         )}
       />
       {onPause !== undefined && (
         <HoverIconButton
           aria-label={t("player.pause")}
-          className="text-primary"
+          className="text-background"
           onClick={onPause}
         >
           <PauseFillIcon className="size-4" />

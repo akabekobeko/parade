@@ -3,6 +3,15 @@ import { StarFillIcon } from "@/components/app/Icons/StarFillIcon";
 import { useT } from "@/features/i18n/useT";
 import { cn } from "@/libs/utils";
 
+/**
+ * Classes of a Star resting on a `foreground` fill (the playing track row):
+ * on and off take the inverse colour (`background`), the off outline toned
+ * down the same way as on the page. Passed through `className`, where the
+ * text colours override the defaults.
+ */
+export const INVERSE_STAR_CLASS_NAME =
+  "text-background/40 aria-pressed:text-background hover:text-background";
+
 type Props = {
   /** Current flag value. */
   readonly favorite: boolean;

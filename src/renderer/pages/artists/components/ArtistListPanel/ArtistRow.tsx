@@ -30,9 +30,9 @@ type Props = {
  * One virtualised artist row (picture, name, song count) with its menu
  * button at the right edge (`docs/specs/v1.6/features/sidebar-rows.md`).
  * The row shares its look with the playlist rows (`sidebarRowClassName`);
- * rows abut each other inside the scroll area, so the row is inset from the
- * panel edges (`inset-x-2`) to leave room for the hover glow. The menu shows
- * on hover and on the selected row. Editing keys off the artist name; the
+ * rows abut each other inside the scroll area and are inset from the panel
+ * edges (`inset-x-2`) like the playlist rows. The menu shows on hover and
+ * on the selected row. Editing keys off the artist name; the
  * empty-name bucket ("Unknown Artist") cannot hold a picture, so no edit
  * there — removal applies to every bucket.
  */
@@ -73,6 +73,7 @@ export const ArtistRow = ({ artist, selected, top, height }: Props) => {
       </button>
       <RowMenu
         variant="ring"
+        inverse={selected}
         className={sidebarRowMenuClassName(selected)}
         items={[
           ...(artist.name !== ""

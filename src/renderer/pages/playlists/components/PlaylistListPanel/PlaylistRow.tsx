@@ -44,7 +44,7 @@ type Props = {
  * While renaming, the two text lines turn into an input and the picture and
  * the menu stay put. Rows are laid out in flow (no virtualiser) at the
  * artist rows' height (`h-12` = `ARTIST_ROW_HEIGHT`), inset by the list's
- * padding; `relative` lets the hover glow rise above the next row's fill.
+ * padding.
  */
 export const PlaylistRow = ({
   playlist,
@@ -77,8 +77,10 @@ export const PlaylistRow = ({
           className={cn(
             "-right-1.5 -bottom-1 absolute size-4",
             // The ring cuts the badge out of the surface it rests on: the
-            // sidebar, or the selected row's fill.
-            selected ? "ring-foreground" : "ring-sidebar",
+            // sidebar, the hovered row's fill, or the selected row's fill.
+            selected
+              ? "ring-foreground"
+              : "ring-sidebar group-hover:ring-fill-hover",
           )}
         />
       )}
@@ -86,7 +88,7 @@ export const PlaylistRow = ({
   );
 
   return (
-    <div className={cn(sidebarRowClassName(selected), "relative h-12")}>
+    <div className={cn(sidebarRowClassName(selected), "h-12")}>
       {editing ? (
         <>
           {picture}
@@ -114,6 +116,7 @@ export const PlaylistRow = ({
       )}
       <RowMenu
         variant="ring"
+        inverse={selected}
         className={sidebarRowMenuClassName(selected)}
         items={[
           {

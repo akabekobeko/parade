@@ -1,6 +1,9 @@
 import type { Music } from "@mp/ipc";
 import type { DragEvent, MouseEvent } from "react";
-import { FavoriteStarButton } from "@/components/app/FavoriteStarButton/FavoriteStarButton";
+import {
+  FavoriteStarButton,
+  INVERSE_STAR_CLASS_NAME,
+} from "@/components/app/FavoriteStarButton/FavoriteStarButton";
 import { PausedButton } from "@/components/app/MusicRow/PausedButton";
 import { PlayingButton } from "@/components/app/MusicRow/PlayingButton";
 import { TrackNumberButton } from "@/components/app/MusicRow/TrackNumberButton";
@@ -106,18 +109,16 @@ const isRowEvent = (event: MouseEvent<HTMLTableRowElement>): boolean =>
  * is the half-transparent accent of `MusicRow` already blended with the
  * page background, because the menu cell has to be opaque.
  *
- * The playing / paused row lights a 1px outline up with a blurred glow and
- * rises above its neighbours so their backgrounds never cover the glow (the
- * transformed rows are stacking contexts). The outline is an inset shadow
- * rather than a border: a border would take 2px off the cells and misalign
- * them with the header. It is drawn by a pseudo element on top of the
- * cells, because the opaque menu cell would cover a shadow of the row
- * itself. Contiguous selected rows merge into one rounded rectangle
- * (`selected-above` / `selected-below` in `App.css` look at the sibling
- * row). A drop target draws the insertion line at its top edge with a
- * pseudo element, so the line takes no space either; it is raised above the
- * menu cell. Text is unselectable so Shift-clicks and drags never start a
- * text selection.
+ * The playing / paused row is filled with `foreground` like the selected
+ * sidebar row, whatever its selection or hover, and its texts and icons
+ * take the inverse colour (`background`; `renderPlaylistCell`, the leading
+ * cell, the Star, and the menu). The fills switch without a transition:
+ * an eased one flickered. Contiguous selected rows merge into one
+ * rounded rectangle (`selected-above` / `selected-below` in `App.css` look
+ * at the sibling row). A drop target draws the insertion line at its top
+ * edge with a pseudo element, so the line takes no space; it is raised
+ * above the menu cell. Text is unselectable so Shift-clicks and drags never
+ * start a text selection.
  */
 const rowClassName = (
   playing: boolean,
@@ -125,13 +126,13 @@ const rowClassName = (
   dropTarget: boolean,
 ): string =>
   cn(
-    "group absolute top-0 left-0 flex h-9 w-full cursor-default select-none items-center rounded-md bg-(--row-bg) text-sm transition-shadow duration-200",
-    "after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:transition-shadow after:duration-200",
-    selected
-      ? "text-accent-foreground [--row-bg:var(--accent)] selected-above:rounded-t-none selected-below:rounded-b-none"
-      : "data-popup-open:[--row-bg:color-mix(in_srgb,var(--accent)_50%,var(--background))] hover:[--row-bg:color-mix(in_srgb,var(--accent)_50%,var(--background))]",
-    playing &&
-      "z-[1] shadow-[0_0_5px_1px_color-mix(in_oklch,var(--foreground)_60%,transparent)] after:shadow-[inset_0_0_0_1px_var(--foreground)]",
+    "group absolute top-0 left-0 flex h-9 w-full cursor-default select-none items-center rounded-md bg-(--row-bg) text-sm",
+    playing
+      ? "text-background [--row-bg:var(--foreground)]"
+      : selected
+        ? "text-accent-foreground [--row-bg:var(--accent)]"
+        : "data-popup-open:[--row-bg:color-mix(in_srgb,var(--accent)_50%,var(--background))] hover:[--row-bg:color-mix(in_srgb,var(--accent)_50%,var(--background))]",
+    selected && "selected-above:rounded-t-none selected-below:rounded-b-none",
     dropTarget &&
       "before:absolute before:inset-x-0 before:top-0 before:z-[1] before:h-0.5 before:bg-primary",
   );
@@ -162,6 +163,8 @@ const MENU_CELL_CLASS_NAME =
  * paused row, `TrackNumberButton` for any other row. The favorite cell
  * holds the Star (`FavoriteStarButton`) and is a control cell like the
  * leading and the menu cell, so its clicks never select or play the row.
+ * On the playing / paused row the Star and the menu are `inverse`, like
+ * the selected sidebar row's menu.
  *
  * The row itself is the right-click menu's trigger and the draggable
  * element, so sibling rows stay adjacent in the DOM for the selection
@@ -228,7 +231,12 @@ export const PlaylistTableRow = ({
               // biome-ignore lint/a11y/noRedundantRoles: the display override drops the implicit role.
               role="cell"
               data-row-control
-              className="flex shrink-0 items-center justify-end px-2 font-mono text-muted-foreground text-xs tabular-nums"
+              className={cn(
+                "flex shrink-0 items-center justify-end px-2 font-mono text-xs tabular-nums",
+                playing !== null
+                  ? "text-background/70"
+                  : "text-muted-foreground",
+              )}
               style={style}
             >
               {playing === "playing" ? (
@@ -257,6 +265,7 @@ export const PlaylistTableRow = ({
               style={style}
             >
               <FavoriteStarButton
+                className={cn(playing !== null && INVERSE_STAR_CLASS_NAME)}
                 favorite={music.favorite}
                 onToggle={onToggleFavorite}
               />
@@ -274,7 +283,11 @@ export const PlaylistTableRow = ({
               className={MENU_CELL_CLASS_NAME}
               style={{ ...style, right: PLAYLIST_TABLE_MENU_STICKY_RIGHT }}
             >
-              <RowMenu variant="ring" items={menuItems} />
+              <RowMenu
+                variant="ring"
+                inverse={playing !== null}
+                items={menuItems}
+              />
             </td>
           );
         }

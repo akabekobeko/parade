@@ -27,8 +27,10 @@ type Args = {
   /** Track of the row. */
   readonly music: Music;
   /**
-   * Whether the row is the current track (playing or paused); emphasises
-   * the title.
+   * Whether the row is the current track (playing or paused): the row is
+   * filled with `foreground`, so the title is emphasised and every text
+   * takes the inverse colour (`background`, toned down for the muted
+   * columns).
    */
   readonly current: boolean;
   /** BCP 47 tag of the UI locale, used for the added date. */
@@ -60,20 +62,24 @@ export const renderPlaylistCell = ({
     case "title":
       return (
         <EllipsisText
-          className={cn(current && "font-medium text-primary")}
+          className={cn(current && "font-medium text-background")}
           text={music.title}
         />
       );
     case "rating":
       return music.rating === null ? null : (
-        <RatingStars stars={ratingStarsOf(music.rating)} />
+        <RatingStars
+          stars={ratingStarsOf(music.rating)}
+          className={cn(current && "text-background/70")}
+        />
       );
     default: {
       const text = playlistCellTextOf(columnId, music, locale);
       return text === "" ? null : (
         <EllipsisText
           className={cn(
-            "text-muted-foreground text-xs",
+            "text-xs",
+            current ? "text-background/70" : "text-muted-foreground",
             DIGIT_CLASS_NAMES[columnId],
           )}
           text={text}

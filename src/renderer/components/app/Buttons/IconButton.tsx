@@ -26,6 +26,12 @@ import { cn } from "@/libs/utils";
  *
  * Either way a toggle (`aria-pressed`) colours its icon `pressed` while it
  * is on (the shuffle mode), also while hovered.
+ *
+ * `inverse` is for a button resting on a `foreground` fill (the selected
+ * sidebar row, the playing track row): the icon, and for "ring" the circle
+ * border and its glow, take the inverse colour (`background`), so the
+ * button reads in both themes. The `foreground` tint of "tint" would vanish
+ * on that fill, so it becomes a faint `background` tint instead.
  */
 const iconButtonVariants = cva(
   "text-foreground aria-pressed:text-pressed aria-pressed:hover:text-pressed",
@@ -35,9 +41,27 @@ const iconButtonVariants = cva(
         tint: "",
         ring: "rounded-full duration-200 hover:border-foreground hover:bg-transparent hover:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--foreground)_60%,transparent)] aria-expanded:bg-transparent",
       },
+      inverse: {
+        true: "text-background hover:text-background aria-expanded:text-background",
+        false: "",
+      },
     },
+    compoundVariants: [
+      {
+        variant: "tint",
+        inverse: true,
+        class: "hover:bg-background/15 aria-expanded:bg-background/15",
+      },
+      {
+        variant: "ring",
+        inverse: true,
+        class:
+          "hover:border-background hover:shadow-[0_0_5px_1px_color-mix(in_oklch,var(--background)_60%,transparent)]",
+      },
+    ],
     defaultVariants: {
       variant: "tint",
+      inverse: false,
     },
   },
 );
@@ -50,11 +74,16 @@ type Props = Omit<ComponentProps<typeof Button>, "variant" | "size"> &
  * hover looks). Disabled buttons get `pointer-events-none` from `Button`,
  * so they never react to hover. Pass `aria-label` for the icon.
  */
-export const IconButton = ({ className, variant, ...props }: Props) => (
+export const IconButton = ({
+  className,
+  variant,
+  inverse,
+  ...props
+}: Props) => (
   <Button
     variant="ghost"
     size="icon-sm"
-    className={cn(iconButtonVariants({ variant }), className)}
+    className={cn(iconButtonVariants({ variant, inverse }), className)}
     {...props}
   />
 );
