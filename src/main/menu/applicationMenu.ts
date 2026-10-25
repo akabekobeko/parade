@@ -35,6 +35,8 @@ export const installApplicationMenu = (): void => {
     }),
     appName: app.getName(),
     state: currentState,
+    // Developer tools stay out of the menu in the packaged app.
+    devTools: !app.isPackaged,
     onAction: (action) => {
       broadcast(IpcKeys.MenuAction, { action });
     },

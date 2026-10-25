@@ -12,6 +12,14 @@ import type { MenuAction, MenuStateSnapshot } from "../ipc/types";
  * Menu actions never run app logic here — every custom item forwards a
  * {@link MenuAction} through `onAction`, which Main pushes to the Renderer
  * via `mp:menu:action`.
+ *
+ * Standard items (Undo, Copy, Zoom In, Minimize, ...) keep their `role` for
+ * the behaviour but always carry an explicit `label`: Electron's role labels
+ * are hard-coded English, so the composite `editMenu` / `viewMenu` /
+ * `windowMenu` roles would stay English while the top-level labels follow
+ * the app locale (`docs/specs/v1.0/cross-platform/system-menu.md`). The items
+ * macOS itself injects (Start Dictation, Emoji & Symbols, the window list)
+ * are outside this template and follow the OS language.
  */
 
 /** Inputs deciding the template. */
@@ -32,9 +40,28 @@ export type MenuBuildOptions = {
    * (Controls > Shuffle, Controls > Repeat > Off / All / One).
    */
   readonly state: MenuStateSnapshot;
+  /**
+   * Whether View gets the developer items (Reload, Force Reload, Toggle
+   * Developer Tools). Development builds only (`!app.isPackaged`): a reload
+   * would stop playback and drop the queue, so end users never see them.
+   */
+  readonly devTools: boolean;
   /** Receives the action of a clicked custom item. */
   readonly onAction: (action: MenuAction) => void;
 };
+
+/**
+ * A standard item: Electron's `role` for the behaviour, our label for the
+ * text (role labels are English only).
+ *
+ * @param role - The Electron role.
+ * @param label - Translated label.
+ * @returns The item.
+ */
+const roleItem = (
+  role: NonNullable<MenuItemConstructorOptions["role"]>,
+  label: string,
+): MenuItemConstructorOptions => ({ role, label });
 
 /**
  * Build the application menu template.
@@ -45,9 +72,12 @@ export type MenuBuildOptions = {
 export const buildMenuTemplate = (
   options: MenuBuildOptions,
 ): MenuItemConstructorOptions[] => {
-  const { platform, locale, appName, state, onAction } = options;
+  const { platform, locale, appName, state, devTools, onAction } = options;
   const t = tFor(locale);
   const isMac = platform === "darwin";
+  // A factory, not a shared object: Electron annotates template items in
+  // place, so every position gets its own separator.
+  const separator = (): MenuItemConstructorOptions => ({ type: "separator" });
 
   const aboutItem: MenuItemConstructorOptions = {
     label: t("menu.about", { appName }),
@@ -67,14 +97,14 @@ export const buildMenuTemplate = (
             label: appName,
             submenu: [
               aboutItem,
-              { type: "separator" },
+              separator(),
               settingsItem,
-              { type: "separator" },
-              { role: "hide" },
-              { role: "hideOthers" },
-              { role: "unhide" },
-              { type: "separator" },
-              { role: "quit" },
+              separator(),
+              roleItem("hide", t("menu.hide", { appName })),
+              roleItem("hideOthers", t("menu.hideOthers")),
+              roleItem("unhide", t("menu.unhide")),
+              separator(),
+              roleItem("quit", t("menu.quitApp", { appName })),
             ],
           } satisfies MenuItemConstructorOptions,
         ]
@@ -88,17 +118,69 @@ export const buildMenuTemplate = (
           click: () => onAction("import"),
         },
         ...(isMac
-          ? [{ role: "close" } satisfies MenuItemConstructorOptions]
+          ? [roleItem("close", t("menu.closeWindow"))]
           : [
-              { type: "separator" } satisfies MenuItemConstructorOptions,
+              separator(),
               settingsItem,
-              { type: "separator" } satisfies MenuItemConstructorOptions,
-              { role: "quit" } satisfies MenuItemConstructorOptions,
+              separator(),
+              roleItem(
+                "quit",
+                platform === "win32" ? t("menu.exit") : t("menu.quit"),
+              ),
             ]),
       ],
     },
-    { label: t("menu.edit"), role: "editMenu" },
-    { label: t("menu.view"), role: "viewMenu" },
+    {
+      // Same composition as Electron's `editMenu` role, with translated labels.
+      label: t("menu.edit"),
+      submenu: [
+        roleItem("undo", t("menu.undo")),
+        roleItem("redo", t("menu.redo")),
+        separator(),
+        roleItem("cut", t("menu.cut")),
+        roleItem("copy", t("menu.copy")),
+        roleItem("paste", t("menu.paste")),
+        ...(isMac
+          ? [
+              roleItem("pasteAndMatchStyle", t("menu.pasteAndMatchStyle")),
+              roleItem("delete", t("menu.delete")),
+              roleItem("selectAll", t("menu.selectAll")),
+              separator(),
+              {
+                label: t("menu.speech"),
+                submenu: [
+                  roleItem("startSpeaking", t("menu.startSpeaking")),
+                  roleItem("stopSpeaking", t("menu.stopSpeaking")),
+                ],
+              } satisfies MenuItemConstructorOptions,
+            ]
+          : [
+              roleItem("delete", t("menu.delete")),
+              separator(),
+              roleItem("selectAll", t("menu.selectAll")),
+            ]),
+      ],
+    },
+    {
+      // Same composition as Electron's `viewMenu` role, with translated
+      // labels; the developer items exist only in development builds.
+      label: t("menu.view"),
+      submenu: [
+        ...(devTools
+          ? [
+              roleItem("reload", t("menu.reload")),
+              roleItem("forceReload", t("menu.forceReload")),
+              roleItem("toggleDevTools", t("menu.toggleDevTools")),
+              separator(),
+            ]
+          : []),
+        roleItem("resetZoom", t("menu.resetZoom")),
+        roleItem("zoomIn", t("menu.zoomIn")),
+        roleItem("zoomOut", t("menu.zoomOut")),
+        separator(),
+        roleItem("togglefullscreen", t("menu.toggleFullScreen")),
+      ],
+    },
     {
       // Playback controls (Apple Music-style: between View and Window).
       label: t("menu.controls"),
@@ -109,7 +191,7 @@ export const buildMenuTemplate = (
           enabled: state.hasTrack,
           click: () => onAction("stop"),
         },
-        { type: "separator" },
+        separator(),
         // Mode items (docs/specs/v1.5/features/controls-menu.md): always
         // enabled, and checked from the snapshot rather than toggled
         // natively, since the menu is rebuilt on every state push and the
@@ -145,7 +227,20 @@ export const buildMenuTemplate = (
         },
       ],
     },
-    { label: t("menu.window"), role: "windowMenu" },
+    {
+      // Same composition as Electron's `windowMenu` role, with translated
+      // labels. `role: "window"` marks it as the macOS Window menu so the
+      // system appends the window list.
+      label: t("menu.window"),
+      role: "window",
+      submenu: [
+        roleItem("minimize", t("menu.minimize")),
+        roleItem("zoom", t("menu.zoom")),
+        ...(isMac
+          ? [separator(), roleItem("front", t("menu.front"))]
+          : [roleItem("close", t("menu.closeWindow"))]),
+      ],
+    },
     {
       label: t("menu.help"),
       role: "help",
