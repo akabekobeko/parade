@@ -37,8 +37,7 @@ it("falls back to the section root for a malformed artist segment", () => {
   expect(lastViewOf("/artists/name/%E0%A4%A")).toEqual({ section: "artists" });
 });
 
-it("returns null for settings and unknown paths", () => {
-  expect(lastViewOf("/settings")).toBeNull();
+it("returns null for unknown paths", () => {
   expect(lastViewOf("/")).toBeNull();
   expect(lastViewOf("/nowhere")).toBeNull();
 });

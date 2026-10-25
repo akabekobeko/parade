@@ -28,7 +28,7 @@ it("points the hash at the remembered view without adding a history entry", asyn
 });
 
 it("leaves an existing hash alone", async () => {
-  const { replaceState } = stubWindow("#/settings");
+  const { replaceState } = stubWindow("#/playlists");
 
   await restoreLastView({ section: "albums" });
 

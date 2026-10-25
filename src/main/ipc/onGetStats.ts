@@ -7,7 +7,7 @@ import { toIpcError } from "./utils/toIpcError";
  * Channel handler for `mp:library:getStats`.
  *
  * @param _ev - Electron event object (unused).
- * @returns Library-wide counters for the settings page.
+ * @returns Library-wide counters for the settings dialog.
  */
 export const onGetStats = async (
   _ev: Electron.IpcMainInvokeEvent,

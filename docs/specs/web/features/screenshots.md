@@ -44,7 +44,7 @@ AI (Claude Code) が操作する場合は CDP (Chrome DevTools Protocol) 方式�
 | `favorites` | Artists ビュー、お気に入りとフィルター メニュー | `artists` と同じ構図 (Milo Ashgrove、Modulations の見出しが上から 2 行目、Test Tone Serenade を再生中。再生位置は問わない) で、曲リストの Star を 4 曲 (Test Tone Serenade、Electric Engine、The Anchor、Umbrella) クリックして ON にし、アルバム Modulations もアルバム メニューの Album info から Favorite を ON にして Apply する (見出しに Star が出る)。コンテンツ ツールバーの Funnel ボタンでフィルター メニューを開き、「Favorites only」の項目が見える状態にする (チェックは OFF のまま。ON にすると曲が減って Star の意味が伝わりにくい) | `artists` / `artists-light` / `player` の撮影でも同じ曲とアルバムを ON にしておく。`albums` では Jazz / 1990s のアルバムのうち Songs for the Parade、Atlas & Evening、Broken Desert をカードの Star で ON にする。デモ用データにお気に入りの初期値はないので、`pnpm demo:assets` で戻したときは付け直す |
 | `music-info` | 曲情報ダイアログ | Test Tone Serenade の行メニューから Song info を開き、Details タブを表示する | **File タブはファイル パスが出るので撮らない。** Details タブでもファイル名が見える場合はマスクする |
 | `player` | プレーヤー バーとキュー | `artists` と同じ構図で再生中に、リピート ボタンを押して `all` (点灯) にし、キュー ボタンでキュー ポップオーバーを開く (開いた直後はゴミ箱ボタンにフォーカスが移るので外す)。ウィンドウ全体を撮り、サイト側でプレーヤー バー付近を切り出す | 切り出しの座標はマスクの manifest に書く。切り出し範囲には曲リストの下半分が入るので、曲リストの見た目が変わる PR ではこのシーンも撮り直す。リピートが点灯するのはこのシーンだけで、他のシーンは `off` のまま撮る |
-| `settings` | Settings ページ | サイドバーから Settings を開く。Theme が Dark、Language が English の状態 | ライブラリー統計はデモ用データの数値なのでそのままでよい |
+| `settings` | Settings ダイアログ | ツールバーの Settings ボタン (歯車) でダイアログを開く (issue #396 でページからダイアログに変更)。Theme が Dark、Language が English の状態 | ライブラリー統計はデモ用データの数値なのでそのままでよい |
 
 - 撮影の前に、トースト通知、ツールチップ、ホバー状態が残っていないことを確認する。再生できる曲は 1:47 で終わり、次の曲へ進むと再生エラーのトースト (ファイル パスを含む) が出るので、撮影のたびに再生し直す
 - ウィンドウの位置は画面の中央にし、他のウィンドウを重ねない

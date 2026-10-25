@@ -147,7 +147,7 @@ export type AlbumFilter = {
 export type FilterOptions = DeepReadonly<z.infer<typeof filterOptionsSchema>>;
 
 /**
- * Library-wide counters shown by the settings page's library section
+ * Library-wide counters shown by the settings dialog's library section
  * (`src/shared/schemas/libraryStatsSchema.ts`).
  */
 export type LibraryStats = DeepReadonly<z.infer<typeof libraryStatsSchema>>;
@@ -1000,7 +1000,7 @@ export type MpBridge = {
     ) => Promise<IpcResult<readonly Music[]>>;
     /** Choices for the Album view's filter UI. */
     readonly getFilterOptions: () => Promise<IpcResult<FilterOptions>>;
-    /** Library-wide counters for the settings page. */
+    /** Library-wide counters for the settings dialog. */
     readonly getStats: () => Promise<IpcResult<LibraryStats>>;
     /** Set (or replace) an artist's representative picture. */
     readonly setArtistPicture: (

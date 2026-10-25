@@ -19,6 +19,7 @@ import { getActivePlayer } from "./features/player/playerBridge";
 import { registerPlayerHotkeys } from "./features/player/registerPlayerHotkeys/registerPlayerHotkeys";
 import { playlistColumnsStore } from "./features/playlistColumns/playlistColumnsStore";
 import { SettingsProvider } from "./features/settings/SettingsProvider";
+import { settingsDialogStore } from "./features/settings/settingsDialogStore";
 import {
   applyThemePreference,
   watchSystemTheme,
@@ -123,15 +124,15 @@ const bootstrap = async (): Promise<void> => {
     menuActionBus.publish(action);
   });
   // Route native menu actions to their targets (app-lifetime, like the
-  // subscription above). Navigation uses the hash directly — the router is
-  // a HashRouter and this runs outside the React tree.
+  // subscription above). Everything goes through React-free stores, so this
+  // can run outside the React tree.
   menuActionBus.subscribe((action) => {
     switch (action) {
       case "import":
         void importStore.openFromDialog();
         break;
       case "openSettings":
-        window.location.hash = "#/settings";
+        settingsDialogStore.open();
         break;
       case "showAbout":
         aboutStore.open();

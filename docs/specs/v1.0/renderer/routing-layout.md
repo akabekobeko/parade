@@ -15,10 +15,10 @@ React Router v8 の HashRouter を使用します (file:// ロードのため。
 | `/albums` | Album ビュー | フィルター状態は URL に持たず state + settings 永続化 |
 | `/playlists` | Playlist ビュー (未選択状態) | |
 | `/playlists/:playlistId` | Playlist ビュー (選択済み) | 静的・動的とも。id は `p<id>` / `s<id>` で種別を区別 |
-| `/settings` | 設定画面 | モーダルではなくルートにする (将来の項目増加に備える) |
 
 - 選択状態をルートに載せることで、「アーティストを選ぶ」「プレイリストを開く」がブラウザーバック相当 (mod+[ 等) で戻れるようになります。audio-player は選択状態が Context のみで、ルーティングが実質機能していませんでした
 - 再生状態・カレントキューはルートと独立です。画面遷移しても再生は継続します
+- 設定画面はルートではなくモーダル ダイアログ (`SettingsDialog`、AppLayout に常設、開閉は React 外ストア `settingsDialogStore`) です。v1.0 では「将来の項目増加に備える」として `/settings` ルートにしていましたが、ページだと元のビューへ戻る操作 (mod+[ かサイドバーのタブの選び直し) が必要で面倒なため、2026-10-25 にダイアログへ変更しました (issue #396)。項目が増えた場合は曲情報 / アルバム情報ダイアログと同じ `DialogTabList` のタブで分けます。ツールバーの Settings ボタンとアプリケーション メニューの Settings… のどちらもこのストアを開きます。ダイアログ内の Import ボタンはインポートのモーダル ダイアログと重ならないよう、設定ダイアログを閉じてからインポートを始めます
 
 ## ウィンドウとタイトルバー
 
@@ -86,13 +86,13 @@ VS Code / Slack のクロスプラットフォーム UI と、macOS 版 Apple Mu
 
 **コンテンツ領域側** — 右端に、ビューごとの曲絞り込みテキストボックスを置きます ([各ビュー仕様](../features/))。右の余白は `--content-toolbar-inset-right` で、macOS では小さな余白 (`0.375rem`)、Windows / Linux では WCO セーフエリア + 1 文字分 (`1rem`) の余白を取ります。
 
-- Artists / Albums / Playlists の各ルートで表示し、Settings では非表示
+- Artists / Albums / Playlists の各ルートで表示します (ルートはこの 3 セクションだけで、それ以外のパスは `/artists` へリダイレクト)
 - 絞り込みテキストは `trackFilterStore` (React 外ストア、セクション別・非永続) が持ち、draft → applied を 200ms デバウンスして各ビューが `useSyncExternalStore` で読みます
 - Artist ビュー: 選択中アーティストの曲をタイトルで絞り込み、一致曲を含まないアルバムは非表示
 - Album ビュー: `AlbumFilter.musicTitle` として SQL WHERE に合流し、一致曲を含むアルバムだけをグリッドに表示。下段の曲リストも同じテキストで絞り込み
 - Playlist ビュー: 選択中プレイリストの曲をタイトルで絞り込み。絞り込み中は並べ替えドラッグを無効化 (行番号は元の並び順を維持)
 
-**最後に表示したビューとセクションごとの選択の復元** — 表示中のセクション (Artists / Albums / Playlists) と、Artists / Playlists それぞれの最後のサイドバー選択 (選択中アーティスト・選択中プレイリスト) を `lastViewStore` (React 外ストア) が持ち、変更のたびに `AppSettings.lastView` (`{ section, artist?, playlist? }`) へ永続化します。サイドバーのタブはこのストアを参照して各セクションの最後の選択へリンクするため、タブを行き来しても選択が保たれます。記録はルート変更を監視する `LastViewRecorder` (`/settings` は対象外、セクションのルート表示はその選択のクリア)、起動時の復元はブートストラップの `restoreLastView` が存在確認のうえストアを seed し `createRoot` 前に hash を設定して行うため、既定ルートが一瞬表示されることはありません。hash は `location.hash` への代入ではなく `history.replaceState` で設定し、ユーザー操作のない起動時に履歴項目を追加しません (2026-10-03 追記、issue #270)。選択対象のアーティスト・プレイリストが消えていた場合はその選択だけを落とします。Albums のサイドバー条件は従来どおり `albumFilter` として別途永続化されます。
+**最後に表示したビューとセクションごとの選択の復元** — 表示中のセクション (Artists / Albums / Playlists) と、Artists / Playlists それぞれの最後のサイドバー選択 (選択中アーティスト・選択中プレイリスト) を `lastViewStore` (React 外ストア) が持ち、変更のたびに `AppSettings.lastView` (`{ section, artist?, playlist? }`) へ永続化します。サイドバーのタブはこのストアを参照して各セクションの最後の選択へリンクするため、タブを行き来しても選択が保たれます。記録はルート変更を監視する `LastViewRecorder` (セクションのルート表示はその選択のクリア)、起動時の復元はブートストラップの `restoreLastView` が存在確認のうえストアを seed し `createRoot` 前に hash を設定して行うため、既定ルートが一瞬表示されることはありません。hash は `location.hash` への代入ではなく `history.replaceState` で設定し、ユーザー操作のない起動時に履歴項目を追加しません (2026-10-03 追記、issue #270)。選択対象のアーティスト・プレイリストが消えていた場合はその選択だけを落とします。Albums のサイドバー条件は従来どおり `albumFilter` として別途永続化されます。
 
 **サイドバー開閉・幅** — 開閉状態と幅は `sidebarStore` (React 外ストア) が持ち、変更のたびに `AppSettings.sidebar` へ永続化して再起動時に復元します (幅の保存はドラッグ確定時 = `onLayoutChanged`)。閉じている間はサイドバーのアイコンクラスターがコンテンツ領域ツールバーの左端に移り、クラスターの幅・配置を保存済みサイドバー幅と揃えることで、**開閉を操作しても各アイコンの画面上の位置が変わりません**。
 

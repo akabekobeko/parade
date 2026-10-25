@@ -167,11 +167,10 @@ src/renderer/
 │   │   └── components/          # このページ専用のコンポーネント
 │   │       └── <Name>/          #   <Name>.tsx + use<Name>.ts + *.test.ts をコロケーション
 │   ├── albums/
-│   ├── playlists/
-│   └── settings/
+│   └── playlists/
 ├── components/                  # 複数ページから参照されるコンポーネントのみ
 │   ├── ui/                      # shadcn 生成プリミティブ
-│   └── app/<Name>/              # AppLayout / Sidebar / PlayerBar / MusicRow (曲リスト行共通) など
+│   └── app/<Name>/              # AppLayout / Sidebar / PlayerBar / SettingsDialog / MusicRow (曲リスト行共通) など
 ├── features/                    # 横断的な機能・ロジックのみ
 │   ├── player/                  # PlayerProvider, reducer, useAudioPlayer, キュー導出
 │   ├── audio/                   # オーディオエンジン (React 非依存)

@@ -1,7 +1,6 @@
 import { FolderInput } from "lucide-react";
-import { FormSection } from "@/components/app/FormSection/FormSection";
-import { Stack } from "@/components/app/stacks";
 import { Button } from "@/components/ui/button";
+import { DialogBody } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -10,25 +9,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useT } from "@/features/i18n/useT";
-import { importStore } from "@/features/import/importStore/importStore";
 import { formatTime } from "@/libs/formatTime";
+import { FormSection } from "../FormSection/FormSection";
 import { SettingsRow } from "./SettingsRow";
 import { StatRow } from "./StatRow";
-import { usePageContent } from "./usePageContent";
+import { useSettingsDialogContent } from "./useSettingsDialogContent";
 
 /**
- * Settings view content (`/settings`)
+ * Body of the settings dialog
  * (`docs/specs/v1.0/architecture/process-model.md`): theme, language, and
- * the library section (stats + import entrance).
+ * the library section (stats + import entrance). Scrolls inside the popup
+ * when the window is too short for it.
  */
-export const PageContent = () => {
+export const SettingsDialogContent = () => {
   const t = useT();
-  const { settings, statsState, setTheme, setLocale } = usePageContent();
+  const { settings, statsState, setTheme, setLocale, startImport } =
+    useSettingsDialogContent();
 
   return (
-    <Stack className="max-w-2xl gap-6 p-6">
-      <h1 className="font-semibold text-lg">{t("settings.title")}</h1>
-
+    <DialogBody className="gap-6 overflow-y-auto">
       <FormSection label={t("settings.appearance")}>
         <SettingsRow label={t("settings.theme")}>
           <Select
@@ -55,7 +54,7 @@ export const PageContent = () => {
         <SettingsRow label={t("settings.language")}>
           <Select
             value={settings.locale ?? "system"}
-            // Language names are intentionally not translated — each locale
+            // Language names are intentionally not translated: each locale
             // is shown in its own language so it stays recognisable.
             items={{
               system: t("settings.language.system"),
@@ -105,11 +104,7 @@ export const PageContent = () => {
           </dl>
         )}
         <div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => void importStore.openFromDialog()}
-          >
+          <Button variant="outline" size="sm" onClick={startImport}>
             <FolderInput /> {t("sidebar.import")}
           </Button>
         </div>
@@ -117,6 +112,6 @@ export const PageContent = () => {
           {t("settings.library.removeHint")}
         </p>
       </FormSection>
-    </Stack>
+    </DialogBody>
   );
 };

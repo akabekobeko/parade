@@ -9,6 +9,6 @@ it("maps a pathname to its section by prefix", () => {
 });
 
 it("yields null outside the main sections", () => {
-  expect(sectionOf("/settings")).toBeNull();
+  expect(sectionOf("/nowhere")).toBeNull();
   expect(sectionOf("/")).toBeNull();
 });
