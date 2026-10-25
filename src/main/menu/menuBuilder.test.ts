@@ -16,14 +16,28 @@ const build = (
   locale: "en" | "ja" = "en",
   onAction: (action: MenuAction) => void = () => {},
   state: MenuStateSnapshot = IDLE_STATE,
+  devTools = true,
 ) =>
   buildMenuTemplate({
     platform,
     locale,
     appName: "Parade",
     state,
+    devTools,
     onAction,
   });
+
+/** Labels (or the type of a separator) of a submenu found by its label. */
+const submenuLabelsOf = (
+  items: readonly MenuItemConstructorOptions[],
+  label: string,
+): string[] => {
+  const submenu = findItem(items, label)?.submenu;
+  expect(Array.isArray(submenu), `submenu of "${label}"`).toBe(true);
+  return (submenu as MenuItemConstructorOptions[]).map(
+    (item) => item.label ?? item.type ?? "",
+  );
+};
 
 /** Depth-first search for an item by label. */
 const findItem = (
@@ -177,11 +191,122 @@ it("places Controls between View and Window", () => {
   expect(labels[controls + 1]).toBe("Window");
 });
 
-it("includes the standard edit / view / window role menus", () => {
-  const roles = build("win32").map((item) => item.role);
-  expect(roles).toContain("editMenu");
-  expect(roles).toContain("viewMenu");
-  expect(roles).toContain("windowMenu");
+it("spells out the Edit menu like Electron's editMenu role, per platform", () => {
+  expect(submenuLabelsOf(build("darwin"), "Edit")).toEqual([
+    "Undo",
+    "Redo",
+    "separator",
+    "Cut",
+    "Copy",
+    "Paste",
+    "Paste and Match Style",
+    "Delete",
+    "Select All",
+    "separator",
+    "Speech",
+  ]);
+  expect(submenuLabelsOf(build("win32"), "Edit")).toEqual([
+    "Undo",
+    "Redo",
+    "separator",
+    "Cut",
+    "Copy",
+    "Paste",
+    "Delete",
+    "separator",
+    "Select All",
+  ]);
+});
+
+it("keeps the role on every standard item so the behaviour stays native", () => {
+  const template = build("darwin");
+  expect(findItem(template, "Undo")?.role).toBe("undo");
+  expect(findItem(template, "Paste and Match Style")?.role).toBe(
+    "pasteAndMatchStyle",
+  );
+  expect(findItem(template, "Zoom In")?.role).toBe("zoomIn");
+  expect(findItem(template, "Toggle Full Screen")?.role).toBe(
+    "togglefullscreen",
+  );
+  expect(findItem(template, "Minimize")?.role).toBe("minimize");
+  expect(findItem(template, "Bring All to Front")?.role).toBe("front");
+  expect(findItem(template, "Hide Parade")?.role).toBe("hide");
+  expect(findItem(template, "Quit Parade")?.role).toBe("quit");
+  expect(findItem(template, "Close Window")?.role).toBe("close");
+  expect(findItem(build("win32"), "Exit")?.role).toBe("quit");
+  // Linux keeps the GTK wording, like Electron's own quit role.
+  expect(findItem(build("linux"), "Quit")?.role).toBe("quit");
+  expect(findItem(build("linux"), "Exit")).toBeUndefined();
+});
+
+it("translates the standard items with the app locale, not the OS", () => {
+  const template = build("darwin", "ja");
+  expect(findItem(template, "取り消す")?.role).toBe("undo");
+  expect(findItem(template, "ペースト")?.role).toBe("paste");
+  expect(findItem(template, "拡大")?.role).toBe("zoomIn");
+  expect(findItem(template, "しまう")?.role).toBe("minimize");
+  expect(findItem(template, "Parade を終了")?.role).toBe("quit");
+  expect(submenuLabelsOf(template, "表示")).not.toContain("Reload");
+
+  const win = build("win32", "ja");
+  expect(submenuLabelsOf(win, "編集")).toEqual([
+    "取り消す",
+    "やり直す",
+    "separator",
+    "カット",
+    "コピー",
+    "ペースト",
+    "削除",
+    "separator",
+    "すべてを選択",
+  ]);
+  expect(submenuLabelsOf(win, "ウィンドウ")).toEqual([
+    "しまう",
+    "拡大 / 縮小",
+    "ウィンドウを閉じる",
+  ]);
+  expect(findItem(win, "終了")?.role).toBe("quit");
+});
+
+it("includes Reload / Force Reload / Toggle Developer Tools only when devTools is on", () => {
+  expect(submenuLabelsOf(build("darwin"), "View")).toEqual([
+    "Reload",
+    "Force Reload",
+    "Toggle Developer Tools",
+    "separator",
+    "Actual Size",
+    "Zoom In",
+    "Zoom Out",
+    "separator",
+    "Toggle Full Screen",
+  ]);
+  const release = build("darwin", "en", () => {}, IDLE_STATE, false);
+  expect(submenuLabelsOf(release, "View")).toEqual([
+    "Actual Size",
+    "Zoom In",
+    "Zoom Out",
+    "separator",
+    "Toggle Full Screen",
+  ]);
+  expect(findItem(release, "Reload")).toBeUndefined();
+  expect(findItem(release, "Force Reload")).toBeUndefined();
+  expect(findItem(release, "Toggle Developer Tools")).toBeUndefined();
+});
+
+it("marks Window as the macOS window menu and closes on other platforms", () => {
+  const mac = findItem(build("darwin"), "Window");
+  expect(mac?.role).toBe("window");
+  expect(submenuLabelsOf(build("darwin"), "Window")).toEqual([
+    "Minimize",
+    "Zoom",
+    "separator",
+    "Bring All to Front",
+  ]);
+  expect(submenuLabelsOf(build("win32"), "Window")).toEqual([
+    "Minimize",
+    "Zoom",
+    "Close Window",
+  ]);
 });
 
 it("localises the labels from the shared dictionaries", () => {
