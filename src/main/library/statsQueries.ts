@@ -3,7 +3,7 @@ import { libraryStatsSchema } from "../../shared/schemas/libraryStatsSchema";
 import type { LibraryStats } from "../ipc/types";
 
 /**
- * Library-wide counters for the settings page (`mp:library:getStats`).
+ * Library-wide counters for the settings dialog (`mp:library:getStats`).
  * Artists count by the display artist (`album_artist` falling back to
  * `artist`) and albums by the identity key `(display artist, album)` — the
  * same groupings the Artist / Album views use.

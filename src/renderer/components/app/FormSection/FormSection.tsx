@@ -16,7 +16,7 @@ type Props = {
 
 /**
  * One titled block of a form: a small muted heading over a rule, then the
- * rows. Shared by the settings page and the playlist info dialog
+ * rows. Shared by the settings dialog and the playlist info dialog
  * (`docs/specs/v1.6/features/playlist-info-dialog.md`) so their sections
  * look the same.
  */

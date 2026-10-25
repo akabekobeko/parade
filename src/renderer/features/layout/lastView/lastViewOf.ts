@@ -24,8 +24,8 @@ const decodeArtistName = (segment: string): string | null => {
 /**
  * Derive the persisted {@link LastView} from a router pathname.
  *
- * Only the three main sections count; `/settings` and unknown paths yield
- * `null` so they never overwrite the remembered view.
+ * Only the three main sections count; unknown paths yield `null` so they
+ * never overwrite the remembered view.
  *
  * @param pathname - Current `location.pathname` (hash part without `#`).
  * @returns The view to persist, or `null` when the path is not a main view.

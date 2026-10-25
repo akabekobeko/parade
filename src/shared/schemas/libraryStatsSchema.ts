@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Library-wide counters shown by the settings page's library section.
+ * Library-wide counters shown by the settings dialog's library section.
  * `getLibraryStats` parses its aggregate row with this schema.
  */
 export const libraryStatsSchema = z.object({

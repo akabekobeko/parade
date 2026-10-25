@@ -1,10 +1,10 @@
 import { FolderInput, Menu, PanelLeft, Settings } from "lucide-react";
 import type { CSSProperties } from "react";
-import { NavLink } from "react-router";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useT } from "@/features/i18n/useT";
 import { importStore } from "@/features/import/importStore/importStore";
 import { sidebarStore } from "@/features/layout/sidebarStore";
+import { settingsDialogStore } from "@/features/settings/settingsDialogStore";
 import { getUiPlatform } from "@/libs/platform";
 import { cn } from "@/libs/utils";
 import { ClusterButton } from "./ClusterButton";
@@ -80,11 +80,7 @@ export const ToolbarIconCluster = ({ className, style }: Props) => {
         </ClusterButton>
         <ClusterButton
           label={t("settings.title")}
-          // The link is not a <button>; tell Base UI so it applies the
-          // non-native semantics (role="button", key handling) instead of
-          // warning about the missing native element.
-          nativeButton={false}
-          render={<NavLink to="/settings" />}
+          onClick={() => settingsDialogStore.open()}
         >
           <Settings />
         </ClusterButton>

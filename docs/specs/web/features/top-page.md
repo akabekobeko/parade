@@ -27,7 +27,7 @@
 | Edit and complete metadata | 曲情報ダイアログでタイトル、アーティスト、アートワークなどを編集し、ファイルへ書き戻す (v1.1)。複数の曲をまとめて編集できる。MusicBrainz から不足している情報とアートワークを取得して補完する (v1.2) | `music-info` |
 | Play your way | 再生キュー、シャッフル、リピート (アルバム全体と 1 曲。v1.5)、OS のメディア キー対応 (MediaSession)。対応形式: mp3, flac, m4a/mp4, ogg/opus, wav, aiff, wma, ape | `player` (プレーヤー バーとキュー ポップオーバー。リピートを `all` にして点灯した状態) |
 | Light and dark | OS に追従するダーク / ライト テーマ | `artists-light` |
-| English and Japanese | 設定ページで言語を English / 日本語 / System から選べる。テーマも同じ設定ページで切り替える。スクリーンショットは英語 UI だけなので、日本語対応はここで明記する | `settings` |
+| English and Japanese | 設定ダイアログで言語を English / 日本語 / System から選べる。テーマも同じ設定ダイアログで切り替える。スクリーンショットは英語 UI だけなので、日本語対応はここで明記する | `settings` |
 
 - MusicBrainz 取得の画面はスクリーンショットを撮らず、文章だけで説明する。デモ用データのアーティストは架空のため MusicBrainz に一致せず、結果の画面を再現できない ([スクリーンショット](screenshots.md))。説明文で MusicBrainz と Cover Art Archive の名前を出し、フッターのクレジットと対応させる ([ページ構成](pages.md))
 - 対応プラットフォームの一覧と対応形式は、ヒーローとこのセクションに分けて置く

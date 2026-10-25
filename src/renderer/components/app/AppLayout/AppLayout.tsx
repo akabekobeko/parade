@@ -19,6 +19,7 @@ import { MusicInfoDialog } from "../InfoDialog/MusicInfoDialog/MusicInfoDialog";
 import { PlaylistInfoDialog } from "../InfoDialog/PlaylistInfoDialog/PlaylistInfoDialog";
 import { LibraryRemoveDialog } from "../LibraryRemoveDialog/LibraryRemoveDialog";
 import { PlayerBar } from "../PlayerBar/PlayerBar";
+import { SettingsDialog } from "../SettingsDialog/SettingsDialog";
 import { Sidebar } from "../Sidebar/Sidebar";
 import { Toaster } from "../Toaster/Toaster";
 import { ContentToolbar } from "../Toolbar/ContentToolbar";
@@ -77,6 +78,7 @@ export const AppLayout = () => {
       <AlbumInfoDialog />
       <PlaylistInfoDialog />
       <LibraryRemoveDialog />
+      <SettingsDialog />
       <AboutDialog />
       <Toaster />
     </div>
