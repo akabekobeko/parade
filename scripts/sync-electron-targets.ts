@@ -86,7 +86,7 @@ function updateMiseToml(root: string, newVersion: string): void {
 function syncElectronTargets(): void {
   const root = resolve(import.meta.dirname, "..");
 
-  const { esTarget, chromeMajor, nodeMajor, nodeVersion } =
+  const { esYear, esTarget, chromeMajor, nodeMajor, nodeVersion } =
     getElectronTargetEnv();
 
   const chromeTarget = `chrome${chromeMajor}`;
@@ -101,7 +101,7 @@ function syncElectronTargets(): void {
   );
 
   // TypeScript `module` only accepts up to "ES2022"; for higher ES targets use "ESNext".
-  const moduleTarget = esTarget > "ES2022" ? "ESNext" : esTarget;
+  const moduleTarget = esYear > 2022 ? "ESNext" : esTarget;
 
   console.log("\ntsconfig:");
   updateTsconfig(root, "tsconfig.node.json", esTarget, moduleTarget);

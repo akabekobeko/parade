@@ -14,14 +14,14 @@
     "og:render": "node scripts/renderOgImages.ts"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10",
+    "@astrojs/check": "^0.9.12",
     "@astrojs/sitemap": "^3.7.4",
     "@fontsource-variable/inter": "^5.3.0",
     "@tailwindcss/vite": "^4.3.3",
-    "astro": "^7.4.0",
-    "lucide-static": "^1.59.0",
+    "astro": "^7.4.4",
+    "lucide-static": "^1.64.0",
     "prettier": "^3.9.10",
-    "prettier-plugin-astro": "^1.1.1",
+    "prettier-plugin-astro": "^1.1.2",
     "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.0",
