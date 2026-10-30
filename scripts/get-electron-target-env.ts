@@ -20,31 +20,34 @@ function queryElectronVersion(key: string): string {
 }
 
 /**
- * Map a Chrome major version to the highest ES target it fully supports.
+ * Map a Chrome major version to the highest ES edition it fully supports.
  *
  * @param major - Chrome major version.
- * @returns ES target, e.g. `"ES2024"`.
+ * @returns ES edition year, e.g. `2024`.
  */
-function chromeToEsTarget(major: number): string {
-  if (major >= 133) return "ES2024";
-  if (major >= 117) return "ES2023";
-  return "ES2022";
+function chromeToEsYear(major: number): number {
+  if (major >= 133) return 2024;
+  if (major >= 117) return 2023;
+  return 2022;
 }
 
 /**
- * Map a Node.js major version to the highest ES target it fully supports.
+ * Map a Node.js major version to the highest ES edition it fully supports.
  *
  * @param major - Node.js major version.
- * @returns ES target, e.g. `"ES2024"`.
+ * @returns ES edition year, e.g. `2024`.
  */
-function nodeToEsTarget(major: number): string {
-  if (major >= 22) return "ES2024";
-  if (major >= 20) return "ES2023";
-  return "ES2022";
+function nodeToEsYear(major: number): number {
+  if (major >= 22) return 2024;
+  if (major >= 20) return 2023;
+  return 2022;
 }
 
 /** Target environment derived from the installed Electron. */
 export type ElectronTargetEnv = {
+  /** ES edition year shared by Chrome and Node, e.g. `2024`. */
+  esYear: number;
+  /** ES target string for tsconfig, e.g. `"ES2024"`. */
   esTarget: string;
   chromeMajor: number;
   nodeMajor: number;
@@ -64,9 +67,13 @@ export function getElectronTargetEnv(): ElectronTargetEnv {
   const nodeVersion = queryElectronVersion("node");
   const chromeMajor = Number(chromeVersion.split(".")[0]);
   const nodeMajor = Number(nodeVersion.split(".")[0]);
-  const chromeEs = chromeToEsTarget(chromeMajor);
-  const nodeEs = nodeToEsTarget(nodeMajor);
   // Use the lower of the two to ensure compatibility
-  const esTarget = chromeEs < nodeEs ? chromeEs : nodeEs;
-  return { esTarget, chromeMajor, nodeMajor, nodeVersion };
+  const esYear = Math.min(chromeToEsYear(chromeMajor), nodeToEsYear(nodeMajor));
+  return {
+    esYear,
+    esTarget: `ES${esYear}`,
+    chromeMajor,
+    nodeMajor,
+    nodeVersion,
+  };
 }
