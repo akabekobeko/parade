@@ -11,6 +11,7 @@
 export const IpcKeys = {
   // Renderer → Main (invoke)
   GetVersions: "mp:app:getVersions",
+  OpenExternal: "mp:app:openExternal",
   OpenImportTargets: "mp:dialog:openImportTargets",
   ExpandPaths: "mp:dnd:expandPaths",
   ImportMusics: "mp:library:import",

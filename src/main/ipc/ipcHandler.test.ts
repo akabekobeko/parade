@@ -18,6 +18,10 @@ it("registers every implemented invoke handler", () => {
     expect.any(Function),
   );
   expect(handle).toHaveBeenCalledWith(
+    IpcKeys.OpenExternal,
+    expect.any(Function),
+  );
+  expect(handle).toHaveBeenCalledWith(
     IpcKeys.GetSettings,
     expect.any(Function),
   );

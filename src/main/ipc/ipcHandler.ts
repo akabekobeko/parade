@@ -18,6 +18,7 @@ import { onCancelImport, onImportMusics } from "./onImportMusics";
 import { onLookupMusic } from "./onLookupMusic";
 import { onMenuPopup } from "./onMenuPopup";
 import { onMenuSetState } from "./onMenuSetState";
+import { onOpenExternal } from "./onOpenExternal";
 import { onOpenImportTargets } from "./onOpenImportTargets";
 import { onPlaylistCreate } from "./onPlaylistCreate";
 import { onPlaylistGetMusics } from "./onPlaylistGetMusics";
@@ -60,6 +61,7 @@ export const initializeIpcEvents = (): void => {
 
   isInitialized = true;
   ipcMain.handle(IpcKeys.GetVersions, onGetVersions);
+  ipcMain.handle(IpcKeys.OpenExternal, onOpenExternal);
   ipcMain.handle(IpcKeys.GetSettings, onGetSettings);
   ipcMain.handle(IpcKeys.SetSettings, onSetSettings);
   ipcMain.handle(IpcKeys.OpenImportTargets, onOpenImportTargets);
@@ -108,6 +110,7 @@ export const releaseIpcEvents = (): void => {
   }
 
   ipcMain.removeHandler(IpcKeys.GetVersions);
+  ipcMain.removeHandler(IpcKeys.OpenExternal);
   ipcMain.removeHandler(IpcKeys.GetSettings);
   ipcMain.removeHandler(IpcKeys.SetSettings);
   ipcMain.removeHandler(IpcKeys.OpenImportTargets);

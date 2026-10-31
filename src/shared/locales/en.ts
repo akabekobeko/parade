@@ -237,6 +237,13 @@ export const en: Dictionary = {
   "menu.zoom": "Zoom",
   "menu.front": "Bring All to Front",
   "about.version": "Version {version}",
+  "about.runtime": "Runtime",
+  "about.musicData": "Music data",
+  "about.musicData.description":
+    "Missing song details and cover art are fetched from MusicBrainz and the Cover Art Archive.",
+  "about.links": "Links",
+  "about.links.website": "Official website",
+  "about.links.github": "GitHub project",
   "menu.rename": "Rename",
   "menu.removeFromPlaylist": "Remove from playlist",
   "common.cancel": "Cancel",

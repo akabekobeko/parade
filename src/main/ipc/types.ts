@@ -713,6 +713,12 @@ export type SetSettingsRequest = {
 // App / dialog / dnd / menu / log
 // ---------------------------------------------------------------------------
 
+/** Request of `mp:app:openExternal`: a link to open in the default browser. */
+export type OpenExternalRequest = {
+  /** Absolute `https:` URL; any other scheme is refused by the handler. */
+  readonly url: string;
+};
+
 /** Runtime versions reported by `mp:app:getVersions` (about dialog). */
 export type Versions = {
   /** The app's own `package.json` version. */
@@ -945,6 +951,10 @@ export type MpBridge = {
   readonly app: {
     /** Resolve the runtime {@link Versions} report. */
     readonly getVersions: () => Promise<IpcResult<Versions>>;
+    /** Open an `https:` link in the default browser. */
+    readonly openExternal: (
+      request: OpenExternalRequest,
+    ) => Promise<IpcResult<void>>;
   };
   /** Native dialog wrappers. */
   readonly dialog: {

@@ -12,9 +12,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // `productName`, so the same value is injected into the main process to make
 // unpackaged runs share that directory (see README "Development userData
 // Directory").
+// The version is injected the same way: `app.getVersion()` reads package.json
+// from the app path, and an unpackaged run (`electron dist/main/main.js`)
+// has none there, so Electron reports its own version instead.
 const pkg = JSON.parse(
   readFileSync(path.join(__dirname, "../../package.json"), "utf-8"),
-) as { name: string; productName?: string };
+) as { name: string; version: string; productName?: string };
 
 // `import.meta.env.DEV` follows NODE_ENV, which Vite reads from the
 // environment (`vite build` only defaults it to production when unset). Derive
@@ -30,6 +33,7 @@ export default defineConfig(({ mode }) => {
     root: __dirname,
     define: {
       __APP_PRODUCT_NAME__: JSON.stringify(pkg.productName ?? pkg.name),
+      __APP_VERSION__: JSON.stringify(pkg.version),
     },
     build: {
       target: "node24",
