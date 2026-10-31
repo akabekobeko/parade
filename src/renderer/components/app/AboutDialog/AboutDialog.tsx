@@ -1,21 +1,37 @@
 import { useSyncExternalStore } from "react";
 import {
   Dialog,
-  DialogBody,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { aboutStore } from "@/features/about/aboutStore";
+import { useLocale } from "@/features/i18n/useLocale";
 import { useT } from "@/features/i18n/useT";
+import { AboutDialogContent } from "./AboutDialogContent";
 
 /**
- * About dialog (menu → About), mounted once in the AppLayout. Shows the
- * runtime versions reported by `mp:app:getVersions`.
+ * Hand a link to the default browser. A refusal (the main process accepts
+ * `https:` only) or a shell failure has no UI; it is logged with the main
+ * process's reason so a dead link can be traced.
+ */
+const openExternal = (url: string): void => {
+  void window.mp.app.openExternal({ url }).then((result) => {
+    if (!result.ok) {
+      console.warn(`[about] could not open ${url}: ${result.error.message}`);
+    }
+  });
+};
+
+/**
+ * About dialog (menu → About), mounted once in the AppLayout. Shows the app
+ * version, the runtime versions reported by `mp:app:getVersions`, the links
+ * to the website and the GitHub project, and the music data credits.
  */
 export const AboutDialog = () => {
   const t = useT();
+  const locale = useLocale();
   const state = useSyncExternalStore(
     aboutStore.subscribe,
     aboutStore.getSnapshot,
@@ -29,7 +45,7 @@ export const AboutDialog = () => {
         }
       }}
     >
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{t("app.name")}</DialogTitle>
           {state.open && state.versions !== null && (
@@ -38,23 +54,14 @@ export const AboutDialog = () => {
             </DialogDescription>
           )}
         </DialogHeader>
-        <DialogBody>
-          {state.open && state.error !== null && (
-            <p className="break-all text-destructive text-sm">
-              {t("library.loadFailed", { message: state.error.message })}
-            </p>
-          )}
-          {state.open && state.versions !== null && (
-            <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-sm">
-              <dt className="text-muted-foreground">Electron</dt>
-              <dd className="tabular-nums">{state.versions.electron}</dd>
-              <dt className="text-muted-foreground">Chromium</dt>
-              <dd className="tabular-nums">{state.versions.chrome}</dd>
-              <dt className="text-muted-foreground">Node.js</dt>
-              <dd className="tabular-nums">{state.versions.node}</dd>
-            </dl>
-          )}
-        </DialogBody>
+        {state.open && (
+          <AboutDialogContent
+            versions={state.versions}
+            error={state.error}
+            locale={locale}
+            onOpenExternal={openExternal}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

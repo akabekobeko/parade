@@ -237,6 +237,13 @@ export const ja: Dictionary = {
   "menu.zoom": "拡大 / 縮小",
   "menu.front": "すべてを手前に移動",
   "about.version": "バージョン {version}",
+  "about.runtime": "実行環境",
+  "about.musicData": "曲情報の取得",
+  "about.musicData.description":
+    "不足している曲情報とカバー アートは MusicBrainz と Cover Art Archive から取得しています。",
+  "about.links": "リンク",
+  "about.links.website": "公式サイト",
+  "about.links.github": "GitHub プロジェクト",
   "menu.rename": "名前を変更",
   "menu.removeFromPlaylist": "プレイリストから削除",
   "common.cancel": "キャンセル",

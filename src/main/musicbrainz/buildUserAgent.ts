@@ -8,7 +8,7 @@
  * MusicBrainz would want to reach is the app's maintainer, not the user), so
  * there is no settings entry for it.
  *
- * @param version - The app version (`app.getVersion()`).
+ * @param version - The app version (`APP_VERSION` from `src/main/appVersion.ts`).
  * @returns The user agent string, e.g. `Parade/1.2.0 ( https://... )`.
  */
 export const buildUserAgent = (version: string): string =>

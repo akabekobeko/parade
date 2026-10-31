@@ -9,6 +9,7 @@ import { applyTitleBarOverlayTheme } from "./ipc/applyTitleBarOverlayTheme";
 import { initializeIpcEvents } from "./ipc/ipcHandler";
 import { pushFullScreenState } from "./ipc/pushFullScreenState";
 import { installApplicationMenu } from "./menu/applicationMenu";
+import { openExternalHttps } from "./openExternalHttps";
 // Importing also registers the privileged schemes (must run before `ready`).
 import { registerProtocolHandlers } from "./protocol/registerProtocol";
 import { resolveUnpackagedUserDataPath } from "./resolveUnpackagedUserDataPath";
@@ -116,6 +117,27 @@ function createWindow(): void {
   mainWindow.on("enter-full-screen", pushFullScreen);
   mainWindow.on("leave-full-screen", pushFullScreen);
   mainWindow.webContents.on("did-finish-load", pushFullScreen);
+
+  // The renderer never opens windows or leaves its page. Links it renders
+  // (about dialog) go through `mp:app:openExternal` on click; this covers the other activation paths (middle click, drag,
+  // `window.open`) that would otherwise spawn a second BrowserWindow or
+  // navigate the app away, and routes an https target to the browser.
+  const openOutside = (url: string): void => {
+    openExternalHttps(url).catch((error: unknown) => {
+      console.warn(`[main] refused to open ${url}:`, error);
+    });
+  };
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    openOutside(url);
+    return { action: "deny" };
+  });
+  mainWindow.webContents.on("will-navigate", (event, url) => {
+    // A reload targets the page's own URL (the dev server's full reloads
+    // use `location.reload()`); everything else leaves the app.
+    if (url === mainWindow.webContents.getURL()) return;
+    event.preventDefault();
+    openOutside(url);
+  });
 
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);

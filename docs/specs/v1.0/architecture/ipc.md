@@ -58,7 +58,8 @@ Renderer は `import type { Music } from "@mp/ipc"` と書けます。`import ty
 
 | チャネル | Request → Response | 用途 |
 | --- | --- | --- |
-| `mp:app:getVersions` | `void → Versions` | about 表示用 |
+| `mp:app:getVersions` | `void → Versions` | about 表示用。`app` はビルド時に Vite `define` で埋め込んだ package.json の `version` (`app.getVersion()` は未パッケージ実行で Electron 自身のバージョンを返すため使わない) |
+| `mp:app:openExternal` | `{ url } → void` | about ダイアログのリンク (公式サイト、GitHub、MusicBrainz、Cover Art Archive) を既定のブラウザーで開く。`https:` 以外は拒否 |
 | `mp:dialog:openImportTargets` | `void → { paths: string[] }` | ファイル・フォルダー選択ダイアログ |
 | `mp:dnd:expandPaths` | `{ paths } → { files: string[] }` | D&D されたパスの再帰展開 (深さ上限・拡張子フィルターつき) |
 | `mp:library:import` | `{ paths } → ImportSummary` | インポート実行。進捗は push で通知 |
@@ -104,7 +105,7 @@ audio-player には push チャネルが 1 本もなく、インポート進捗�
 
 ```ts
 contextBridge.exposeInMainWorld("mp", {
-  app: { getVersions },
+  app: { getVersions, openExternal },
   dialog: { openImportTargets },
   dnd: {
     expandPaths,

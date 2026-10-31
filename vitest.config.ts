@@ -7,6 +7,11 @@ import { defineConfig } from "vitest/config";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  define: {
+    // Build-time constant of src/main/vite.config.ts (the app version shown
+    // in the about dialog); tests see a fixed placeholder.
+    __APP_VERSION__: JSON.stringify("0.0.0-test"),
+  },
   resolve: {
     alias: {
       // Electron 42+ fetches its binary lazily on first bin launch, so importing

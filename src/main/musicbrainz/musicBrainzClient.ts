@@ -1,4 +1,4 @@
-import { app } from "electron";
+import { APP_VERSION } from "../appVersion";
 import { buildUserAgent } from "./buildUserAgent";
 import {
   DEFAULT_CLIENT_DEPS,
@@ -16,7 +16,7 @@ import {
  * build-time constant).
  */
 export const musicBrainzClient = new MusicBrainzClient(
-  buildUserAgent(app.getVersion()),
+  buildUserAgent(APP_VERSION),
   import.meta.env.DEV
     ? { ...DEFAULT_CLIENT_DEPS, log: (line) => console.info(line) }
     : DEFAULT_CLIENT_DEPS,

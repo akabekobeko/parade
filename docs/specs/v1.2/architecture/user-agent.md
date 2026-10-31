@@ -37,7 +37,7 @@ export const buildUserAgent = (version: string): string =>
   `Parade/${version} ( https://github.com/akabekobeko/parade )`;
 ```
 
-- `version` は `app.getVersion()` (package.json の `version`。about ダイアログと同じ値)
+- `version` は `src/main/appVersion.ts` の `APP_VERSION` (package.json の `version` をビルド時に Vite `define` で埋め込んだ値。about ダイアログと同じ)。`app.getVersion()` は未パッケージ実行 (`electron dist/main/main.js`) で Electron 自身のバージョンを返すため使わない
 - 連絡先はリポジトリー URL。issue を受け付けられ、メールアドレスを公開せずに済みます
 - Cover Art Archive へのリクエストにも同じ値を付けます
 - 開発時も同じ形式で送ります (`Parade/1.2.0` のように見えるだけで、識別上の問題はありません)

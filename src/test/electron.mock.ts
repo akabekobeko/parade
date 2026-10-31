@@ -66,6 +66,11 @@ export const protocol = {
   handle: noop,
 };
 
+/** Stub of Electron's `shell`. Tests spy on `openExternal`. */
+export const shell = {
+  openExternal: (): Promise<void> => Promise.resolve(),
+};
+
 /** Stub of Electron's `net`. Tests spy on `fetch` to assert delegation. */
 export const net = {
   fetch: (): Promise<Response> =>

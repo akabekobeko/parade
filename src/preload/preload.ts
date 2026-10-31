@@ -43,6 +43,8 @@ const subscribe = <T>(
 const buildBridge = (): MpBridge => ({
   app: {
     getVersions: () => ipcRenderer.invoke(IpcKeys.GetVersions),
+    openExternal: (request) =>
+      ipcRenderer.invoke(IpcKeys.OpenExternal, request),
   },
   dialog: {
     openImportTargets: () => ipcRenderer.invoke(IpcKeys.OpenImportTargets),

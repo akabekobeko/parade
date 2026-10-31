@@ -1,12 +1,12 @@
-import { app } from "electron";
+import { APP_VERSION } from "../appVersion";
 import type { IpcResult, Versions } from "./types";
 import { toIpcError } from "./utils/toIpcError";
 
 /**
  * Channel handler for `mp:app:getVersions`.
  *
- * Combines the app's own `package.json` version (`app.getVersion()`) with
- * `process.versions` for the about display.
+ * Combines the app's own version ({@link APP_VERSION}, a build-time
+ * constant) with `process.versions` for the about display.
  *
  * @param _ev - Electron event object (unused).
  * @returns A snapshot of the runtime stack versions.
@@ -18,7 +18,7 @@ export const onGetVersions = async (
     return {
       ok: true,
       value: {
-        app: app.getVersion(),
+        app: APP_VERSION,
         electron: process.versions.electron ?? "",
         chrome: process.versions.chrome ?? "",
         node: process.versions.node,
