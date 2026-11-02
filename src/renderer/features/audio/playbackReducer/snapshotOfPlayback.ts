@@ -15,6 +15,8 @@ export const snapshotOfPlayback = (
   currentTime: internal.pendingSeekTime ?? internal.currentTime,
   duration: internal.duration,
   volume: internal.volume,
+  rate: internal.rate,
+  preservesPitch: internal.preservesPitch,
   seeking: internal.pendingSeekTime !== null,
   error: internal.error,
 });

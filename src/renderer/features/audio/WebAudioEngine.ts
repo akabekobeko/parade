@@ -1,10 +1,11 @@
+import { clampPlaybackRate } from "../../../shared/clampPlaybackRate";
 import { clampVolume } from "./clampVolume";
 import { createInitialPlayback } from "./playbackReducer/createInitialPlayback";
 import { playbackSnapshotsEqual } from "./playbackReducer/playbackSnapshotsEqual";
 import { reducePlayback } from "./playbackReducer/reducePlayback";
 import { snapshotOfPlayback } from "./playbackReducer/snapshotOfPlayback";
 import type { InternalPlayback, PlaybackEvent } from "./playbackReducer/types";
-import type { PlaybackSnapshot } from "./types";
+import type { AudioEngineOptions, PlaybackSnapshot } from "./types";
 
 /** Interval of the position timer (also the `currentTime` throttle). */
 const TICK_INTERVAL_MS = 250;
@@ -58,10 +59,11 @@ export class WebAudioEngine {
    * constructor never throws for source problems.
    *
    * @param url - `media-stream://` URL of the audio file.
-   * @param options.volume - Initial volume (`[0, 1]`) from app state.
+   * @param options - Initial volume, playback rate and pitch preservation
+   *   from the engine host (clamped by the reducer).
    */
-  constructor(url: string, options: { readonly volume?: number } = {}) {
-    this.#internal = createInitialPlayback(options.volume ?? 1);
+  constructor(url: string, options: AudioEngineOptions = {}) {
+    this.#internal = createInitialPlayback(options);
     this.#snapshot = snapshotOfPlayback(this.#internal);
 
     this.#context = new AudioContext();
@@ -70,7 +72,7 @@ export class WebAudioEngine {
     this.#analyser = this.#context.createAnalyser();
     this.#analyser.fftSize = 64;
     this.#gain = this.#context.createGain();
-    this.#gain.gain.value = clampVolume(options.volume ?? 1);
+    this.#gain.gain.value = this.#internal.volume;
     this.#effectInput.connect(effectOutput);
     effectOutput.connect(this.#analyser);
     this.#analyser.connect(this.#gain);
@@ -174,6 +176,38 @@ export class WebAudioEngine {
 
     this.#gain.gain.value = clampVolume(volume);
     this.#dispatch({ type: "volumeChanged", volume });
+  }
+
+  /**
+   * Set the playback rate (`[0.25, 2]`, 0.05 grid); applies at once.
+   *
+   * Accepted in `error` as well (the value is kept and harmless there);
+   * only a closed engine ignores it.
+   */
+  setRate(rate: number): void {
+    if (this.#internal.closed) {
+      return;
+    }
+
+    const next = clampPlaybackRate(rate);
+    if (this.#audio !== null) {
+      WebAudioEngine.#applyRate(this.#audio, next);
+    }
+
+    this.#dispatch({ type: "rateChanged", rate: next });
+  }
+
+  /** Keep (or stop keeping) the pitch while the rate differs from `1`. */
+  setPreservesPitch(enabled: boolean): void {
+    if (this.#internal.closed) {
+      return;
+    }
+
+    if (this.#audio !== null) {
+      this.#audio.preservesPitch = enabled;
+    }
+
+    this.#dispatch({ type: "preservesPitchChanged", enabled });
   }
 
   /** Release every resource; all further calls become no-ops. */
@@ -283,9 +317,24 @@ export class WebAudioEngine {
       });
     };
     element.src = url;
+    // Applied after `src`: the load algorithm resets `playbackRate` to
+    // `defaultPlaybackRate`, so both are kept equal. Set explicitly even
+    // for the defaults rather than relying on Chromium's.
+    WebAudioEngine.#applyRate(element, this.#internal.rate);
+    element.preservesPitch = this.#internal.preservesPitch;
     this.#audio = element;
     this.#mediaSource = this.#context.createMediaElementSource(element);
     this.#mediaSource.connect(this.#effectInput);
+  }
+
+  /**
+   * Apply a rate to both `defaultPlaybackRate` and `playbackRate`: the
+   * media element load algorithm resets the latter to the former, so the
+   * two must never drift apart.
+   */
+  static #applyRate(element: HTMLAudioElement, rate: number): void {
+    element.defaultPlaybackRate = rate;
+    element.playbackRate = rate;
   }
 
   /** Streaming teardown for close (spec order). */

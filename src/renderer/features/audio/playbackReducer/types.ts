@@ -31,6 +31,10 @@ export type InternalPlayback = {
   readonly duration: number;
   /** User volume, clamped to `[0, 1]` by the reducer. */
   readonly volume: number;
+  /** Playback rate, clamped and stepped by the reducer (`clampPlaybackRate`). */
+  readonly rate: number;
+  /** Whether the pitch is kept while `rate` differs from `1`. */
+  readonly preservesPitch: boolean;
   /**
    * Target of the seek the media element is still working on; non-null
    * exactly while `seeking` is shown.
@@ -59,4 +63,6 @@ export type PlaybackEvent =
   | { readonly type: "ended" }
   | { readonly type: "failed"; readonly error: PlaybackError }
   | { readonly type: "volumeChanged"; readonly volume: number }
+  | { readonly type: "rateChanged"; readonly rate: number }
+  | { readonly type: "preservesPitchChanged"; readonly enabled: boolean }
   | { readonly type: "closed" };

@@ -1,3 +1,4 @@
+import { clampPlaybackRate } from "../../../../shared/clampPlaybackRate";
 import { clampVolume } from "../clampVolume";
 import type { InternalPlayback, PlaybackEvent } from "./types";
 
@@ -7,7 +8,9 @@ import type { InternalPlayback, PlaybackEvent } from "./types";
  * Total and pure: unknown combinations return the input unchanged (same
  * reference) so the shell can cheaply detect "nothing happened". A closed
  * engine is frozen — no event can revive it. An engine in `error` only
- * reacts to `closed` (playback never silently resumes after a failure).
+ * reacts to `closed` (playback never silently resumes after a failure) and
+ * to the rate / pitch settings, which do not touch playback and are kept
+ * so the snapshot keeps matching the host's app-level values.
  *
  * @param internal - Current internal state.
  * @param event - The event to apply.
@@ -23,6 +26,14 @@ export const reducePlayback = (
 
   if (event.type === "closed") {
     return { ...internal, closed: true };
+  }
+
+  if (event.type === "rateChanged") {
+    return { ...internal, rate: clampPlaybackRate(event.rate) };
+  }
+
+  if (event.type === "preservesPitchChanged") {
+    return { ...internal, preservesPitch: event.enabled };
   }
 
   if (internal.state === "error") {

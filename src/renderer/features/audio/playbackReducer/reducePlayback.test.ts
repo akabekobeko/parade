@@ -6,7 +6,7 @@ import type { InternalPlayback, PlaybackEvent } from "./types";
 
 const initial = (
   overrides: Partial<InternalPlayback> = {},
-): InternalPlayback => ({ ...createInitialPlayback(1), ...overrides });
+): InternalPlayback => ({ ...createInitialPlayback(), ...overrides });
 
 const apply = (
   state: InternalPlayback,
@@ -156,4 +156,54 @@ it("volumeChanged clamps into [0, 1]", () => {
   expect(
     reducePlayback(initial(), { type: "volumeChanged", volume: -0.5 }).volume,
   ).toBe(0);
+});
+
+it("rateChanged clamps into the range and rounds onto the step grid", () => {
+  expect(
+    reducePlayback(initial(), { type: "rateChanged", rate: 1.5 }).rate,
+  ).toBe(1.5);
+  expect(reducePlayback(initial(), { type: "rateChanged", rate: 5 }).rate).toBe(
+    2,
+  );
+  expect(
+    reducePlayback(initial(), { type: "rateChanged", rate: 1.1500000000000001 })
+      .rate,
+  ).toBe(1.15);
+  expect(
+    reducePlayback(initial(), { type: "rateChanged", rate: Number.NaN }).rate,
+  ).toBe(1);
+});
+
+it("preservesPitchChanged replaces the flag", () => {
+  const off = reducePlayback(initial(), {
+    type: "preservesPitchChanged",
+    enabled: false,
+  });
+  expect(off.preservesPitch).toBe(false);
+  expect(
+    reducePlayback(off, { type: "preservesPitchChanged", enabled: true })
+      .preservesPitch,
+  ).toBe(true);
+});
+
+it("rate and pitch changes are still applied in the error state", () => {
+  const failed = reducePlayback(initial({ state: "playing" }), {
+    type: "failed",
+    error: { kind: "playback", message: "boom" },
+  });
+  const rated = reducePlayback(failed, { type: "rateChanged", rate: 1.5 });
+  expect(rated.rate).toBe(1.5);
+  expect(rated.state).toBe("error");
+  expect(
+    reducePlayback(failed, { type: "preservesPitchChanged", enabled: false })
+      .preservesPitch,
+  ).toBe(false);
+});
+
+it("rate and pitch changes are ignored once closed", () => {
+  const closed = reducePlayback(initial(), { type: "closed" });
+  expect(reducePlayback(closed, { type: "rateChanged", rate: 2 })).toBe(closed);
+  expect(
+    reducePlayback(closed, { type: "preservesPitchChanged", enabled: false }),
+  ).toBe(closed);
 });
