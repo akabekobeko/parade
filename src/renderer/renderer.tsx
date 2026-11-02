@@ -58,14 +58,15 @@ const loadInitialSettings = async (): Promise<AppSettings> => {
 };
 
 /**
- * Persist the playback modes and volume
- * (`docs/specs/v1.5/architecture/playback-settings.md`). Straight to
+ * Persist the playback modes, volume, rate and pitch preservation
+ * (`docs/specs/v1.5/architecture/playback-settings.md`,
+ * `docs/specs/v1.7/architecture/playback-settings.md`). Straight to
  * `mp:settings:set` like the sidebar and playlist-columns stores, not via
  * `SettingsProvider` (nothing there reads `playback`). A failure is only
  * logged: the modes keep working for the session and the next change saves
  * again.
  *
- * @param playback - The complete modes-and-volume triple.
+ * @param playback - The complete five-field playback settings.
  */
 const savePlayback = (playback: PlaybackSettings): void => {
   window.mp.settings

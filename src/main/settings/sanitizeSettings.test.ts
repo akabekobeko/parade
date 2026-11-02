@@ -102,16 +102,34 @@ it("keeps a valid playback and repairs its broken fields one by one", () => {
     sanitizeSettings({
       version: 1,
       window: {},
-      playback: { shuffle: true, repeat: "one", volume: 0.3 },
+      playback: {
+        shuffle: true,
+        repeat: "one",
+        volume: 0.3,
+        rate: 1.5,
+        preservesPitch: false,
+      },
     }).playback,
-  ).toEqual({ shuffle: true, repeat: "one", volume: 0.3 });
+  ).toEqual({
+    shuffle: true,
+    repeat: "one",
+    volume: 0.3,
+    rate: 1.5,
+    preservesPitch: false,
+  });
   expect(
     sanitizeSettings({
       version: 1,
       window: {},
-      playback: { shuffle: true, repeat: "twice", volume: 0.5 },
+      playback: { shuffle: true, repeat: "twice", volume: 0.5, rate: 9 },
     }).playback,
-  ).toEqual({ shuffle: true, repeat: "off", volume: 0.5 });
+  ).toEqual({
+    shuffle: true,
+    repeat: "off",
+    volume: 0.5,
+    rate: 2,
+    preservesPitch: true,
+  });
 });
 
 it("drops a non-object playback", () => {

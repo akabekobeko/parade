@@ -148,38 +148,104 @@ it("keeps the current playlistColumns when the patch value is invalid", () => {
 it("replaces playback wholesale", () => {
   const current = {
     ...DEFAULT_SETTINGS,
-    playback: { shuffle: false, repeat: "off" as const, volume: 1 },
+    playback: {
+      shuffle: false,
+      repeat: "off" as const,
+      volume: 1,
+      rate: 1,
+      preservesPitch: true,
+    },
   };
   const merged = mergeSettings(current, {
-    playback: { shuffle: true, repeat: "all", volume: 0.4 },
+    playback: {
+      shuffle: true,
+      repeat: "all",
+      volume: 0.4,
+      rate: 1.25,
+      preservesPitch: false,
+    },
   });
   expect(merged.playback).toEqual({
     shuffle: true,
     repeat: "all",
     volume: 0.4,
+    rate: 1.25,
+    preservesPitch: false,
   });
   expect(mergeSettings(merged, { theme: "dark" }).playback).toEqual({
     shuffle: true,
     repeat: "all",
     volume: 0.4,
+    rate: 1.25,
+    preservesPitch: false,
   });
 });
 
 it("sanitizes the playback of a patch field by field", () => {
   const merged = mergeSettings(DEFAULT_SETTINGS, {
-    playback: { shuffle: true, repeat: "off", volume: 7 },
+    playback: {
+      shuffle: true,
+      repeat: "off",
+      volume: 7,
+      rate: 0.1,
+      preservesPitch: "no" as unknown as boolean,
+    },
   });
-  expect(merged.playback).toEqual({ shuffle: true, repeat: "off", volume: 1 });
+  expect(merged.playback).toEqual({
+    shuffle: true,
+    repeat: "off",
+    volume: 1,
+    rate: 0.25,
+    preservesPitch: true,
+  });
+});
+
+it("resets an omitted preservesPitch to on, since playback is replaced wholesale", () => {
+  // A patch from an older Renderer build (four fields or fewer) cannot
+  // keep a saved `false`: the default-on asymmetry is by spec.
+  const current = {
+    ...DEFAULT_SETTINGS,
+    playback: {
+      shuffle: false,
+      repeat: "off" as const,
+      volume: 1,
+      rate: 1,
+      preservesPitch: false,
+    },
+  };
+  expect(
+    mergeSettings(current, {
+      playback: { shuffle: false, repeat: "off", volume: 1, rate: 1.5 },
+    }).playback,
+  ).toEqual({
+    shuffle: false,
+    repeat: "off",
+    volume: 1,
+    rate: 1.5,
+    preservesPitch: true,
+  });
 });
 
 it("keeps the current playback when the patch value is not an object", () => {
   const current = {
     ...DEFAULT_SETTINGS,
-    playback: { shuffle: true, repeat: "one" as const, volume: 0.2 },
+    playback: {
+      shuffle: true,
+      repeat: "one" as const,
+      volume: 0.2,
+      rate: 1.5,
+      preservesPitch: false,
+    },
   };
   expect(
     mergeSettings(current, {
       playback: null as unknown as undefined,
     }).playback,
-  ).toEqual({ shuffle: true, repeat: "one", volume: 0.2 });
+  ).toEqual({
+    shuffle: true,
+    repeat: "one",
+    volume: 0.2,
+    rate: 1.5,
+    preservesPitch: false,
+  });
 });
