@@ -15,5 +15,7 @@ export const playbackSnapshotsEqual = (
   a.currentTime === b.currentTime &&
   a.duration === b.duration &&
   a.volume === b.volume &&
+  a.rate === b.rate &&
+  a.preservesPitch === b.preservesPitch &&
   a.seeking === b.seeking &&
   a.error === b.error;

@@ -112,6 +112,18 @@ export type PlayerCommands = {
    * the modes (`savePlayback`).
    */
   readonly setVolume: (volume: number) => void;
+  /**
+   * Set the playback rate (`[0.25, 2]`, 0.05 grid); applies to the active
+   * engine at once, survives across tracks and is saved with the modes
+   * (`savePlayback`).
+   */
+  readonly setPlaybackRate: (rate: number) => void;
+  /**
+   * Keep (or stop keeping) the pitch while the rate differs from `1`;
+   * applies at once, survives across tracks and is saved with the modes
+   * (`savePlayback`).
+   */
+  readonly setPreservesPitch: (enabled: boolean) => void;
   /** Replace the queue, keeping the current track and playback running. */
   readonly replaceQueue: (queue: readonly Music[], source: QueueSource) => void;
   /** Insert tracks right after the current one ("Play next"). */
@@ -154,8 +166,12 @@ const createCommands = (
    * (`docs/specs/v1.0/renderer/state-management.md`).
    */
   const startEngine = (music: Music): void => {
+    // The host hands its app-level values to every new engine (also the
+    // repeat `one` restart, which comes through here as well).
     const engine = createAudioEngine(toMediaStreamUrl(music.filePath), {
       volume: host.getVolume(),
+      rate: host.getRate(),
+      preservesPitch: host.getPreservesPitch(),
     });
     let advanced = false;
     engine.subscribe(() => {
@@ -371,6 +387,20 @@ const createCommands = (
       persistPlayback({});
     },
 
+    // Rate and pitch live in the host only (not in PlayerState, not in the
+    // native menu): the engine applies them at once and the host keeps them
+    // for the next track. Saving the two values is Phase 3; the call is
+    // here already so the hook-up is in place.
+    setPlaybackRate: (rate) => {
+      host.setRate(rate);
+      persistPlayback({});
+    },
+
+    setPreservesPitch: (enabled) => {
+      host.setPreservesPitch(enabled);
+      persistPlayback({});
+    },
+
     replaceQueue: (queue, source) => {
       dispatch({ type: "queueReplaced", queue, source });
     },
@@ -449,7 +479,7 @@ export const PlayerProvider = ({
   const [host] = useState(() => {
     // The restored volume lives in the host until the first engine exists,
     // so the volume popover shows it before anything plays.
-    const created = createEngineHost(initialPlayback?.volume);
+    const created = createEngineHost({ volume: initialPlayback?.volume });
     // Seed the native menu with the modes the reducer started with (the
     // persisted ones from `initialPlayback`), then keep its playback state
     // in sync; `menuStateSync` drops the pushes where nothing changed

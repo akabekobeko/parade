@@ -36,3 +36,23 @@ export const IMAGE_EXTENSION_BY_MIME: Readonly<Record<string, string>> = {
   "image/webp": "webp",
   "image/bmp": "bmp",
 };
+
+/** Lower bound of the playback rate (not a quality guarantee below 0.5). */
+export const PLAYBACK_RATE_MIN = 0.25;
+
+/** Upper bound of the playback rate. */
+export const PLAYBACK_RATE_MAX = 2;
+
+/**
+ * Granularity of the playback rate: slider steps and the +/- buttons move
+ * by it, and `clampPlaybackRate` rounds every value onto this grid.
+ */
+export const PLAYBACK_RATE_STEP = 0.05;
+
+/**
+ * Preset rates offered by the speed popover. Finer around 1x where music
+ * listening lives; nothing above 2x (little use for music).
+ */
+export const PLAYBACK_RATE_PRESETS: readonly number[] = [
+  0.5, 0.75, 1, 1.25, 1.5, 2,
+];

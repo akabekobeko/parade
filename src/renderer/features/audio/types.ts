@@ -45,6 +45,10 @@ export type PlaybackSnapshot = {
   readonly duration: number;
   /** User volume in `[0, 1]`. */
   readonly volume: number;
+  /** Playback rate in `[0.25, 2]` on the 0.05 grid; `1` is the original speed. */
+  readonly rate: number;
+  /** Whether the pitch is kept while `rate` differs from `1`. */
+  readonly preservesPitch: boolean;
   /**
    * A seek is waiting for the media element to land (data may have to be
    * fetched first); the UI shows a spinner / pulse.
@@ -52,6 +56,16 @@ export type PlaybackSnapshot = {
   readonly seeking: boolean;
   /** Failure detail while `state` is `error`; `null` otherwise. */
   readonly error: PlaybackError | null;
+};
+
+/** Initial values handed to a new engine (what survives across tracks). */
+export type AudioEngineOptions = {
+  /** Initial volume (`[0, 1]`); defaults to `1`. */
+  readonly volume?: number;
+  /** Initial playback rate (`[0.25, 2]`); defaults to `1`. */
+  readonly rate?: number;
+  /** Initial pitch preservation; defaults to `true`. */
+  readonly preservesPitch?: boolean;
 };
 
 /** Engine handle returned by `createAudioEngine`. */
@@ -74,6 +88,13 @@ export type AudioEngine = {
   readonly seek: (timeSec: number) => void;
   /** Set the user volume (`[0, 1]`). */
   readonly setVolume: (volume: number) => void;
+  /**
+   * Set the playback rate (clamped into `[0.25, 2]` and rounded to the
+   * 0.05 grid); applies at once, also mid-playback.
+   */
+  readonly setRate: (rate: number) => void;
+  /** Keep (or stop keeping) the pitch while the rate differs from `1`. */
+  readonly setPreservesPitch: (enabled: boolean) => void;
   /** Release everything up to `AudioContext.close`; calls become no-ops. */
   readonly close: () => void;
   /** Current snapshot; the same reference until an observable change. */

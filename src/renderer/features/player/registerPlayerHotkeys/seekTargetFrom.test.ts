@@ -7,6 +7,8 @@ const snapshot = (patch: Partial<PlaybackSnapshot>): PlaybackSnapshot => ({
   currentTime: 0,
   duration: 0,
   volume: 1,
+  rate: 1,
+  preservesPitch: true,
   seeking: false,
   error: null,
   ...patch,

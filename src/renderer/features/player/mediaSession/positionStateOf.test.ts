@@ -7,6 +7,8 @@ const snapshot = (patch: Partial<PlaybackSnapshot>): PlaybackSnapshot => ({
   currentTime: 0,
   duration: 0,
   volume: 1,
+  rate: 1,
+  preservesPitch: true,
   seeking: false,
   error: null,
   ...patch,
@@ -22,6 +24,17 @@ it("builds a clamped position state once the duration is known", () => {
   expect(
     positionStateOf(snapshot({ currentTime: -1, duration: 200 }))?.position,
   ).toBe(0);
+});
+
+it("passes the snapshot's rate as playbackRate", () => {
+  expect(
+    positionStateOf(snapshot({ currentTime: 30, duration: 200, rate: 2 }))
+      ?.playbackRate,
+  ).toBe(2);
+  expect(
+    positionStateOf(snapshot({ currentTime: 30, duration: 200, rate: 0.75 }))
+      ?.playbackRate,
+  ).toBe(0.75);
 });
 
 it("returns null while the duration is unknown", () => {

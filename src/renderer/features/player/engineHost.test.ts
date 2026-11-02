@@ -7,6 +7,8 @@ const snapshot = (patch: Partial<PlaybackSnapshot> = {}): PlaybackSnapshot => ({
   currentTime: 1,
   duration: 100,
   volume: 1,
+  rate: 1,
+  preservesPitch: true,
   seeking: false,
   error: null,
   ...patch,
@@ -23,6 +25,8 @@ const createFakeEngine = (initial: PlaybackSnapshot = snapshot()) => {
       stop: vi.fn(),
       seek: vi.fn(),
       setVolume: vi.fn(),
+      setRate: vi.fn(),
+      setPreservesPitch: vi.fn(),
       close: vi.fn(),
       getSnapshot: () => current,
       subscribe: (listener: () => void) => {
@@ -42,12 +46,31 @@ const createFakeEngine = (initial: PlaybackSnapshot = snapshot()) => {
 };
 
 it("returns the idle snapshot before any engine exists", () => {
-  const host = createEngineHost(0.7);
+  const host = createEngineHost({ volume: 0.7 });
   expect(host.getSnapshot()).toMatchObject({
     state: "stopped",
     volume: 0.7,
+    rate: 1,
+    preservesPitch: true,
   });
   expect(host.getSnapshot()).toBe(host.getSnapshot());
+});
+
+it("starts from the given rate (clamped) and pitch preservation", () => {
+  const host = createEngineHost({ rate: 1.13, preservesPitch: false });
+  expect(host.getRate()).toBe(1.15);
+  expect(host.getPreservesPitch()).toBe(false);
+  expect(host.getSnapshot()).toMatchObject({
+    rate: 1.15,
+    preservesPitch: false,
+  });
+});
+
+it("defaults to volume 1, rate 1 and pitch preserved", () => {
+  const host = createEngineHost();
+  expect(host.getVolume()).toBe(1);
+  expect(host.getRate()).toBe(1);
+  expect(host.getPreservesPitch()).toBe(true);
 });
 
 it("proxies the active engine's snapshot", () => {
@@ -103,6 +126,63 @@ it("reflects a volume change in the idle snapshot and notifies", () => {
   host.setVolume(0.5);
   expect(host.getSnapshot().volume).toBe(0.5);
   expect(listener).toHaveBeenCalledTimes(1);
+});
+
+it("reflects rate and pitch changes in the idle snapshot and notifies", () => {
+  const host = createEngineHost();
+  const listener = vi.fn();
+  host.subscribe(listener);
+
+  host.setRate(1.5);
+  expect(host.getSnapshot().rate).toBe(1.5);
+  expect(listener).toHaveBeenCalledTimes(1);
+
+  host.setPreservesPitch(false);
+  expect(host.getSnapshot().preservesPitch).toBe(false);
+  expect(listener).toHaveBeenCalledTimes(2);
+});
+
+it("clamps and steps the rate before keeping it", () => {
+  const host = createEngineHost();
+  host.setRate(1.1500000000000001);
+  expect(host.getRate()).toBe(1.15);
+  host.setRate(10);
+  expect(host.getRate()).toBe(2);
+  host.setRate(Number.NaN);
+  expect(host.getRate()).toBe(1);
+});
+
+it("forwards rate and pitch to the active engine without notifying itself", () => {
+  const host = createEngineHost();
+  const { engine } = createFakeEngine();
+  host.set(engine);
+  const listener = vi.fn();
+  host.subscribe(listener);
+
+  host.setRate(1.25);
+  expect(engine.setRate).toHaveBeenCalledWith(1.25);
+  host.setPreservesPitch(false);
+  expect(engine.setPreservesPitch).toHaveBeenCalledWith(false);
+  // The engine's own snapshot change is what notifies while it exists.
+  expect(listener).not.toHaveBeenCalled();
+  expect(host.getRate()).toBe(1.25);
+  expect(host.getPreservesPitch()).toBe(false);
+});
+
+it("keeps rate and pitch across an engine swap", () => {
+  const host = createEngineHost();
+  const first = createFakeEngine();
+  host.set(first.engine);
+  host.setRate(2);
+  host.setPreservesPitch(false);
+
+  const second = createFakeEngine();
+  host.set(second.engine);
+  expect(host.getRate()).toBe(2);
+  expect(host.getPreservesPitch()).toBe(false);
+
+  host.set(null);
+  expect(host.getSnapshot()).toMatchObject({ rate: 2, preservesPitch: false });
 });
 
 it("set(null) closes the current engine and falls back to idle", () => {

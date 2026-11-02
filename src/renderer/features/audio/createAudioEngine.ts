@@ -1,4 +1,4 @@
-import type { AudioEngine } from "./types";
+import type { AudioEngine, AudioEngineOptions } from "./types";
 import { WebAudioEngine } from "./WebAudioEngine";
 
 /**
@@ -7,10 +7,11 @@ import { WebAudioEngine } from "./WebAudioEngine";
  * `new` directly, so the class remains an implementation detail.
  *
  * @param url - `media-stream://` URL of the audio file.
- * @param options.volume - Initial volume (`[0, 1]`).
+ * @param options - Initial volume, playback rate and pitch preservation
+ *   (the values that survive across tracks).
  * @returns The engine handle.
  */
 export const createAudioEngine = (
   url: string,
-  options: { readonly volume?: number } = {},
+  options: AudioEngineOptions = {},
 ): AudioEngine => new WebAudioEngine(url, options);
