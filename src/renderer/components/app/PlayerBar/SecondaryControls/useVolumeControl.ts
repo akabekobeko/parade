@@ -1,8 +1,5 @@
 import { useState } from "react";
-
-/** Coerce Base UI's single-or-array slider value into a number. */
-const asNumber = (value: number | readonly number[]): number =>
-  Array.isArray(value) ? (value[0] ?? 0) : (value as number);
+import { sliderValueAsNumber } from "@/components/ui/sliderValue";
 
 /**
  * Logic of `VolumeControl`: the 0–100 slider value over the internal
@@ -29,7 +26,7 @@ export const useVolumeControl = (
   };
 
   const setPercent = (value: number | readonly number[]): void => {
-    onChange(asNumber(value) / 100);
+    onChange(sliderValueAsNumber(value) / 100);
   };
 
   return {
