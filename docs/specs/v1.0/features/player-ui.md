@@ -7,17 +7,17 @@
 PlayerBar はウィンドウ最下段・全幅の帯です。タイトルバー相当の役割 (ドラッグ領域、ウィンドウ操作コントロールのセーフエリア) は最上段のツールバー帯が受け持つため、PlayerBar 自体に drag 領域やセーフエリアの調整はありません ([ルーティングとレイアウト](../renderer/routing-layout.md))。
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ [Art] Title        [⏮][⏯][⏭]  0:42 ────────●──────── 3:28  [🔁][🔀] [キュー][🔊] │ ← 全要素を垂直中央揃え
-│       Artist - Album                                                         │
-└──────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────┐
+│ [Art] Title        [⏮][⏯][⏭]  0:42 ────────●──────── 3:28  [🔁][🔀][⏱] [キュー][🔊] │ ← 全要素を垂直中央揃え
+│       Artist - Album                                                               │
+└────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- 左から順に、アートワーク・曲情報・前曲/再生(一時停止)/次曲・SeekBar (再生時間 / 総演奏時間を含む)・リピート ([リピート ボタン](../../v1.5/features/repeat-button.md)、v1.5)・シャッフル・キュー ([Playlist](playlist.md) のキュー Popover)・音量を **垂直中央揃え** で並べます
-- レイアウト図は 2026-10-18 に改訂しました。v1.0 の図にはシャッフル ボタン (v1.0 の実装中に追加) とリピート ボタン (v1.5) がありませんでした
+- 左から順に、アートワーク・曲情報・前曲/再生(一時停止)/次曲・SeekBar (再生時間 / 総演奏時間を含む)・リピート ([リピート ボタン](../../v1.5/features/repeat-button.md)、v1.5)・シャッフル・再生速度 ([再生速度ボタンと Popover](../../v1.7/features/speed-control.md)、v1.7)・キュー ([Playlist](playlist.md) のキュー Popover)・音量を **垂直中央揃え** で並べます
+- レイアウト図は 2026-10-18 と 2026-11-03 に改訂しました。v1.0 の図にはシャッフル ボタン (v1.0 の実装中に追加) とリピート ボタン (v1.5) がなく、再生速度ボタン (v1.7) はシャッフルとキューの間に足しました
 - 曲情報は固定幅の縦 2 段 (上: 曲名、下: `アーティスト - アルバム`)。各行は省略記号で切り詰め、ホバーで全文をツールチップ表示します
 - SeekBar が残り幅を最大に使います
-- コンポーネントは `src/renderer/components/app/PlayerBar/` 配下で `Picture` / `MusicInfo` / `PlayerControls` / `SeekBar` / `RepeatButton` / `ShuffleButton` / `SecondaryControls` (キュー + 音量) に分割しています
+- コンポーネントは `src/renderer/components/app/PlayerBar/` 配下で `Picture` / `MusicInfo` / `PlayerControls` / `SeekBar` / `RepeatButton` / `ShuffleButton` / `SpeedControl` (再生速度のボタンと Popover、v1.7) / `SecondaryControls` (キュー + 音量) に分割しています
 - 停止はボタンを置かず (Apple Music と同様)、以下の導線で提供します
   - アプリメニュー「コントロール > 停止」(`CmdOrCtrl+.`)。現在曲がない間は disabled (`mp:menu:setState` の `hasTrack` で gate)
   - PlayerBar の右クリックメニュー「停止」
@@ -32,6 +32,7 @@ PlayerBar はウィンドウ最下段・全幅の帯です。タイトルバー�
 | 前曲・次曲 | キュー上の前後が null なら disabled ([Playlist](playlist.md) のキュー仕様で決まる)。リピート `all` では末尾と先頭がつながる ([リピート モード](../../v1.5/architecture/repeat-mode.md)) |
 | リピート | クリックのたびに `off → all → one → off`。`all` / `one` はアイコンが点灯色になる ([リピート ボタン](../../v1.5/features/repeat-button.md)、v1.5) |
 | シャッフル | ON / OFF のトグル。ON はアイコンが点灯色になる |
+| 再生速度 | Popover を開くボタン (Lucide `Gauge`)。1x 以外はアイコンが点灯色になり、ツールチップに現在の速度が出る。Popover のプリセット (0.5x から 2x の 6 つ)、スライダー (0.25x から 2x、0.05 刻み)、± ボタンで速度を、「ピッチを維持」のチェックで音程を保つかを変える。再生中もその場で効き、曲をまたいで保たれ、`settings.json` に保存する ([再生速度ボタンと Popover](../../v1.7/features/speed-control.md)、[再生速度の永続化](../../v1.7/architecture/playback-settings.md)、v1.7) |
 | 再生・一時停止 | `state` に応じてトグル。`loading` 中はスピナー |
 | 停止 | `stop()`。ボタンは置かず、メニュー / 右クリック / MediaSession から呼ぶ (上記レイアウト参照) |
 | SeekBar | shadcn Slider。step 1 秒。`duration` 未確定 (0) の間は disabled |
@@ -79,7 +80,7 @@ MediaSession への同期も useEffect では行いません ([状態管理](../
     - 保持する Blob URL は現在曲の 1 件だけです。アートワークが変わる、またはアートワークのない曲へ切り替わった時点で前の Blob URL を `revokeObjectURL` します。読み込み中に次の曲へ切り替わった場合は `fetch` を中断します
     - 読み込みに失敗した場合 (画像ファイルの欠落など) は artwork なしで表示し、アートワークが変わるまで再取得しません
 - action handler (`play` / `pause` / `stop` / `previoustrack` / `nexttrack` / `seekto` → PlayerCommands) の登録は PlayerProvider の初期化時に 1 回だけ行います (コマンド参照は React 外のディスパッチャー経由で常に最新を呼ぶ)
-- `navigator.mediaSession.playbackState` と `setPositionState()` は、エンジン生成時にコマンド内で登録する snapshot 購読 (`engine.subscribe`) の中で同期します。React のレンダリングを経由しません
+- `navigator.mediaSession.playbackState` と `setPositionState()` は、エンジン生成時にコマンド内で登録する snapshot 購読 (`engine.subscribe`) の中で同期します。React のレンダリングを経由しません。`setPositionState` の `playbackRate` には snapshot の `rate` を渡します (v1.7)。OS はこの値で位置を外挿するため、固定の 1 では 2x 再生中に表示位置が遅れます
 
 ## 再生中表示 (各ビューとの連携)
 
