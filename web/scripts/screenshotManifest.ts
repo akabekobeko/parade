@@ -1,13 +1,8 @@
 import { z } from "zod";
 
-/**
- * The scenes the top page uses, in the order of
- * docs/specs/web/features/screenshots.md. Captures with other names are
- * refused so a stray file never lands in the committed assets.
- */
-export const SCENES = [
+/** The screens of docs/specs/web/features/screenshots.md, in its order. */
+const SCREENS = [
   "artists",
-  "artists-light",
   "albums",
   "playlists",
   "favorites",
@@ -15,6 +10,16 @@ export const SCENES = [
   "player",
   "settings",
 ] as const;
+
+/**
+ * The scenes the top page uses: every screen in the dark theme
+ * (`<screen>`) and in the light theme (`<screen>-light`). Captures with
+ * other names are refused so a stray file never lands in the committed
+ * assets.
+ */
+export const SCENES = SCREENS.flatMap(
+  (screen) => [screen, `${screen}-light`] as const,
+);
 
 export type Scene = (typeof SCENES)[number];
 

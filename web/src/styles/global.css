@@ -57,23 +57,23 @@
 }
 
 /*
- * Lamp glow: the hovered element lights up like a lamp, a mid bloom plus a
- * wide faint halo. Same values as the lamp glow the app's icon buttons had
- * up to v1.4.0 (the app since moved to a tint or a circle border; the site
- * keeps the lamp). Apply as
- * `hover:glow-lamp` together with `transition-glow`.
+ * Ring glow: a transparent border takes the foreground colour and glows.
+ * Same values as the hover of the app's IconButton `ring` variant (the
+ * player bar buttons). The element keeps `border border-transparent` so
+ * its size does not change on hover. Apply as `hover:glow-ring` together
+ * with `transition-glow` (docs/specs/web/architecture/theme.md).
  */
-@utility glow-lamp {
-  filter: drop-shadow(0 0 5px var(--foreground))
-    drop-shadow(
-      0 0 12px color-mix(in oklch, var(--foreground) 60%, transparent)
-    );
+@utility glow-ring {
+  border-color: var(--foreground);
+  box-shadow: 0 0 5px 1px
+    color-mix(in oklch, var(--foreground) 60%, transparent);
 }
 
 /*
  * Border glow: the border of an outlined element lights up. Same values as
- * the app's CircleIconButton. Apply as `hover:glow-border` together with
- * `transition-glow`.
+ * the app's CircleIconButton, whose border is always visible (hence the
+ * inner 1px line on top of the ring glow). Apply as `hover:glow-border`
+ * together with `transition-glow`.
  */
 @utility glow-border {
   border-color: var(--foreground);
@@ -101,12 +101,13 @@
 }
 
 /*
- * Transition for the glow utilities. Switched off under reduced motion; the
- * glow itself stays.
+ * Transition for the glow utilities (border and shadow only: the tint fill
+ * of `hover:bg-foreground/10` switches at once, as in the app, because a
+ * fading fill flickers). Switched off under reduced motion; the glow itself
+ * stays.
  */
 @utility transition-glow {
-  transition-property:
-    filter, color, background-color, border-color, box-shadow;
+  transition-property: border-color, box-shadow;
   transition-duration: 200ms;
   transition-timing-function: ease;
 

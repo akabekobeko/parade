@@ -52,19 +52,17 @@ export const ja: Dictionary = {
     "Details タブでタイトル、アーティスト、アルバム、ジャンル、年の入力欄を表示した曲情報ダイアログ",
   "home.feature.player.title": "好きなように再生する",
   "home.feature.player.body":
-    "再生キューに曲を並べ、シャッフルし、アルバムや 1 曲をリピートし、OS のメディア キーから操作できます。対応形式は mp3、flac、m4a / mp4、ogg / opus、wav、aiff、wma、ape です。",
+    "再生キューに曲を並べ、シャッフルし、アルバムや 1 曲をリピートし、音程を保ったまま再生をゆっくりにも速くにもできます。再生、一時停止、曲送りは OS のメディア キーからも行えます。対応形式は mp3、flac、m4a / mp4、ogg / opus、wav、aiff、wma、ape です。",
   "home.feature.player.alt":
-    "曲を再生中のプレーヤー バーと、次に再生する曲を並べたキューのポップオーバー",
-  "home.feature.theme.title": "ライトとダーク",
-  "home.feature.theme.body":
-    "ダークとライトのテーマを用意しています。OS の設定に追従させることも、好きなほうに固定することもできます。",
-  "home.feature.theme.alt":
-    "ライト テーマの Parade の Artists ビュー。Milo Ashgrove のアルバムを表示している",
-  "home.feature.language.title": "英語と日本語",
-  "home.feature.language.body":
-    "設定ページで English / 日本語 / System から言語を選べます。テーマも同じ設定ページで切り替えられます。",
-  "home.feature.language.alt":
-    "Theme を Dark、Language を English に設定した Settings ページ",
+    "曲を再生中のプレーヤー バーと、開いた再生速度のポップオーバー。速度のプリセット、スライダー、「ピッチを維持」のチェックが見える",
+  "home.feature.settings.title": "言語とテーマを選ぶ",
+  "home.feature.settings.body":
+    "設定ダイアログで English / 日本語 / System から言語を選べます。ダークとライトのテーマも同じ設定ダイアログで切り替えるか、OS の設定に追従させられます。",
+  "home.feature.settings.alt":
+    "Language を English にし、テーマを選んだ Settings ダイアログ",
+  "home.screenshot.dark": "ダーク",
+  "home.screenshot.light": "ライト",
+  "home.screenshot.alt": "{alt} ({theme} テーマ)",
   "home.cta.title": "Parade を入手する",
   "home.cta.body":
     "macOS / Windows / Linux 向けに、無料でオープンソースで提供しています。",

@@ -22,13 +22,15 @@ const currentPath = pagePath[page] ?? "";
   Sticky header (docs/specs/web/features/pages.md). Three columns: icon and
   product name, page links, then the language switch, theme toggle and GitHub
   link. The two switches stay visible at every width; on narrow screens the
-  product name goes first, then the GitHub link.
+  product name goes first, then the GitHub link. Hover follows the app: the
+  icon-and-name link gets the tint (rounded fill, no transition), the pills
+  and the round icon buttons get the ring (border and glow).
 */}
 <header class="sticky top-0 z-10 flex h-(--header-height) justify-center border-b bg-background/80 px-4 backdrop-blur sm:px-8">
   <div class="grid w-full max-w-(--content-max-width) grid-cols-[auto_1fr_auto] items-center gap-2 sm:grid-cols-[1fr_auto_1fr] sm:gap-4">
     <a
       href={getRelativeLocaleUrl(locale, "")}
-      class="inline-flex w-fit items-center gap-2 text-foreground transition-glow hover:glow-lamp"
+      class="inline-flex h-9 w-fit items-center gap-2 rounded-md px-2 text-foreground hover:bg-foreground/10"
     >
       <img src={withBase("icon.svg")} width="28" height="28" alt="" />
       <span class="sr-only text-base font-semibold sm:not-sr-only">
@@ -46,7 +48,7 @@ const currentPath = pagePath[page] ?? "";
                 href={getRelativeLocaleUrl(locale, pagePath[item] ?? "")}
                 aria-current={current ? "page" : undefined}
                 class:list={[
-                  "inline-flex h-8 items-center rounded-full px-3 text-sm font-medium whitespace-nowrap transition-glow hover:glow-lamp",
+                  "inline-flex h-8 items-center rounded-full border border-transparent px-3 text-sm font-medium whitespace-nowrap transition-glow hover:glow-ring",
                   current ? "bg-foreground text-background" : "text-foreground",
                 ]}
               >
@@ -64,7 +66,7 @@ const currentPath = pagePath[page] ?? "";
       <a
         href={REPOSITORY_URL}
         aria-label={t("header.github")}
-        class="hidden size-8 items-center justify-center rounded-full text-foreground transition-glow hover:glow-lamp xs:inline-flex"
+        class="hidden size-8 items-center justify-center rounded-full border border-transparent text-foreground transition-glow hover:glow-ring xs:inline-flex"
       >
         <GitHubIcon class="size-5" />
       </a>

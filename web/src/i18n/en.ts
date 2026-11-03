@@ -54,19 +54,17 @@ export const en = {
     "Song info dialog with the Details tab showing the editable title, artist, album, genre and year fields",
   "home.feature.player.title": "Play your way",
   "home.feature.player.body":
-    "Queue songs up, shuffle them, repeat an album or a single song, and control playback from the media keys of your OS. Parade plays mp3, flac, m4a / mp4, ogg / opus, wav, aiff, wma and ape.",
+    "Queue songs up, shuffle them, repeat an album or a single song, and slow down or speed up playback while the pitch stays put. Play, pause and skip from the media keys of your OS. Parade plays mp3, flac, m4a / mp4, ogg / opus, wav, aiff, wma and ape.",
   "home.feature.player.alt":
-    "Player bar with a song playing and the queue popover listing the upcoming songs",
-  "home.feature.theme.title": "Light and dark",
-  "home.feature.theme.body":
-    "A dark and a light theme, following your OS setting or fixed to the one you prefer.",
-  "home.feature.theme.alt":
-    "Artists view of Parade in the light theme, showing the albums of Milo Ashgrove",
-  "home.feature.language.title": "English and Japanese",
-  "home.feature.language.body":
-    "Choose English, Japanese or your system language on the settings page. The theme is switched there as well.",
-  "home.feature.language.alt":
-    "Settings page with the theme set to Dark and the language set to English",
+    "Player bar with a song playing and the playback speed popover open, showing the speed presets, the slider and the Keep pitch checkbox",
+  "home.feature.settings.title": "Choose your language and theme",
+  "home.feature.settings.body":
+    "Pick English, Japanese or your system language in the settings dialog, and switch between the dark and light themes there as well, or follow your OS.",
+  "home.feature.settings.alt":
+    "Settings dialog with the language set to English and the theme selected",
+  "home.screenshot.dark": "Dark",
+  "home.screenshot.light": "Light",
+  "home.screenshot.alt": "{alt} ({theme} theme)",
   "home.cta.title": "Get Parade",
   "home.cta.body": "Free and open source, for macOS, Windows and Linux.",
   "home.cta.button": "Go to downloads",

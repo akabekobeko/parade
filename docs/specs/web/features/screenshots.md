@@ -33,20 +33,22 @@ AI (Claude Code) が操作する場合は CDP (Chrome DevTools Protocol) 方式�
 
 ## 撮影する画面
 
-テーマはデモ設定の既定 (ダーク) を基本にし、テーマ紹介用に 1 枚だけライトを撮ります。アプリの言語は英語だけです (設定の Language を English にする。OS が日本語の場合は System のままだと日本語になる)。日本語 UI は撮らず、対応言語は `settings` の画面と文章で伝えます。
+全シーンをダークとライトの両方で撮ります (2026-11-03 改訂。v1.6 まではダーク基調で、テーマ紹介用に `artists-light` だけライトを撮っていた)。ファイル名はダークが `<scene>.png`、ライトが `<scene>-light.png` で、`web/scripts/screenshotManifest.ts` の `SCENES` が両方を受け付けます。アプリの言語は英語だけです (設定の Language を English にする。OS が日本語の場合は System のままだと日本語になる)。日本語 UI は撮らず、対応言語は `settings` の画面と文章で伝えます。
+
+手順は 2 周です。デモ設定の既定 (ダーク) で下の表の全シーンを撮り、次に Settings の Theme を Light にして同じ操作を繰り返します。お気に入り、カラム設定、プレイリストの選択はデモ用データと設定に残るので、2 周目は画面の移動と再生のやり直しが中心です。テーマは `window.mp.settings.set({ patch: { theme: "light" } })` と `location.reload()` で切り替えてもかまいません。撮影後に Dark へ戻します。
 
 | scene | 画面 | 操作 | 注意 |
 | --- | --- | --- | --- |
 | `artists` | Artists ビュー、Milo Ashgrove、再生中 | 起動直後の状態 (Milo Ashgrove が選択済み)。アルバム Modulations の 1 曲目 Test Tone Serenade を再生する。再生位置が 0:30 前後になるまで待つ | 再生できるのはこの曲だけ。他の曲は再生するとエラーになる |
-| `artists-light` | 同上、ライト テーマ | Settings → Theme を Light にしてから `artists` と同じ状態にする | 撮影後に Dark へ戻す |
 | `albums` | Albums ビュー、フィルター適用 | サイドバーのジャンルで Jazz、年代で 1990s を選び、アルバムが 10 - 20 枚程度並ぶ状態にする。再生中のまま | ジャケットは生成した抽象図形なので権利の問題はない |
 | `playlists` | Playlists ビュー、テーブル。サイドバーに My Best (画像あり)、Jazz (画像とスマートのバッジ)、Rock (プレースホルダー) の項目が並び、ヘッダーに My Best の画像が出る (v1.6) | My Best を開く。コンテンツ ツールバーのカラム メニューで Album artist と Genre と Year を表示し、ウィンドウ幅に収まるようにカラム幅を縮める (Title 150、Artist 140、Album 140、Album artist 130、Genre 90、Year 60。v1.4 でお気に入りカラムが加わった分、Title を 190 から縮めた)。1 行目 (Test Tone Serenade) を再生中にする。お気に入りカラム (常に表示) には 1 行目のほか、8 行目 Hidden Map と 11 行目 Daydream in Slow Motion の Star を ON にしておく | 右クリック メニューは閉じる。サイドバーとヘッダーの画像はデモ用データが持つ (`pnpm demo:assets` が My Best に Modulations、Jazz に Songs for the Parade のアートワークを割り当て、Rock は画像なし。[公式サイトへの反映](../../v1.6/features/web-site.md))。撮影時の操作は増えない |
-| `favorites` | Artists ビュー、お気に入りとフィルター メニュー | `artists` と同じ構図 (Milo Ashgrove、Modulations の見出しが上から 2 行目、Test Tone Serenade を再生中。再生位置は問わない) で、曲リストの Star を 4 曲 (Test Tone Serenade、Electric Engine、The Anchor、Umbrella) クリックして ON にし、アルバム Modulations もアルバム メニューの Album info から Favorite を ON にして Apply する (見出しに Star が出る)。コンテンツ ツールバーの Funnel ボタンでフィルター メニューを開き、「Favorites only」の項目が見える状態にする (チェックは OFF のまま。ON にすると曲が減って Star の意味が伝わりにくい) | `artists` / `artists-light` / `player` の撮影でも同じ曲とアルバムを ON にしておく。`albums` では Jazz / 1990s のアルバムのうち Songs for the Parade、Atlas & Evening、Broken Desert をカードの Star で ON にする。デモ用データにお気に入りの初期値はないので、`pnpm demo:assets` で戻したときは付け直す |
+| `favorites` | Artists ビュー、お気に入りとフィルター メニュー | `artists` と同じ構図 (Milo Ashgrove、Modulations の見出しが上から 2 行目、Test Tone Serenade を再生中。再生位置は問わない) で、曲リストの Star を 4 曲 (Test Tone Serenade、Electric Engine、The Anchor、Umbrella) クリックして ON にし、アルバム Modulations もアルバム メニューの Album info から Favorite を ON にして Apply する (見出しに Star が出る)。コンテンツ ツールバーの Funnel ボタンでフィルター メニューを開き、「Favorites only」の項目が見える状態にする (チェックは OFF のまま。ON にすると曲が減って Star の意味が伝わりにくい) | `artists` / `player` の撮影でも同じ曲とアルバムを ON にしておく。`albums` では Jazz / 1990s のアルバムのうち Songs for the Parade、Atlas & Evening、Broken Desert をカードの Star で ON にする。デモ用データにお気に入りの初期値はないので、`pnpm demo:assets` で戻したときは付け直す |
 | `music-info` | 曲情報ダイアログ | Test Tone Serenade の行メニューから Song info を開き、Details タブを表示する | **File タブはファイル パスが出るので撮らない。** Details タブでもファイル名が見える場合はマスクする |
-| `player` | プレーヤー バーとキュー | `artists` と同じ構図で再生中に、リピート ボタンを押して `all` (点灯) にし、キュー ボタンでキュー ポップオーバーを開く (開いた直後はゴミ箱ボタンにフォーカスが移るので外す)。ウィンドウ全体を撮り、サイト側でプレーヤー バー付近を切り出す | 切り出しの座標はマスクの manifest に書く。切り出し範囲には曲リストの下半分が入るので、曲リストの見た目が変わる PR ではこのシーンも撮り直す。リピートが点灯するのはこのシーンだけで、他のシーンは `off` のまま撮る |
-| `settings` | Settings ダイアログ | ツールバーの Settings ボタン (歯車) でダイアログを開く (issue #396 でページからダイアログに変更)。Theme が Dark、Language が English の状態 | ライブラリー統計はデモ用データの数値なのでそのままでよい |
+| `player` | プレーヤー バーと再生速度のポップオーバー (v1.7。v1.6 まではキューのポップオーバー) | `artists` と同じ構図で再生中に、リピート ボタンを押して `all` (点灯) にし、再生速度ボタンでポップオーバーを開いて 1.25x のプリセットを選ぶ (ボタンが点灯し、1.25x が塗りつぶされる)。Keep pitch は ON のまま。Popover を開いた直後は最初のプリセットにフォーカスが移るので外す (`document.activeElement.blur()`)。ウィンドウ全体を撮り、サイト側でプレーヤー バー付近を切り出す | 切り出しの座標はマスクの manifest に書く (`player` と `player-light` に同じ `crop`)。切り出し範囲には曲リストの下半分が入るので、曲リストの見た目が変わる PR ではこのシーンも撮り直す。リピートと速度が点灯するのはこのシーンだけで、他のシーンは `off` / 1x のまま撮る。撮影後に速度を 1x へ戻す |
+| `settings` | Settings ダイアログ | ツールバーの Settings ボタン (歯車) でダイアログを開く (issue #396 でページからダイアログに変更)。Language が English の状態。Theme はその周のテーマ (ダークの周は Dark、ライトの周は Light) が写る | ライブラリー統計はデモ用データの数値なのでそのままでよい。背景は `artists` と同じ構図にする |
 
-- 撮影の前に、トースト通知、ツールチップ、ホバー状態が残っていないことを確認する。再生できる曲は 1:47 で終わり、次の曲へ進むと再生エラーのトースト (ファイル パスを含む) が出るので、撮影のたびに再生し直す
+- 撮影の前に、トースト通知、ツールチップ、ホバー状態が残っていないことを確認する。再生できる曲は 1:47 で終わり、次の曲へ進むと再生エラーのトースト (ファイル パスを含む) が出るので、撮影のたびに再生し直す。再生中の行には再生ボタンが出ないので、再生し直しはアルバム見出しの Play album ボタンかプレイリストの Play playlist ボタンで行う。シーンの合間はリピートを `one` にしておき、撮影の直前に `off` へ戻すと途切れない
+- CDP の合成マウス (`Input.dispatchMouseEvent`) の位置がそのまま hover になる。撮影の前に、そのシーンで hover の効かない空き領域 (アーティストの見出し、アルバム一覧の下の余白、ダイアログの外) へ移す
 - ウィンドウの位置は画面の中央にし、他のウィンドウを重ねない
 - 撮り直す場合は同じ scene 名で上書きする。画面が変わっていない scene は撮り直さない (差分を小さくするため)
 
@@ -64,13 +66,18 @@ AI (Claude Code) が操作する場合は CDP (Chrome DevTools Protocol) 方式�
 - 領域は `web/screenshots.manifest.json` に scene ごとに記録する (`x`、`y`、`width`、`height`、2x の座標)。切り出し (`player`) も同じ manifest に書く。`player` は幅を 2784 のまま高さ 1008 で切り出し、上端は曲リストの再生中の行が枠線ごと入る位置にする (構図が数 px ずれたら撮り直すより `y` を直す)
 - 実行は `pnpm --filter parade-web screenshots:mask -- <input-dir>`。入力はマスク前の画像のディレクトリー、出力は `web/src/assets/screenshots/`
 
+現在の manifest は `player` / `player-light` の切り出しだけです (Details タブにファイル名は出ないので `music-info` にマスクはない)。マスクが必要になったときは次の形で `mask` を足します (`music-info` の行は書き方の例)。
+
 ```json
 {
   "music-info": {
     "mask": [{ "x": 640, "y": 1180, "width": 1280, "height": 48 }]
   },
   "player": {
-    "crop": { "x": 0, "y": 796, "width": 2784, "height": 1008 }
+    "crop": { "x": 0, "y": 784, "width": 2784, "height": 1008 }
+  },
+  "player-light": {
+    "crop": { "x": 0, "y": 784, "width": 2784, "height": 1008 }
   }
 }
 ```
@@ -82,7 +89,7 @@ commit する前に次を確認します。
 - [ ] ファイル パス、ユーザー名、メール アドレスが写っていない
 - [ ] 実在のアーティスト名、曲名、アルバム名がない (デモ用データは架空だが、偶然の一致は `docs/demo/README.md` の注意のとおり)
 - [ ] トースト、ツールチップ、ホバー状態が残っていない
-- [ ] 画像サイズが 2784 x 1824 (切り出した `player` を除く) で、ファイル サイズが 1 枚 1 MB 以内を目安にする (ジャケットが並ぶ `albums` は可逆圧縮では 1.2 MB 程度になる)
+- [ ] 14 枚 (7 シーン × ダーク / ライト) が揃い、画像サイズが 2784 x 1824 (切り出した `player` / `player-light` を除く) で、ファイル サイズが 1 枚 1 MB 以内を目安にする (ジャケットが並ぶ `albums` / `albums-light` は可逆圧縮では 1.2 MB 程度になる)
 - [ ] `pnpm --filter parade-web build` で画像最適化が通る
 
 ## 更新の契機
