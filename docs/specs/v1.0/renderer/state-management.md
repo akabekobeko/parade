@@ -77,6 +77,8 @@ type PlayerCommands = {
   stop: () => void;
   seek: (timeSec: number) => void;
   setVolume: (volume: number) => void;
+  setPlaybackRate: (rate: number) => void;        // v1.7。0.25-2、曲をまたいで保ち保存する
+  setPreservesPitch: (enabled: boolean) => void;  // v1.7。速度が 1 以外のとき音程を保つか
   replaceQueue: (queue: Music[], source: QueueSource) => void; // 再生は維持
   insertNext: (musics: Music[]) => void;     // Play next
   appendToQueue: (musics: Music[]) => void;  // Add to queue
@@ -86,6 +88,7 @@ type PlayerCommands = {
 
 - `shuffle` / `orderedQueue` / `playShuffled` / `toggleShuffle` は v1.0 の実装中に追加したものです
 - `repeat` / `setRepeat` / `cycleRepeat` は v1.5 で追加しました (2026-10-18 改訂)。終端と前後曲の解決、シャッフルとの関係は [リピート モード](../../v1.5/architecture/repeat-mode.md)、モードと音量の保存は [再生モードの永続化](../../v1.5/architecture/playback-settings.md) を参照してください
+- `setPlaybackRate` / `setPreservesPitch` は v1.7 で追加しました (2026-11-03 改訂)。値は `PlayerState` には持たず、音量と同じく engine host が保持して新しいエンジンへ引き継ぎます。reducer には dispatch せず、`menuStateSync` にも伝えません (メニューに速度の項目はない)。効かせ方は [再生速度](../../v1.7/architecture/playback-rate.md)、保存は [再生速度の永続化](../../v1.7/architecture/playback-settings.md) を参照してください
 
 実装の要点:
 

@@ -37,6 +37,7 @@ export type AppSettings = {
 - `playback` は任意項目で、未保存 (`undefined`) のときは既定値 (`shuffle: false`、`repeat: "off"`、`volume: 1`) です。`DEFAULT_SETTINGS` には足しません (`sidebar` や `playlistColumns` と同じ扱い)
 - 音量は engine host が持つ `[0, 1]` の値をそのまま保存します。ミュートは音量 0 なので、ミュート中に終了すると 0 が保存され、次回も無音で始まります。ミュート解除で戻る値 (`lastAudible`) は保存しないため、再起動後の解除は 100% になります
 - `version` は 1 のままです。項目の追加だけで、既存の項目の意味は変わりません
+- v1.7 で再生速度 `rate` (`[0.25, 2]`、既定 `1`) とピッチ維持 `preservesPitch` (既定 `true`) を足しました (2026-11-03 改訂)。保存の形、sanitize、復元は [再生速度の永続化](../../v1.7/architecture/playback-settings.md) を参照してください。本書の以下の記述は v1.5 時点の 3 項目についてのものです
 
 ## sanitize と merge
 
@@ -48,7 +49,7 @@ export type AppSettings = {
 - `volume` は有限の数を `[0, 1]` に丸める (`clampVolume` と同じ規則)。数でなければ `1`
 - 1 つが不正でも残りは生かす (`{ shuffle: true, repeat: "twice", volume: 0.5 }` は `{ shuffle: true, repeat: "off", volume: 0.5 }`)
 
-`mergeSettings` では `sidebar` と同じく、patch に `playback` があれば sanitize した値で全体を置き換えます。Renderer は常に `{ shuffle, repeat, volume }` の 3 つを送ります。`sanitizeSettings` と `mergeSettings` のテストに `playback` の行を足します。
+`mergeSettings` では `sidebar` と同じく、patch に `playback` があれば sanitize した値で全体を置き換えます。Renderer は常に `{ shuffle, repeat, volume }` の 3 つを送ります (v1.7 からは `rate` / `preservesPitch` を含む 5 つ)。`sanitizeSettings` と `mergeSettings` のテストに `playback` の行を足します。
 
 ## 起動時の復元
 

@@ -19,6 +19,7 @@ Electron / Chromium の制約と、それに対する方針は次のとおりで
 1. `HTMLAudioElement` + `MediaElementAudioSourceNode` で即時再生開始 (`canplay` で開始可能)
 2. シークは常に `currentTime` へ直接代入する。Chromium が必要な byte range を `media-stream://` へ再要求する
 3. `currentTime` 代入から要素の `seeked` イベントまでを snapshot の `seeking` として UI へ出す。その間 `currentTime` は目標値を返し、シークが成功したように見せる
+4. 再生速度とピッチ維持は `<audio>` の `playbackRate` / `defaultPlaybackRate` / `preservesPitch` で変える (v1.7、2026-11-03 改訂)。HTML の media element load algorithm が `playbackRate` を `defaultPlaybackRate` に戻すため、`src` の設定後と以後の変更で両方を同じ値にする。`MediaElementAudioSourceNode` を通しても Chromium は両方を反映するので、ノードグラフは変えない ([再生速度](../../v1.7/architecture/playback-rate.md))
 
 ノードグラフは AudioPlayer3 を継承します (EQ・ビジュアライザーの拡張点を最初から確保):
 
@@ -67,6 +68,8 @@ export type PlaybackSnapshot = {
   readonly currentTime: number;   // シーク中は目標値
   readonly duration: number;      // 0 = 未確定
   readonly volume: number;        // 0-1
+  readonly rate: number;          // 再生速度 0.25-2 (0.05 刻み)。v1.7
+  readonly preservesPitch: boolean; // 速度が 1 以外のとき音程を保つか。v1.7
   readonly seeking: boolean;      // シーク先のデータ待ち (UI はスピナー等を表示)
   readonly error: PlaybackError | null;
 };
@@ -77,31 +80,39 @@ export type AudioEngine = {
   readonly stop: () => void;                    // 先頭へ戻して停止
   readonly seek: (timeSec: number) => void;
   readonly setVolume: (volume: number) => void; // 0-1
+  readonly setRate: (rate: number) => void;     // 0.25-2 に丸めて即時反映。v1.7
+  readonly setPreservesPitch: (enabled: boolean) => void; // v1.7
   readonly close: () => void;                   // AudioContext.close まで。以後の呼び出しは no-op
   readonly getSnapshot: () => PlaybackSnapshot;
   readonly subscribe: (listener: () => void) => () => void;
   readonly getSpectrums: () => Uint8Array | null; // 高頻度用。snapshot を経由しない
 };
 
-export const createAudioEngine = (url: string, options?: { volume?: number }): AudioEngine => { ... };
+export const createAudioEngine = (
+  url: string,
+  options?: { volume?: number; rate?: number; preservesPitch?: boolean }, // rate / preservesPitch は v1.7
+): AudioEngine => { ... };
 ```
 
 設計上の決定:
 
 - **AudioPlayer3 と異なり、ファクトリーは同期で即座にエンジンを返します**。`canplay` 待ちの Promise ファクトリー (audio-player 方式) だと「生成待ちの間はエラーも状態も外から見えない」問題があるため、生成直後から `state: "loading"` の snapshot を返し、open 失敗も `error` イベントとして通知します。呼び出し側 (PlayerProvider) の分岐が「成功 / 失敗」から「snapshot を見るだけ」に単純化されます
 - getter/setter (`engine.currentTime = 30`) は採用しません。書き込みはメソッド (`seek`)、読み取りは snapshot に統一し、「読むたびに値が変わる live view」をなくします
+- `rate` / `preservesPitch` と `setRate` / `setPreservesPitch` は v1.7 で追加しました (2026-11-03 改訂)。`setRate` は `clampPlaybackRate` (`src/shared/`) で範囲と刻みに丸め、`setVolume` と同じく `closed` 以外 (`error` 中も) で受け付けます。既定は速度 1、ピッチ維持 ON です ([再生速度](../../v1.7/architecture/playback-rate.md))
 
 ## snapshot と通知の実装
 
 ```ts
 // playbackReducer/ — 純関数の状態コア
-export type InternalPlayback = { state; intendedPlaying; currentTime; duration; volume; pendingSeekTime; error; closed };
+export type InternalPlayback = { state; intendedPlaying; currentTime; duration; volume; rate; preservesPitch; pendingSeekTime; error; closed };
 export type PlaybackEvent =
   | { type: "loaded" } | { type: "playRequested" } | { type: "playStarted" }
   | { type: "paused" } | { type: "stopped" } | { type: "ended" }
   | { type: "seekStarted"; time } | { type: "seekFinished" }
   | { type: "tick"; time } | { type: "durationChanged"; duration }
-  | { type: "failed"; error } | { type: "volumeChanged"; volume } | { type: "closed" };
+  | { type: "failed"; error } | { type: "volumeChanged"; volume }
+  | { type: "rateChanged"; rate } | { type: "preservesPitchChanged"; enabled } // v1.7
+  | { type: "closed" };
 export const reducePlayback = (internal, event) => { ... };      // 純関数
 export const snapshotOfPlayback = (internal) => { ... };          // 射影
 
@@ -150,7 +161,7 @@ export const createAudioEngine = (url, options = {}): AudioEngine =>
 - エンジンは「**1 つの音源 URL の再生**」だけを知ります。キュー、次曲、曲メタデータは一切持ちません
 - 曲の切り替え = 旧エンジン `close()` → 新エンジン生成。エンジンの使い回しはしません (AudioContext ごと作り直すことでノードグラフの状態リセットを保証)
 - streaming の後始末 (`close()`): `pause()` → リスナー除去 → `MediaElementAudioSourceNode.disconnect()` → `src` 除去 + `load()` (メモリー解放)
-- 音量はアプリ状態 (PlayerProvider) が正で、エンジン生成時に `options.volume` で引き継ぎます
+- 音量はアプリ状態 (PlayerProvider の engine host) が正で、エンジン生成時に `options.volume` で引き継ぎます。再生速度とピッチ維持も同じく engine host が持ち、`options.rate` / `options.preservesPitch` で引き継ぎます (v1.7。[再生速度](../../v1.7/architecture/playback-rate.md))
 - `ended` → 次曲、エラー時のキュー継続判断 (次曲へスキップするか停止するか) は PlayerProvider の責務です。v1.0 では**エラー時は自動スキップせず停止して表示**します (連続失敗によるキュー全消化を避けるため)
 
 ## テスト
