@@ -569,9 +569,11 @@ export type SetPlaylistPictureOk = {
 // ---------------------------------------------------------------------------
 
 /**
- * Playback modes and volume persisted in `AppSettings.playback` and restored
- * on next launch (`docs/specs/v1.5/architecture/playback-settings.md`). The
- * Renderer always saves all three; Main replaces the object wholesale.
+ * Playback modes, volume, rate and pitch preservation persisted in
+ * `AppSettings.playback` and restored on next launch
+ * (`docs/specs/v1.5/architecture/playback-settings.md`,
+ * `docs/specs/v1.7/architecture/playback-settings.md`). The Renderer always
+ * saves all five; Main replaces the object wholesale.
  */
 export type PlaybackSettings = {
   /** Shuffle mode of the PlayerBar toggle. */
@@ -583,6 +585,13 @@ export type PlaybackSettings = {
    * saved, so a muted launch unmutes to full volume).
    */
   readonly volume: number;
+  /** Playback rate in `[0.25, 2]`; `1` is the original speed. */
+  readonly rate: number;
+  /**
+   * Keep the pitch while `rate` differs from `1`
+   * (`HTMLMediaElement.preservesPitch`); on by default.
+   */
+  readonly preservesPitch: boolean;
 };
 
 /** Color theme preference persisted in `AppSettings.theme`. */

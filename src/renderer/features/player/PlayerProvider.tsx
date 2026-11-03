@@ -148,7 +148,7 @@ const EngineHostContext = createContext<EngineHost | null>(null);
  * @param host - Engine host (owns the active engine + volume).
  * @param stateRef - Always-current player state (updated during render).
  * @param dispatch - The reducer dispatch.
- * @param savePlayback - Persists the modes and volume after a change.
+ * @param savePlayback - Persists the modes, volume, rate and pitch preservation after a change.
  * @returns The commands; created once per provider mount.
  */
 const createCommands = (
@@ -239,17 +239,23 @@ const createCommands = (
   };
 
   /**
-   * Save the modes and volume after one of them changed
-   * (`docs/specs/v1.5/architecture/playback-settings.md`): always all three,
-   * since Main replaces `playback` wholesale. The volume is read from the
-   * host, which is updated synchronously. Fire-and-forget: a failed save
-   * never rolls the state back.
+   * Save the modes, volume, rate and pitch preservation after one of them
+   * changed (`docs/specs/v1.5/architecture/playback-settings.md`,
+   * `docs/specs/v1.7/architecture/playback-settings.md`): always all five,
+   * since Main replaces `playback` wholesale. The host-level values are
+   * read from the host, which is updated synchronously. Fire-and-forget: a
+   * failed save never rolls the state back.
    */
   const persistPlayback = (
     changed: Partial<Pick<PlaybackSettings, "shuffle" | "repeat">>,
   ): void => {
     savedModes = { ...savedModes, ...changed };
-    savePlayback({ ...savedModes, volume: host.getVolume() });
+    savePlayback({
+      ...savedModes,
+      volume: host.getVolume(),
+      rate: host.getRate(),
+      preservesPitch: host.getPreservesPitch(),
+    });
   };
 
   const commands: PlayerCommands = {
@@ -388,9 +394,9 @@ const createCommands = (
     },
 
     // Rate and pitch live in the host only (not in PlayerState, not in the
-    // native menu): the engine applies them at once and the host keeps them
-    // for the next track. Saving the two values is Phase 3; the call is
-    // here already so the hook-up is in place.
+    // native menu): the engine applies them at once, the host keeps them
+    // for the next track, and every change saves (slider drags included;
+    // Main's debounce collapses the disk writes).
     setPlaybackRate: (rate) => {
       host.setRate(rate);
       persistPlayback({});
@@ -439,8 +445,8 @@ type Props = {
    */
   readonly initialPlayback?: PlaybackSettings;
   /**
-   * Persists the modes and volume after a change (production:
-   * `mp:settings:set`; tests substitute). Called with all three values.
+   * Persists the modes, volume, rate and pitch preservation after a change (production:
+   * `mp:settings:set`; tests substitute). Called with all five values.
    * Read once on mount, like `initialPlayback`: the commands are created
    * once and keep the first function.
    */
@@ -477,9 +483,14 @@ export const PlayerProvider = ({
   stateRef.current = state;
 
   const [host] = useState(() => {
-    // The restored volume lives in the host until the first engine exists,
-    // so the volume popover shows it before anything plays.
-    const created = createEngineHost({ volume: initialPlayback?.volume });
+    // The restored volume, rate and pitch preservation live in the host
+    // until the first engine exists, so the volume and speed popovers show
+    // them before anything plays and the first engine inherits them.
+    const created = createEngineHost({
+      volume: initialPlayback?.volume,
+      rate: initialPlayback?.rate,
+      preservesPitch: initialPlayback?.preservesPitch,
+    });
     // Seed the native menu with the modes the reducer started with (the
     // persisted ones from `initialPlayback`), then keep its playback state
     // in sync; `menuStateSync` drops the pushes where nothing changed

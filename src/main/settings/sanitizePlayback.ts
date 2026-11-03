@@ -1,3 +1,4 @@
+import { clampPlaybackRate } from "../../shared/clampPlaybackRate";
 import type { PlaybackSettings, RepeatMode } from "../ipc/types";
 import { asFiniteNumber } from "./asFiniteNumber";
 
@@ -6,13 +7,18 @@ const REPEAT_MODES: readonly RepeatMode[] = ["off", "all", "one"];
 
 /**
  * Validate an unknown value as `AppSettings["playback"]`
- * (`docs/specs/v1.5/architecture/playback-settings.md`).
+ * (`docs/specs/v1.5/architecture/playback-settings.md`,
+ * `docs/specs/v1.7/architecture/playback-settings.md`).
  *
  * Unlike `sanitizeSidebar`, one broken field does not discard the rest:
  * each falls back to its own default (`shuffle: false`, `repeat: "off"`,
- * `volume: 1`), and a finite volume is clamped into `[0, 1]` like
- * `clampVolume` on the Renderer side. Only a non-object discards the whole
- * value.
+ * `volume: 1`, `rate: 1`, `preservesPitch: true`). A finite volume is
+ * clamped into `[0, 1]` like `clampVolume` on the Renderer side, and a
+ * finite rate goes through the shared `clampPlaybackRate` (range and step
+ * grid). `preservesPitch` is `false` only when saved as exactly `false`:
+ * the opposite direction from `shuffle`, because its default is on. A
+ * v1.6 file without the two newer fields thus loads with the defaults.
+ * Only a non-object discards the whole value.
  *
  * @param value - Raw `playback` value from disk or a patch.
  * @returns The validated settings, or `undefined` for a non-object.
@@ -32,5 +38,7 @@ export const sanitizePlayback = (
       ? (raw.repeat as RepeatMode)
       : "off",
     volume: volume === undefined ? 1 : Math.min(1, Math.max(0, volume)),
+    rate: clampPlaybackRate(asFiniteNumber(raw.rate) ?? 1),
+    preservesPitch: raw.preservesPitch !== false,
   };
 };
