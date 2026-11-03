@@ -23,7 +23,7 @@ const other: Locale = locale === "en" ? "ja" : "en";
 <a
   href={getRelativeLocaleUrl(other, path)}
   hreflang={other}
-  class="inline-flex h-8 items-center rounded-full px-2 text-sm font-medium whitespace-nowrap text-foreground transition-glow hover:glow-lamp"
+  class="inline-flex h-8 items-center rounded-full border border-transparent px-2 text-sm font-medium whitespace-nowrap text-foreground transition-glow hover:glow-ring"
 >
   <span lang={other} class="xs:hidden">
     {t("header.switchLocale.short")}

@@ -1,6 +1,6 @@
 # テーマとスタイル
 
-アプリの配色を踏襲したダーク / ライト テーマと、hover 時の glow 効果の実装方針です。
+アプリの配色を踏襲したダーク / ライト テーマと、hover 時の glow 効果 (枠線 + glow と角丸矩形の塗り) の実装方針です。
 
 ## 配色トークンの共有
 
@@ -28,17 +28,18 @@
 
 ## glow 効果
 
-アプリの hover 効果をそのまま CSS に写します。アプリには 2 種類あり、サイトでも使い分けます。
+アプリの hover 効果をそのまま CSS に写します。アプリには 3 種類あり、サイトでも使い分けます (2026-11-03 改訂。v1.4.0 までのアプリの lamp glow を写していた `glow-lamp` は v1.7 で廃止し、アプリの現在の ring / tint に揃えた。[公式サイトのヘッダー](../../v1.7/features/web-header.md))。
 
 | 種類 | アプリでの用途 | サイトでの用途 | CSS |
 | --- | --- | --- | --- |
-| Lamp glow (v1.4.0 までの `GlowIconButton`。アプリは v1.4.1 で tint / 円の border へ移行したが、サイトは lamp のまま) | プレーヤー バーとツールバーのアイコン ボタン (当時) | ヘッダーのアイコン ボタン (テーマ切り替え、GitHub リンク)、ナビゲーション リンク | `filter: drop-shadow(0 0 5px var(--foreground)) drop-shadow(0 0 12px color-mix(in oklch, var(--foreground) 60%, transparent))` を svg (またはテキスト) に適用。`transition: filter 200ms` |
-| Border glow (`CircleIconButton`、`Button` の outline / secondary) | 枠線つきのボタン、フォーム部品 | ダウンロード ボタン、カード | `border-color: var(--foreground)` と `box-shadow: 0 0 5px 1px color-mix(in oklch, var(--foreground) 60%, transparent)`。`transition: color, background-color, border-color, box-shadow 200ms` |
+| Ring (`IconButton` の `ring`) | プレーヤー バーのボタン、曲行のメニュー ボタン | ヘッダーのページ リンク (pill)、言語切り替え (pill)、テーマ切り替えと GitHub リンク (円)、日本語版の案内バナーの閉じるボタン (円) | 要素は常に `border border-transparent` を持ち、hover で `border-color: var(--foreground)` と `box-shadow: 0 0 5px 1px color-mix(in oklch, var(--foreground) 60%, transparent)` (`glow-ring`)。`transition: border-color, box-shadow 200ms` |
+| Tint (`IconButton` の `tint`) | サイドバーのツール ボタン、コンテンツ ツールバーのメニュー、一般のアイコン ボタン | ヘッダー左端のアイコンと製品名 | `hover:bg-foreground/10` の角丸矩形。transition は付けない (塗りの transition はちらつくため、アプリでも付けていない) |
+| Border glow (`CircleIconButton`、`Button` の outline / secondary) | 枠線つきのボタン、フォーム部品 | ダウンロード ボタン、カード | `border-color: var(--foreground)` と `box-shadow: 0 0 0 1px var(--foreground), 0 0 5px 1px color-mix(in oklch, var(--foreground) 60%, transparent)` (`glow-border`。枠線が常にあるため内側の 1px の線を含む)。`transition: border-color, box-shadow 200ms` |
 
-- `Button` の `default` variant (塗りつぶし) は `--primary` で光る: `box-shadow: 0 0 5px 1px color-mix(in oklch, var(--primary) 60%, transparent)`。ダウンロード ページの主ボタンに使う
-- ナビゲーション リンクの現在ページは、アプリのサイドバーの active タブと同じく塗りつぶし (`bg-foreground text-background`) で示し、hover の glow は付けたままにする
+- `Button` の `default` variant (塗りつぶし) は `--primary` で光る: `box-shadow: 0 0 5px 1px color-mix(in oklch, var(--primary) 60%, transparent)` (`glow-primary`)。ダウンロード ページの主ボタンに使う
+- ナビゲーション リンクの現在ページは、アプリのサイドバーの active タブと同じく塗りつぶし (`bg-foreground text-background`) で示し、hover では枠線が `foreground` になるため glow だけが足される
 - `prefers-reduced-motion: reduce` では transition を切る (glow 自体は残す)
-- Tailwind のユーティリティとして `@utility glow-lamp` / `@utility glow-border` を `global.css` に定義し、`.astro` 側では `hover:glow-lamp` のように使う
+- Tailwind のユーティリティとして `@utility glow-ring` / `@utility glow-border` / `@utility glow-primary` と `@utility transition-glow` (対象は `border-color, box-shadow`) を `global.css` に定義し、`.astro` 側では `hover:glow-ring` のように使う。`transition-glow` は ring の要素に付け、tint の要素には付けない
 
 ## その他の外観
 

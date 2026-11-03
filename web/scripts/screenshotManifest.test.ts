@@ -1,5 +1,10 @@
 import { expect, it } from "vitest";
-import { fitsInside, isScene, parseManifest } from "./screenshotManifest";
+import {
+  fitsInside,
+  isScene,
+  parseManifest,
+  SCENES,
+} from "./screenshotManifest";
 
 it("parses mask and crop rectangles per scene", () => {
   const manifest = parseManifest(
@@ -36,6 +41,21 @@ it("rejects a scene name outside the spec", () => {
   expect(() => parseManifest(JSON.stringify({ hero: {} }))).toThrow();
   expect(isScene("artists")).toBe(true);
   expect(isScene("Artists")).toBe(false);
+});
+
+it("accepts every screen in the dark and the light theme, nothing else", () => {
+  expect(SCENES).toHaveLength(14);
+  expect(isScene("artists-light")).toBe(true);
+  expect(isScene("player-light")).toBe(true);
+  expect(isScene("artists-dark")).toBe(false);
+  expect(isScene("light-artists")).toBe(false);
+  expect(isScene("artists_light")).toBe(false);
+  const manifest = parseManifest(
+    JSON.stringify({
+      "player-light": { crop: { x: 0, y: 784, width: 2784, height: 1008 } },
+    }),
+  );
+  expect(manifest["player-light"]?.crop?.height).toBe(1008);
 });
 
 it("checks that a rectangle fits inside the image", () => {

@@ -3,13 +3,19 @@ import type { ImageOutputFormat } from "astro";
 import { Picture } from "astro:assets";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import albums from "../assets/screenshots/albums.png";
+import albumsLight from "../assets/screenshots/albums-light.png";
 import artists from "../assets/screenshots/artists.png";
 import artistsLight from "../assets/screenshots/artists-light.png";
 import favorites from "../assets/screenshots/favorites.png";
+import favoritesLight from "../assets/screenshots/favorites-light.png";
 import musicInfo from "../assets/screenshots/music-info.png";
+import musicInfoLight from "../assets/screenshots/music-info-light.png";
 import player from "../assets/screenshots/player.png";
+import playerLight from "../assets/screenshots/player-light.png";
 import playlists from "../assets/screenshots/playlists.png";
+import playlistsLight from "../assets/screenshots/playlists-light.png";
 import settings from "../assets/screenshots/settings.png";
+import settingsLight from "../assets/screenshots/settings-light.png";
 import { tFor } from "../i18n/t";
 import type { Locale } from "../i18n/types";
 import Base from "../layouts/Base.astro";
@@ -32,18 +38,22 @@ const downloadUrl = getRelativeLocaleUrl(locale, "download");
 /**
  * Features in display order (docs/specs/web/features/top-page.md). The key
  * names the dictionary entries `home.feature.<key>.title` / `.body` /
- * `.alt` and the screenshot comes from `src/assets/screenshots/`.
+ * `.alt`; every feature shows the same screen in the dark and the light
+ * theme (`<scene>.png` / `<scene>-light.png` in `src/assets/screenshots/`,
+ * docs/specs/v1.7/features/web-feature-layout.md).
  */
 const features = [
-  { key: "artists", image: artists },
-  { key: "albums", image: albums },
-  { key: "playlists", image: playlists },
-  { key: "favorites", image: favorites },
-  { key: "metadata", image: musicInfo },
-  { key: "player", image: player },
-  { key: "theme", image: artistsLight },
-  { key: "language", image: settings },
+  { key: "artists", dark: artists, light: artistsLight },
+  { key: "albums", dark: albums, light: albumsLight },
+  { key: "playlists", dark: playlists, light: playlistsLight },
+  { key: "favorites", dark: favorites, light: favoritesLight },
+  { key: "metadata", dark: musicInfo, light: musicInfoLight },
+  { key: "player", dark: player, light: playerLight },
+  { key: "settings", dark: settings, light: settingsLight },
 ] as const;
+
+/** The two themes of a feature, dark first (left from `md` up). */
+const THEMES = ["dark", "light"] as const;
 
 /** Rendered widths of the screenshots; the 2x captures are 2784px wide. */
 const WIDTHS = [640, 1280, 2560];
@@ -60,9 +70,12 @@ const FALLBACK_FORMAT: ImageOutputFormat = "webp";
  */
 const HERO_SIZES =
   "(min-width: 1184px) 1120px, (min-width: 640px) calc(100vw - 64px), calc(100vw - 32px)";
-/** A feature image takes half the content column (minus the gap) from `md` up. */
+/**
+ * A feature image takes half the content column minus half the 24px grid
+ * gap (`md:gap-6`) from `md` up: (1120 - 24) / 2 at the maximum width.
+ */
 const FEATURE_SIZES =
-  "(min-width: 1184px) 544px, (min-width: 768px) calc(50vw - 48px), (min-width: 640px) calc(100vw - 64px), calc(100vw - 32px)";
+  "(min-width: 1184px) 548px, (min-width: 768px) calc(50vw - 44px), (min-width: 640px) calc(100vw - 64px), calc(100vw - 32px)";
 ---
 
 <Base
@@ -126,39 +139,49 @@ const FEATURE_SIZES =
   </section>
 
   {/*
-    Features: heading, two or three sentences and a screenshot each. From
-    `md` up they sit side by side, alternating sides; below, text then image.
+    Features: heading, two or three sentences, then the same screen in the
+    dark and the light theme. From `md` up the two screenshots sit side by
+    side (dark left); below, they stack dark then light.
   */}
   <section class="flex flex-col gap-10">
     <h2 class="text-center text-3xl font-bold tracking-tight">
       {t("home.features.title")}
     </h2>
-    <ul class="flex flex-col gap-12">
-      {features.map((feature, index) => (
-        <li class="grid items-center gap-6 md:grid-cols-2 md:gap-8">
-          <div
-            class:list={[
-              "flex flex-col gap-3",
-              index % 2 === 1 && "md:order-2",
-            ]}
-          >
-            <h3 class="text-2xl font-semibold tracking-tight">
-              {t(`home.feature.${feature.key}.title`)}
-            </h3>
-            <p class="text-muted-foreground">
-              {t(`home.feature.${feature.key}.body`)}
-            </p>
+    <ul class="flex flex-col gap-14">
+      {features.map((feature) => (
+        <li class="flex flex-col gap-4">
+          <h3 class="text-2xl font-semibold tracking-tight">
+            {t(`home.feature.${feature.key}.title`)}
+          </h3>
+          <p class="max-w-prose text-muted-foreground">
+            {t(`home.feature.${feature.key}.body`)}
+          </p>
+          <div class="grid gap-4 md:grid-cols-2 md:gap-6">
+            {THEMES.map((theme) => (
+              <figure class="flex flex-col gap-2">
+                <Picture
+                  src={feature[theme]}
+                  widths={WIDTHS}
+                  sizes={FEATURE_SIZES}
+                  formats={FORMATS}
+                  fallbackFormat={FALLBACK_FORMAT}
+                  alt={t("home.screenshot.alt", {
+                    alt: t(`home.feature.${feature.key}.alt`),
+                    theme: t(`home.screenshot.${theme}`),
+                  })}
+                  loading="lazy"
+                  class="h-auto w-full"
+                />
+                {/* The theme is already in the alt; keep the caption visual only. */}
+                <figcaption
+                  aria-hidden="true"
+                  class="text-center text-xs text-muted-foreground"
+                >
+                  {t(`home.screenshot.${theme}`)}
+                </figcaption>
+              </figure>
+            ))}
           </div>
-          <Picture
-            src={feature.image}
-            widths={WIDTHS}
-            sizes={FEATURE_SIZES}
-            formats={FORMATS}
-            fallbackFormat={FALLBACK_FORMAT}
-            alt={t(`home.feature.${feature.key}.alt`)}
-            loading="lazy"
-            class="h-auto w-full"
-          />
         </li>
       ))}
     </ul>
