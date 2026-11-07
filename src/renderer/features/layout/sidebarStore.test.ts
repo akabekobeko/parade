@@ -11,7 +11,19 @@ it("starts open with the default width", () => {
   expect(store.getSnapshot()).toEqual({
     open: true,
     width: SIDEBAR_DEFAULT_WIDTH,
+    generation: 0,
   });
+});
+
+it("counts a new showing each time the sidebar is opened again", () => {
+  const store = new SidebarStore(vi.fn());
+  store.toggle();
+  expect(store.getSnapshot().generation).toBe(0);
+  store.toggle();
+  expect(store.getSnapshot().generation).toBe(1);
+  store.toggle();
+  store.toggle();
+  expect(store.getSnapshot().generation).toBe(2);
 });
 
 it("toggles between open and closed", () => {
@@ -67,7 +79,11 @@ it("initializes from persisted settings without saving back", () => {
   const save = vi.fn();
   const store = new SidebarStore(save);
   store.initialize({ open: false, width: 320 });
-  expect(store.getSnapshot()).toEqual({ open: false, width: 320 });
+  expect(store.getSnapshot()).toEqual({
+    open: false,
+    width: 320,
+    generation: 0,
+  });
   expect(save).not.toHaveBeenCalled();
 });
 
@@ -77,5 +93,6 @@ it("keeps the defaults when no settings were persisted", () => {
   expect(store.getSnapshot()).toEqual({
     open: true,
     width: SIDEBAR_DEFAULT_WIDTH,
+    generation: 0,
   });
 });

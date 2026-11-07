@@ -17,3 +17,4 @@ minimumReleaseAgeExclude:
   - '@biomejs/cli-win32-x64@2.5.8'
   - '@akabeko/music-metadata-editor@1.1.0 || 1.1.1 || 1.2.0'
   - prettier@3.9.10
+  - react-resizable-panels@4.19.1
