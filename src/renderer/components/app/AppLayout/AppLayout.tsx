@@ -34,10 +34,13 @@ import { useAppLayout } from "./useAppLayout";
  * OS window controls).
  *
  * The sidebar keeps its pixel width when the window resizes
- * (`preserve-pixel-size`); the width persistence is in `useAppLayout`.
+ * (`preserve-pixel-size`); the width persistence and the per-showing panel
+ * id (which keeps the library from reopening the sidebar at a stale width)
+ * are in `useAppLayout`.
  */
 export const AppLayout = () => {
-  const { sidebar, onSidebarResize, onLayoutChanged } = useAppLayout();
+  const { sidebar, sidebarPanelId, onSidebarResize, onLayoutChanged } =
+    useAppLayout();
   return (
     <div className="flex h-dvh flex-col overflow-hidden">
       <LastViewRecorder />
@@ -49,7 +52,7 @@ export const AppLayout = () => {
         {sidebar.open && (
           <>
             <ResizablePanel
-              id="sidebar"
+              id={sidebarPanelId}
               className="flex min-w-0 flex-col"
               defaultSize={sidebar.width}
               minSize={SIDEBAR_MIN_WIDTH}

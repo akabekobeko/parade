@@ -94,7 +94,7 @@ VS Code / Slack のクロスプラットフォーム UI と、macOS 版 Apple Mu
 
 **最後に表示したビューとセクションごとの選択の復元** — 表示中のセクション (Artists / Albums / Playlists) と、Artists / Playlists それぞれの最後のサイドバー選択 (選択中アーティスト・選択中プレイリスト) を `lastViewStore` (React 外ストア) が持ち、変更のたびに `AppSettings.lastView` (`{ section, artist?, playlist? }`) へ永続化します。サイドバーのタブはこのストアを参照して各セクションの最後の選択へリンクするため、タブを行き来しても選択が保たれます。記録はルート変更を監視する `LastViewRecorder` (セクションのルート表示はその選択のクリア)、起動時の復元はブートストラップの `restoreLastView` が存在確認のうえストアを seed し `createRoot` 前に hash を設定して行うため、既定ルートが一瞬表示されることはありません。hash は `location.hash` への代入ではなく `history.replaceState` で設定し、ユーザー操作のない起動時に履歴項目を追加しません (2026-10-03 追記、issue #270)。選択対象のアーティスト・プレイリストが消えていた場合はその選択だけを落とします。Albums のサイドバー条件は従来どおり `albumFilter` として別途永続化されます。
 
-**サイドバー開閉・幅** — 開閉状態と幅は `sidebarStore` (React 外ストア) が持ち、変更のたびに `AppSettings.sidebar` へ永続化して再起動時に復元します (幅の保存はドラッグ確定時 = `onLayoutChanged`)。閉じている間はサイドバーのアイコンクラスターがコンテンツ領域ツールバーの左端に移り、クラスターの幅・配置を保存済みサイドバー幅と揃えることで、**開閉を操作しても各アイコンの画面上の位置が変わりません**。
+**サイドバー開閉・幅** — 開閉状態と幅は `sidebarStore` (React 外ストア) が持ち、変更のたびに `AppSettings.sidebar` へ永続化して再起動時に復元します (幅の保存はドラッグ確定時 = `onLayoutChanged`)。サイドバーの `ResizablePanel` には表示のたびに新しい `id` (`sidebar-N`、N は `sidebarStore` が数える再表示回数で永続化しない) を与えます。react-resizable-panels は panel id の組み合わせごとに最後に要求された layout (割合) を記憶し、同じ組み合わせが再 mount されると `defaultSize` より優先するため、同じ id のままだとウィンドウをリサイズしてから開閉したときに古い幅との割合で復元され、保存済みの px 幅とずれるからです。id を変えることで再表示は常に `defaultSize` (保存済みの px 幅) から始まります (2026-11-07 追記、react-resizable-panels 4.19.1 への更新時)。閉じている間はサイドバーのアイコンクラスターがコンテンツ領域ツールバーの左端に移り、クラスターの幅・配置を保存済みサイドバー幅と揃えることで、**開閉を操作しても各アイコンの画面上の位置が変わりません**。
 
 ## ブートストラップと Provider 構成
 

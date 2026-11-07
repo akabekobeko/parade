@@ -13,12 +13,24 @@ import type { AppSettings } from "@mp/ipc";
  * sidebar layout survives a restart.
  */
 
+/** The persisted part of the sidebar state (`AppSettings.sidebar`). */
+export type SidebarSettings = NonNullable<AppSettings["sidebar"]>;
+
 /** UI-facing snapshot of the sidebar column. */
 export type SidebarSnapshot = {
   /** Whether the sidebar is visible. */
   readonly open: boolean;
   /** Sidebar column width in pixels. */
   readonly width: number;
+  /**
+   * How many times the sidebar has been shown again in this session (0 for
+   * the first showing). Not persisted. `AppLayout` derives the id of the
+   * sidebar panel from it so that react-resizable-panels, which remembers the
+   * last requested layout per set of panel ids and prefers it over
+   * `defaultSize` when the same set mounts again, sizes every reopen from the
+   * persisted width instead of a percentage of an earlier window width.
+   */
+  readonly generation: number;
 };
 
 /** Width on first launch — matches the previous fixed `w-56` (14rem). */
@@ -36,14 +48,18 @@ const clampWidth = (width: number): number =>
  * the injected settings saver.
  */
 export class SidebarStore {
-  #snapshot: SidebarSnapshot = { open: true, width: SIDEBAR_DEFAULT_WIDTH };
+  #snapshot: SidebarSnapshot = {
+    open: true,
+    width: SIDEBAR_DEFAULT_WIDTH,
+    generation: 0,
+  };
   #listeners = new Set<() => void>();
-  #save: (sidebar: SidebarSnapshot) => void;
+  #save: (sidebar: SidebarSettings) => void;
 
   /**
    * @param save - Persists a change (production: `mp:settings:set`).
    */
-  constructor(save: (sidebar: SidebarSnapshot) => void) {
+  constructor(save: (sidebar: SidebarSettings) => void) {
     this.#save = save;
   }
 
@@ -69,12 +85,24 @@ export class SidebarStore {
       return;
     }
 
-    this.#snapshot = { open: sidebar.open, width: clampWidth(sidebar.width) };
+    this.#snapshot = {
+      ...this.#snapshot,
+      open: sidebar.open,
+      width: clampWidth(sidebar.width),
+    };
   }
 
-  /** Flip the sidebar between open and closed, and persist the change. */
+  /**
+   * Flip the sidebar between open and closed, and persist the change. Opening
+   * counts as a new showing (see `SidebarSnapshot.generation`).
+   */
   toggle(): void {
-    this.#setSnapshot({ ...this.#snapshot, open: !this.#snapshot.open });
+    const { open, generation } = this.#snapshot;
+    this.#setSnapshot({
+      ...this.#snapshot,
+      open: !open,
+      generation: open ? generation : generation + 1,
+    });
   }
 
   /**
@@ -93,7 +121,7 @@ export class SidebarStore {
 
   #setSnapshot(next: SidebarSnapshot): void {
     this.#snapshot = next;
-    this.#save(next);
+    this.#save({ open: next.open, width: next.width });
     for (const listener of [...this.#listeners]) {
       listener();
     }
