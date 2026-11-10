@@ -20,6 +20,10 @@ import { useEffect, useLayoutEffect } from "react";
 export const markStartup = (label: string, at: number = Date.now()): void => {
   if (!__STARTUP_TRACE__) return;
   console.info(`[startup] ${label} ${Math.round(at)}`);
+  // Also a User Timing mark, so the label shows up in a Chromium trace
+  // (--trace-startup) and in the DevTools Performance panel next to the
+  // style, layout and paint work it is being compared with.
+  performance.mark(label, { startTime: at - performance.timeOrigin });
 };
 
 /**

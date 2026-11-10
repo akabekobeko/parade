@@ -25,9 +25,12 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: "chrome156",
-    // The trace build lands in dist-trace/ (see src/main/vite.config.ts).
+    // The trace build lands in dist-trace/ (see src/main/vite.config.ts), with
+    // a source map so a Chromium trace or a CPU profile of the minified bundle
+    // can be mapped back to the sources.
     outDir:
       mode === "trace" ? "../../dist-trace/renderer" : "../../dist/renderer",
+    sourcemap: mode === "trace",
     emptyOutDir: true,
   },
 }));
