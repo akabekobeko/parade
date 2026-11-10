@@ -4,23 +4,11 @@ import { useEffect } from "react";
  * Renderer side of the startup trace (`src/main/startupTrace.ts`, README
  * "Startup Trace").
  *
- * The flag reaches the Renderer through the preload
- * (`window.mp.app.startupTraceEnabled`). Marks are emitted as console
+ * Compiled in only by `pnpm build:trace`, which defines `__STARTUP_TRACE__`
+ * as `true` for the Renderer bundle as well. Marks are emitted as console
  * messages of the form `[startup] <label> <epochMs>`, which the main process
  * parses; keep the two sides in sync.
  */
-
-/**
- * Whether tracing is on. Read lazily: tests stub `window.mp` partially (no
- * `app`), and Node has no `window` at all.
- *
- * @returns `true` when the main process asked for the trace.
- */
-const isEnabled = (): boolean => {
-  const app: { readonly startupTraceEnabled?: boolean } | undefined =
-    globalThis.window?.mp?.app;
-  return app?.startupTraceEnabled === true;
-};
 
 /**
  * Emit a startup mark.
@@ -29,7 +17,7 @@ const isEnabled = (): boolean => {
  * @param at - Epoch ms of the event; defaults to now.
  */
 export const markStartup = (label: string, at: number = Date.now()): void => {
-  if (!isEnabled()) return;
+  if (!__STARTUP_TRACE__) return;
   console.info(`[startup] ${label} ${Math.round(at)}`);
 };
 
@@ -43,7 +31,7 @@ const emitted = new Set<string>();
  * @returns `true` when the mark was emitted by this call.
  */
 export const markStartupOnce = (label: string): boolean => {
-  if (!isEnabled() || emitted.has(label)) return false;
+  if (!__STARTUP_TRACE__ || emitted.has(label)) return false;
   emitted.add(label);
   markStartup(label);
   return true;
@@ -60,6 +48,7 @@ export const markStartupOnce = (label: string): boolean => {
  */
 export const useStartupMarkWhen = (label: string, ready: boolean): void => {
   useEffect(() => {
+    if (!__STARTUP_TRACE__) return;
     if (!ready || !markStartupOnce(`${label}-committed`)) return;
     let frame = requestAnimationFrame(() => {
       frame = requestAnimationFrame(() => {

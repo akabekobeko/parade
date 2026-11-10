@@ -40,5 +40,10 @@ const tracedFetch: QueryFetcher = (key) => {
   return pending;
 };
 
-/** The app-wide library query store. */
-export const libraryStore = createLibraryStore(tracedFetch);
+/**
+ * The app-wide library query store. The regular build selects the plain
+ * fetcher, so the tracing wrapper is dropped from the bundle.
+ */
+export const libraryStore = createLibraryStore(
+  __STARTUP_TRACE__ ? tracedFetch : fetchLibraryQuery,
+);

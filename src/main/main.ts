@@ -1,11 +1,10 @@
 // First on purpose: records the first main-process JS line before the other
-// imports are evaluated (PARADE_STARTUP_TRACE, see startupTrace.ts).
+// imports are evaluated (startup trace build, see startupTrace.ts).
 import "./startupTrace";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow, dialog, nativeTheme, screen } from "electron";
 import { resolveLocale } from "../shared/locales/resolveLocale";
-import { STARTUP_TRACE_ARGUMENT } from "../shared/startupTraceArgument";
 import { buildWindowChrome } from "./buildWindowChrome";
 import { closeDatabase, openDatabase } from "./db/connection";
 import { buildStartupErrorContent } from "./db/startupError";
@@ -23,11 +22,7 @@ import {
   initializeSettings,
   updateSettings,
 } from "./settings/settingsManager";
-import {
-  isStartupTraceEnabled,
-  markStartup,
-  traceWindowStartup,
-} from "./startupTrace";
+import { markStartup, traceWindowStartup } from "./startupTrace";
 import { resolveWindowBounds } from "./windowState";
 
 /** `productName` from package.json, injected at build time via Vite `define`. */
@@ -106,10 +101,6 @@ function createWindow(): void {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
-      // Hands the startup-trace flag to the preload (README "Startup Trace").
-      additionalArguments: isStartupTraceEnabled()
-        ? [STARTUP_TRACE_ARGUMENT]
-        : [],
     },
   });
   markStartup("main:browser-window-constructed");

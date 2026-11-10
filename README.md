@@ -132,14 +132,14 @@ Diagnostics that help while developing but must not ship (request logs, `console
 
 ## Startup Trace
 
-Set `PARADE_STARTUP_TRACE=1` to print a startup timeline to stdout: the elapsed time since the OS created the process at each milestone of the main process (first JS line, `ready`, DB open, window creation), the page load, and the Renderer (module evaluation, settings, first React commit, the Artist view's queries and their first paint). The flag is a runtime check in `src/main/startupTrace.ts`, so a production bundle and the packaged app can be measured as they ship:
+`pnpm build:trace` builds the app with a startup timeline printed to stdout: the elapsed time since the OS created the process at each milestone of the main process (first JS line, `ready`, DB open, window creation), the page load, and the Renderer (module evaluation, settings, first React commit, the Artist view's queries and their first paint).
 
 ```sh
-pnpm build
-PARADE_STARTUP_TRACE=1 ./node_modules/.bin/electron dist/main/main.js
+pnpm build:trace
+./node_modules/.bin/electron dist/main/main.js
 ```
 
-The main process hands the flag to the Renderer through `webPreferences.additionalArguments` and the preload (`window.mp.app.startupTraceEnabled`); the Renderer then emits its marks as `console.info` messages (`src/renderer/startupMark.tsx`) that the main process prints on the same time axis. Without the flag neither side emits anything. Add `PARADE_USER_DATA_DIR` (see Demo Mode) to measure against the demo library instead of the real one.
+The script runs the regular production builds with `--mode trace`, which defines the build-time constant `__STARTUP_TRACE__` as `true` in the main and Renderer bundles (`src/main/vite.config.ts`, `src/renderer/vite.config.ts`). `pnpm build` / `pnpm package` define it as `false`, so the bundler removes the trace logic (`src/main/startupTrace.ts`, `src/renderer/startupMark.tsx`) together with the mark calls spread through the app; at most a few short label strings remain in the shipped bundles. The trace mode is still a production build in every other respect, so the numbers describe what ships. The Renderer emits its marks as `console.info` messages that the main process prints on the same time axis. Add `PARADE_USER_DATA_DIR` (see Demo Mode) to measure against the demo library instead of the real one.
 
 ## Adding shadcn/ui Components
 

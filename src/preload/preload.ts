@@ -10,7 +10,6 @@ import type {
   UpdateProgressPayload,
   WindowFullScreenChangedPayload,
 } from "../main/ipc/types";
-import { STARTUP_TRACE_ARGUMENT } from "../shared/startupTraceArgument";
 
 /**
  * Wrap `ipcRenderer.on` for a push channel and hand back the unsubscribe
@@ -44,8 +43,6 @@ const subscribe = <T>(
 const buildBridge = (): MpBridge => ({
   app: {
     getVersions: () => ipcRenderer.invoke(IpcKeys.GetVersions),
-    // Appended by the main process via webPreferences.additionalArguments.
-    startupTraceEnabled: process.argv.includes(STARTUP_TRACE_ARGUMENT),
     openExternal: (request) =>
       ipcRenderer.invoke(IpcKeys.OpenExternal, request),
   },

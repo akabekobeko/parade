@@ -34,6 +34,10 @@ export default defineConfig(({ mode }) => {
     define: {
       __APP_PRODUCT_NAME__: JSON.stringify(pkg.productName ?? pkg.name),
       __APP_VERSION__: JSON.stringify(pkg.version),
+      // Startup trace (README "Startup Trace"): compiled in by
+      // `pnpm build:trace` only. The trace mode is still a production build
+      // (see nodeEnvOf), so the numbers describe what ships.
+      __STARTUP_TRACE__: JSON.stringify(mode === "trace"),
     },
     build: {
       target: "node24",

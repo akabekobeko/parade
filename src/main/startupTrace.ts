@@ -4,9 +4,11 @@ import type { BrowserWindow } from "electron";
  * Startup timeline tracing for performance measurement (README "Startup
  * Trace").
  *
- * Enabled by `PARADE_STARTUP_TRACE=1`. This is a runtime check on purpose
- * (not `import.meta.env.DEV`), so a production bundle and the packaged app
- * can be measured as they ship.
+ * Compiled in only by `pnpm build:trace` (`vite build --mode trace`), which
+ * defines `__STARTUP_TRACE__` as `true`; the regular build defines it as
+ * `false`, so the bundler drops the bodies below and the mark calls in the
+ * app become no-ops. The trace build is otherwise a production build, so
+ * the numbers describe what ships.
  *
  * Every mark is printed as the elapsed wall-clock time since the OS created
  * the process, so the Electron and Node bootstrap shows up as the offset of
@@ -16,25 +18,15 @@ import type { BrowserWindow } from "electron";
  * appear slightly out of order relative to the main-process marks.
  */
 
-const enabled = process.env.PARADE_STARTUP_TRACE === "1";
-
-/**
- * Whether the trace is on; `createWindow` hands the flag to the Renderer.
- *
- * @returns `true` when `PARADE_STARTUP_TRACE=1`.
- */
-export function isStartupTraceEnabled(): boolean {
-  return enabled;
-}
-
 /**
  * Process creation time in epoch ms; falls back to module evaluation. The
  * Electron extension is absent under plain Node (vitest), hence the guard.
  */
-const origin =
-  (typeof process.getCreationTime === "function"
-    ? process.getCreationTime()
-    : null) ?? Date.now();
+const origin = __STARTUP_TRACE__
+  ? ((typeof process.getCreationTime === "function"
+      ? process.getCreationTime()
+      : null) ?? Date.now())
+  : 0;
 
 /**
  * Print a startup mark.
@@ -43,7 +35,7 @@ const origin =
  * @param at - Epoch ms of the event; defaults to now.
  */
 export function markStartup(label: string, at: number = Date.now()): void {
-  if (!enabled) return;
+  if (!__STARTUP_TRACE__) return;
   const elapsed = (at - origin).toFixed(0).padStart(6);
   console.log(`[startup] ${elapsed} ms  ${label}`);
 }
@@ -62,7 +54,7 @@ export function markStartupOnce(
   label: string,
   at: number = Date.now(),
 ): boolean {
-  if (!enabled || emitted.has(label)) return false;
+  if (!__STARTUP_TRACE__ || emitted.has(label)) return false;
   emitted.add(label);
   markStartup(label, at);
   return true;
@@ -82,7 +74,7 @@ const RENDERER_MARK = /^\[startup\] (\S+) (\d+(?:\.\d+)?)$/;
  * @param window - The main window.
  */
 export function traceWindowStartup(window: BrowserWindow): void {
-  if (!enabled) return;
+  if (!__STARTUP_TRACE__) return;
   const { webContents } = window;
   webContents.once("did-start-loading", () => {
     markStartup("renderer:did-start-loading");
