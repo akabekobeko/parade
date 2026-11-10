@@ -1,5 +1,6 @@
 import { Stack } from "@/components/app/stacks";
 import { useT } from "@/features/i18n/useT";
+import { useStartupMarkWhen } from "@/startupMark";
 import { AlbumHeaderRow } from "./AlbumHeaderRow";
 import { ArtistHeader } from "./ArtistHeader";
 import { ArtistMusicRow } from "./ArtistMusicRow";
@@ -42,6 +43,10 @@ export const ArtistContent = ({ artistName }: Props) => {
     playingStateOf,
     activeAlbumKey,
   } = useArtistContent(artistName);
+  useStartupMarkWhen(
+    "renderer:artist-content",
+    musicsState.status === "success",
+  );
 
   return (
     <Stack className="h-full gap-0">

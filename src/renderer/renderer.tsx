@@ -27,6 +27,11 @@ import {
 import { applyFullScreenState } from "./libs/applyFullScreenState";
 import { detectPlatform } from "./libs/platform";
 import { albumFilterStore } from "./pages/albums/components/albumFilterStore";
+import { markStartup, StartupMark } from "./startupMark";
+
+// All static imports above have been evaluated by the time this line runs.
+markStartup("renderer:navigation-start", performance.timeOrigin);
+markStartup("renderer:modules-evaluated");
 
 /**
  * Fallback when `mp:settings:get` fails: the app still starts with defaults
@@ -102,12 +107,14 @@ const bootstrap = async (): Promise<void> => {
   });
 
   const settings = await loadInitialSettings();
+  markStartup("renderer:settings-loaded");
   applyThemePreference(settings.theme);
   watchSystemTheme();
   albumFilterStore.initialize(settings.albumFilter);
   sidebarStore.initialize(settings.sidebar);
   playlistColumnsStore.initialize(settings.playlistColumns);
   await restoreLastView(settings.lastView);
+  markStartup("renderer:last-view-restored");
 
   registerWindowDropHandler();
   registerPlayerHotkeys();
@@ -162,6 +169,7 @@ const bootstrap = async (): Promise<void> => {
     throw new Error("Root element not found");
   }
 
+  markStartup("renderer:render-called");
   createRoot(root).render(
     <StrictMode>
       <SettingsProvider initialSettings={settings}>
@@ -171,6 +179,7 @@ const bootstrap = async (): Promise<void> => {
         >
           <HashRouter>
             <App />
+            <StartupMark />
           </HashRouter>
         </PlayerProvider>
       </SettingsProvider>

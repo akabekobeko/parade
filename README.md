@@ -130,6 +130,17 @@ Notes:
 
 Diagnostics that help while developing but must not ship (request logs, `console.warn` details that the UI already reports in its own words) are wrapped in `if (import.meta.env.DEV) { ... }`. Vite replaces `import.meta.env.DEV` with a literal at build time and the bundler removes the dead branch, so the production bundle carries neither the code nor its strings. Vite ties `import.meta.env.DEV` to `NODE_ENV`, not to `--mode`, and honours a `NODE_ENV` already present in the environment, so the main and preload vite configs derive `NODE_ENV` from the mode themselves: `scripts/dev.ts` builds in development mode (`true`), `pnpm build` / `pnpm package` build in production mode (`false`), whatever the caller's shell exports; vitest runs with `true`, so tests still exercise those branches. Use this for code that only exists for diagnosis. Facts about the running process, such as the userData redirect above, stay on runtime checks like `app.isPackaged`.
 
+## Startup Trace
+
+`pnpm build:trace` builds the app with a startup timeline printed to stdout: the elapsed time since the OS created the process at each milestone of the main process (first JS line, `ready`, DB open, window creation), the page load, and the Renderer (module evaluation, settings, first React commit, the Artist view's queries and their first paint).
+
+```sh
+pnpm build:trace
+./node_modules/.bin/electron dist-trace/main/main.js
+```
+
+The script runs the regular production builds with `--mode trace`, which defines the build-time constant `__STARTUP_TRACE__` as `true` in the main and Renderer bundles (`src/main/vite.config.ts`, `src/renderer/vite.config.ts`) and writes them to `dist-trace/` instead of `dist/`, so electron-builder (which packages `dist/`) can never pick up a trace build. `pnpm build` / `pnpm package` define the constant as `false`, so the bundler removes the trace logic (`src/main/startupTrace.ts`, `src/renderer/startupMark.tsx`) together with the mark calls spread through the app; at most a few short label strings remain in the shipped bundles. The trace mode is still a production build in every other respect, so the numbers describe what ships. The Renderer emits its marks as `console.info` messages that the main process prints on the same time axis, once per label. Add `PARADE_USER_DATA_DIR` (see Demo Mode) to measure against the demo library instead of the real one.
+
 ## Adding shadcn/ui Components
 
 shadcn/ui components live in `src/renderer/components/ui/` and use the `@/*` path alias defined in `tsconfig.web.json`. Use the `shadcn` script to add components:

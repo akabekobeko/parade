@@ -11,6 +11,8 @@ export default defineConfig({
     // Build-time constant of src/main/vite.config.ts (the app version shown
     // in the about dialog); tests see a fixed placeholder.
     __APP_VERSION__: JSON.stringify("0.0.0-test"),
+    // Startup trace (README "Startup Trace") is a build:trace-only feature.
+    __STARTUP_TRACE__: "false",
   },
   resolve: {
     alias: {
