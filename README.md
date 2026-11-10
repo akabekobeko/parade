@@ -136,10 +136,10 @@ Diagnostics that help while developing but must not ship (request logs, `console
 
 ```sh
 pnpm build:trace
-./node_modules/.bin/electron dist/main/main.js
+./node_modules/.bin/electron dist-trace/main/main.js
 ```
 
-The script runs the regular production builds with `--mode trace`, which defines the build-time constant `__STARTUP_TRACE__` as `true` in the main and Renderer bundles (`src/main/vite.config.ts`, `src/renderer/vite.config.ts`). `pnpm build` / `pnpm package` define it as `false`, so the bundler removes the trace logic (`src/main/startupTrace.ts`, `src/renderer/startupMark.tsx`) together with the mark calls spread through the app; at most a few short label strings remain in the shipped bundles. The trace mode is still a production build in every other respect, so the numbers describe what ships. The Renderer emits its marks as `console.info` messages that the main process prints on the same time axis. Add `PARADE_USER_DATA_DIR` (see Demo Mode) to measure against the demo library instead of the real one.
+The script runs the regular production builds with `--mode trace`, which defines the build-time constant `__STARTUP_TRACE__` as `true` in the main and Renderer bundles (`src/main/vite.config.ts`, `src/renderer/vite.config.ts`) and writes them to `dist-trace/` instead of `dist/`, so electron-builder (which packages `dist/`) can never pick up a trace build. `pnpm build` / `pnpm package` define the constant as `false`, so the bundler removes the trace logic (`src/main/startupTrace.ts`, `src/renderer/startupMark.tsx`) together with the mark calls spread through the app; at most a few short label strings remain in the shipped bundles. The trace mode is still a production build in every other respect, so the numbers describe what ships. The Renderer emits its marks as `console.info` messages that the main process prints on the same time axis, once per label. Add `PARADE_USER_DATA_DIR` (see Demo Mode) to measure against the demo library instead of the real one.
 
 ## Adding shadcn/ui Components
 

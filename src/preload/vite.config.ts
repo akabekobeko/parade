@@ -21,7 +21,11 @@ export default defineConfig(({ mode }) => {
     root: __dirname,
     build: {
       target: "node24",
-      outDir: "../../dist/preload",
+      // The startup trace build (README "Startup Trace") has no preload
+      // changes, but main.js resolves the preload next to itself, so the
+      // trace build needs its own copy in dist-trace/.
+      outDir:
+        mode === "trace" ? "../../dist-trace/preload" : "../../dist/preload",
       lib: {
         entry: "preload.ts",
         formats: ["cjs"],

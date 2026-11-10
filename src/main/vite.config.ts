@@ -36,12 +36,14 @@ export default defineConfig(({ mode }) => {
       __APP_VERSION__: JSON.stringify(pkg.version),
       // Startup trace (README "Startup Trace"): compiled in by
       // `pnpm build:trace` only. The trace mode is still a production build
-      // (see nodeEnvOf), so the numbers describe what ships.
+      // (see nodeEnvOf), so the numbers describe what ships; see outDir below.
       __STARTUP_TRACE__: JSON.stringify(mode === "trace"),
     },
     build: {
       target: "node24",
-      outDir: "../../dist/main",
+      // The trace build (README "Startup Trace") lands in dist-trace/ so
+      // electron-builder, which packages dist/, can never pick it up.
+      outDir: mode === "trace" ? "../../dist-trace/main" : "../../dist/main",
       lib: {
         entry: "main.ts",
         formats: ["es"],

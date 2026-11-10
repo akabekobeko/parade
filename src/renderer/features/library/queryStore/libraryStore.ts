@@ -1,7 +1,11 @@
-import { markStartupOnce } from "@/startupMark";
+import { markStartup } from "@/startupMark";
 import { createLibraryStore } from "./createLibraryStore";
 import { fetchLibraryQuery } from "./fetchLibraryQuery";
+import { queryKeys } from "./queryKeys";
 import type { QueryFetcher, QueryKey } from "./types";
+
+/** Key prefix of the selected artist's track list, derived from the builder. */
+const MUSICS_BY_ARTIST_PREFIX = queryKeys.musicsByArtist("");
 
 /**
  * Startup-trace label of the queries the initial Artist view issues, or
@@ -11,28 +15,27 @@ import type { QueryFetcher, QueryKey } from "./types";
  * @returns Label stem used for the `-fetch-start` / `-fetch-end` marks.
  */
 const traceLabelOf = (key: QueryKey): string | undefined => {
-  if (key === "artists") return "renderer:artists";
-  if (key.startsWith("musicsByArtist:")) return "renderer:artist-musics";
+  if (key === queryKeys.artists) return "renderer:artists";
+  if (key.startsWith(MUSICS_BY_ARTIST_PREFIX)) return "renderer:artist-musics";
   return undefined;
 };
 
 /**
- * `fetchLibraryQuery` with the startup marks of the first Artist view
- * queries (`src/main/startupTrace.ts`); later refetches emit nothing and
- * attach nothing. The original promise is returned as is, so the marks add
- * no microtask hop to the store's own settlement.
+ * `fetchLibraryQuery` with the startup marks of the Artist view queries
+ * (`src/main/startupTrace.ts`). Every fetch of those keys emits; the main
+ * process prints the first one per label. The original promise is returned
+ * as is, so the marks add no microtask hop to the store's own settlement.
  *
  * @param key - Query key to resolve.
  * @returns The pending IPC result.
  */
 const tracedFetch: QueryFetcher = (key) => {
   const label = traceLabelOf(key);
-  const started =
-    label !== undefined && markStartupOnce(`${label}-fetch-start`);
+  if (label !== undefined) markStartup(`${label}-fetch-start`);
   const pending = fetchLibraryQuery(key);
-  if (started) {
+  if (label !== undefined) {
     const end = (): void => {
-      markStartupOnce(`${label}-fetch-end`);
+      markStartup(`${label}-fetch-end`);
     };
     pending.then(end, end);
   }

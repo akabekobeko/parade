@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 
 /**
  * Renderer side of the startup trace (`src/main/startupTrace.ts`, README
@@ -7,7 +7,8 @@ import { useEffect } from "react";
  * Compiled in only by `pnpm build:trace`, which defines `__STARTUP_TRACE__`
  * as `true` for the Renderer bundle as well. Marks are emitted as console
  * messages of the form `[startup] <label> <epochMs>`, which the main process
- * parses; keep the two sides in sync.
+ * parses and prints once per label (so a repeated event here, a refetch or a
+ * remount, is harmless); keep the two sides in sync.
  */
 
 /**
@@ -21,42 +22,34 @@ export const markStartup = (label: string, at: number = Date.now()): void => {
   console.info(`[startup] ${label} ${Math.round(at)}`);
 };
 
-const emitted = new Set<string>();
-
 /**
- * Emit a mark only the first time its label is seen, for events that recur
- * during the session (refetches, remounts) but only matter at startup.
+ * Mark the commit in which `ready` is true as `<label>-committed`, and the
+ * moment the browser has painted it as `<label>-painted`.
  *
- * @param label - Short identifier.
- * @returns `true` when the mark was emitted by this call.
- */
-export const markStartupOnce = (label: string): boolean => {
-  if (!__STARTUP_TRACE__ || emitted.has(label)) return false;
-  emitted.add(label);
-  markStartup(label);
-  return true;
-};
-
-/**
- * Mark the first commit in which `ready` is true as `<label>-committed`, and
- * the frame after it was painted as `<label>-painted` (two animation frames
- * later). Both marks are emitted once per label; an unmount before the paint
- * cancels the pending frames so no paint is recorded that never happened.
+ * The commit stamp runs in a layout effect, which React flushes before the
+ * browser paints (a passive effect may run after the paint for non-discrete
+ * renders). The paint stamp runs in a task queued from the next animation
+ * frame: the frame callback precedes that frame's paint, so a zero-delay
+ * timer from inside it lands right after. An unmount or a `ready` flip
+ * before the paint cancels the pending stamp; the next ready commit arms it
+ * again, and the main process keeps the first arrival.
  *
  * @param label - Prefix such as `renderer:artist-list`.
  * @param ready - Whether the content the label stands for is on screen.
  */
 export const useStartupMarkWhen = (label: string, ready: boolean): void => {
-  useEffect(() => {
-    if (!__STARTUP_TRACE__) return;
-    if (!ready || !markStartupOnce(`${label}-committed`)) return;
-    let frame = requestAnimationFrame(() => {
-      frame = requestAnimationFrame(() => {
-        markStartupOnce(`${label}-painted`);
-      });
+  useLayoutEffect(() => {
+    if (!__STARTUP_TRACE__ || !ready) return;
+    markStartup(`${label}-committed`);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const frame = requestAnimationFrame(() => {
+      timer = setTimeout(() => {
+        markStartup(`${label}-painted`);
+      }, 0);
     });
     return () => {
       cancelAnimationFrame(frame);
+      if (timer !== undefined) clearTimeout(timer);
     };
   }, [label, ready]);
 };

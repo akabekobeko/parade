@@ -140,6 +140,8 @@ vite.config.ts.timestamp-*
 
 # Electron builder output
 release/
+# Startup trace build (pnpm build:trace)
+dist-trace/
 
 # Astro cache (web/)
 .astro/

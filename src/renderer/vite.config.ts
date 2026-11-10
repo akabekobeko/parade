@@ -25,7 +25,9 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: "chrome156",
-    outDir: "../../dist/renderer",
+    // The trace build lands in dist-trace/ (see src/main/vite.config.ts).
+    outDir:
+      mode === "trace" ? "../../dist-trace/renderer" : "../../dist/renderer",
     emptyOutDir: true,
   },
 }));
