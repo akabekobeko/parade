@@ -239,3 +239,80 @@ it("keys lists every cached key, subscribed or idle", async () => {
 
   expect([...store.keys()].sort()).toEqual(["artists", "musicsByArtist:A"]);
 });
+
+it("prefetch starts the fetch without a subscriber and resolves with the settled state", async () => {
+  const { fetch, pending } = createManualFetcher();
+  const store = createQueryStore(fetch);
+  const settled = store.prefetch("artists");
+  expect(pending).toHaveLength(1);
+
+  pending[0]?.resolve(ok(["a"]));
+  expect(await settled).toEqual({ status: "success", value: ["a"] });
+
+  // The first subscriber reads the result; no second fetch.
+  const listener = vi.fn();
+  store.subscribe("artists", listener);
+  expect(pending).toHaveLength(1);
+  expect(store.getSnapshot("artists")).toEqual({
+    status: "success",
+    value: ["a"],
+  });
+  expect(listener).not.toHaveBeenCalled();
+});
+
+it("prefetch of a key in flight joins that fetch instead of starting another", async () => {
+  const { fetch, pending } = createManualFetcher();
+  const store = createQueryStore(fetch);
+  store.subscribe("artists", vi.fn());
+  const settled = store.prefetch("artists");
+  expect(pending).toHaveLength(1);
+
+  pending[0]?.resolve(ok(["a"]));
+  expect(await settled).toEqual({ status: "success", value: ["a"] });
+});
+
+it("prefetch of a cached key resolves at once without fetching", async () => {
+  const { fetch, pending } = createManualFetcher();
+  const store = createQueryStore(fetch);
+  store.subscribe("artists", vi.fn());
+  pending[0]?.resolve(ok(["a"]));
+  await flush();
+
+  expect(await store.prefetch("artists")).toEqual({
+    status: "success",
+    value: ["a"],
+  });
+  expect(pending).toHaveLength(1);
+});
+
+it("prefetch resolves with the error state when the fetch fails", async () => {
+  const store = createQueryStore(() => Promise.reject(new Error("boom")));
+  expect(await store.prefetch("artists")).toEqual({
+    status: "error",
+    error: { name: "Error", message: "boom" },
+  });
+});
+
+it("a prefetched key is idle once settled and reclaimed by invalidation", async () => {
+  const { fetch, pending } = createManualFetcher();
+  const store = createQueryStore(fetch);
+  const settled = store.prefetch("artists");
+  pending[0]?.resolve(ok(["a"]));
+  await settled;
+
+  store.invalidate();
+  expect(store.keys()).toEqual([]);
+});
+
+it("an invalidation while a prefetch is pending refetches and the prefetch resolves with the new result", async () => {
+  const { fetch, pending } = createManualFetcher();
+  const store = createQueryStore(fetch);
+  const settled = store.prefetch("artists");
+  store.invalidate("artists");
+  expect(pending).toHaveLength(2);
+
+  pending[0]?.resolve(ok(["stale"]));
+  await flush();
+  pending[1]?.resolve(ok(["fresh"]));
+  expect(await settled).toEqual({ status: "success", value: ["fresh"] });
+});

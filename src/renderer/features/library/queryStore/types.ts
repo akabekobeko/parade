@@ -55,6 +55,19 @@ export type QueryStore = {
    */
   readonly patch: <T>(key: QueryKey, updater: (value: T) => T) => void;
   /**
+   * Start the fetch of a key ahead of its first subscriber and resolve with
+   * the settled state. The bootstrap uses it for the lists the view restore
+   * checks and the remembered artist's tracks, so the first render reads
+   * them instead of fetching after the first commit. A key already in the
+   * cache is not fetched again: a settled state resolves at once, a fetch in
+   * flight is awaited. The entry is an ordinary one afterwards (idle until
+   * subscribed, reclaimed by invalidation like any idle key).
+   *
+   * @param key - Query key to fetch.
+   * @returns The success or error state once the fetch has settled.
+   */
+  readonly prefetch: <T>(key: QueryKey) => Promise<FetchState<T>>;
+  /**
    * Every key currently in the cache, subscribed or idle. Lets a mutation
    * command patch or invalidate a family of keys (`musicsByArtist:*`, ...)
    * without the store knowing the key conventions.

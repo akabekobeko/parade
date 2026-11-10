@@ -141,6 +141,15 @@ pnpm build:trace
 
 The script runs the regular production builds with `--mode trace`, which defines the build-time constant `__STARTUP_TRACE__` as `true` in the main and Renderer bundles (`src/main/vite.config.ts`, `src/renderer/vite.config.ts`) and writes them to `dist-trace/` instead of `dist/`, so electron-builder (which packages `dist/`) can never pick up a trace build. `pnpm build` / `pnpm package` define the constant as `false`, so the bundler removes the trace logic (`src/main/startupTrace.ts`, `src/renderer/startupMark.tsx`) together with the mark calls spread through the app; at most a few short label strings remain in the shipped bundles. The trace mode is still a production build in every other respect, so the numbers describe what ships. The Renderer emits its marks as `console.info` messages that the main process prints on the same time axis, once per label. Add `PARADE_USER_DATA_DIR` (see Demo Mode) to measure against the demo library instead of the real one.
 
+The Renderer marks are also User Timing marks (`performance.mark`), and the trace build writes a source map, so the time between two marks can be broken down with a Chromium trace of the same run. The JSON trace loads into the DevTools Performance panel or Perfetto; the `disabled-by-default-v8.cpu_profiler` category adds a sampling profile of the JavaScript, whose minified positions map back to the sources through `dist-trace/renderer/assets/*.js.map`:
+
+```sh
+./node_modules/.bin/electron \
+  --trace-startup="devtools.timeline,disabled-by-default-devtools.timeline,blink,blink.user_timing,v8,disabled-by-default-v8.cpu_profiler" \
+  --trace-startup-format=json --trace-startup-file=/tmp/parade-startup.json --trace-startup-duration=6 \
+  dist-trace/main/main.js
+```
+
 ## Adding shadcn/ui Components
 
 shadcn/ui components live in `src/renderer/components/ui/` and use the `@/*` path alias defined in `tsconfig.web.json`. Use the `shadcn` script to add components:

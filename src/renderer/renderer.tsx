@@ -32,6 +32,24 @@ import { markStartup, StartupMark } from "./startupMark";
 // All static imports above have been evaluated by the time this line runs.
 markStartup("renderer:navigation-start", performance.timeOrigin);
 markStartup("renderer:modules-evaluated");
+if (__STARTUP_TRACE__) {
+  // Split the page load into process start, HTML load and script
+  // evaluation (the gap from html-response-end to modules-evaluated; Resource
+  // Timing has no entries under file://, so the script is not marked).
+  const navigation = performance.getEntriesByType("navigation")[0] as
+    | PerformanceNavigationTiming
+    | undefined;
+  if (navigation !== undefined) {
+    markStartup(
+      "renderer:html-fetch-start",
+      performance.timeOrigin + navigation.fetchStart,
+    );
+    markStartup(
+      "renderer:html-response-end",
+      performance.timeOrigin + navigation.responseEnd,
+    );
+  }
+}
 
 /**
  * Fallback when `mp:settings:get` fails: the app still starts with defaults
@@ -105,6 +123,12 @@ const bootstrap = async (): Promise<void> => {
   window.mp.window.onFullScreenChanged(({ fullScreen }) => {
     applyFullScreenState(fullScreen);
   });
+  // Also before the first await: `restoreLastView` fills the query store
+  // before the render, and a library change broadcast in that window must
+  // still invalidate what it put there.
+  window.mp.library.onChanged(() => {
+    libraryStore.invalidate();
+  });
 
   const settings = await loadInitialSettings();
   markStartup("renderer:settings-loaded");
@@ -119,9 +143,6 @@ const bootstrap = async (): Promise<void> => {
   registerWindowDropHandler();
   registerPlayerHotkeys();
 
-  window.mp.library.onChanged(() => {
-    libraryStore.invalidate();
-  });
   window.mp.library.onImportProgress((payload) => {
     importStore.handleProgress(payload);
   });
