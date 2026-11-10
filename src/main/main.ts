@@ -1,7 +1,11 @@
+// First on purpose: records the first main-process JS line before the other
+// imports are evaluated (PARADE_STARTUP_TRACE, see startupTrace.ts).
+import "./startupTrace";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, BrowserWindow, dialog, nativeTheme, screen } from "electron";
 import { resolveLocale } from "../shared/locales/resolveLocale";
+import { STARTUP_TRACE_ARGUMENT } from "../shared/startupTraceArgument";
 import { buildWindowChrome } from "./buildWindowChrome";
 import { closeDatabase, openDatabase } from "./db/connection";
 import { buildStartupErrorContent } from "./db/startupError";
@@ -19,12 +23,19 @@ import {
   initializeSettings,
   updateSettings,
 } from "./settings/settingsManager";
+import {
+  isStartupTraceEnabled,
+  markStartup,
+  traceWindowStartup,
+} from "./startupTrace";
 import { resolveWindowBounds } from "./windowState";
 
 /** `productName` from package.json, injected at build time via Vite `define`. */
 declare const __APP_PRODUCT_NAME__: string;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+markStartup("main:imports-evaluated");
 
 // Unpackaged runs (`pnpm run dev`) use the shared Electron binary, so userData
 // would default to the generic "Electron" directory. Point it at the directory
@@ -95,8 +106,14 @@ function createWindow(): void {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      // Hands the startup-trace flag to the preload (README "Startup Trace").
+      additionalArguments: isStartupTraceEnabled()
+        ? [STARTUP_TRACE_ARGUMENT]
+        : [],
     },
   });
+  markStartup("main:browser-window-constructed");
+  traceWindowStartup(mainWindow);
   if (saved.maximized) {
     mainWindow.maximize();
   }
@@ -147,6 +164,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  markStartup("main:ready");
   try {
     openDatabase(path.join(app.getPath("userData"), "app.db"));
   } catch (error) {
@@ -161,12 +179,16 @@ app.whenReady().then(() => {
     app.quit();
     return;
   }
+  markStartup("main:db-opened");
 
   initializeSettings(path.join(app.getPath("userData"), "settings.json"));
+  markStartup("main:settings-initialized");
   registerProtocolHandlers();
   initializeIpcEvents();
   installApplicationMenu();
+  markStartup("main:menu-installed");
   createWindow();
+  markStartup("main:window-created");
 
   // Keep the WCO control colors in sync when the OS switches between light
   // and dark while the preference is "system" (explicit preferences are

@@ -2,6 +2,7 @@ import { HStack, Stack } from "@/components/app/stacks";
 import { Input } from "@/components/ui/input";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useT } from "@/features/i18n/useT";
+import { useStartupMarkWhen } from "@/startupMark";
 import { ArtistListRows } from "./ArtistListRows";
 import { InitialPicker } from "./InitialPicker";
 import { useArtistListPanel } from "./useArtistListPanel";
@@ -30,6 +31,7 @@ export const ArtistListPanel = () => {
     rowsRef,
     jumpToInitial,
   } = useArtistListPanel();
+  useStartupMarkWhen("renderer:artist-list", artistsState.status === "success");
 
   return (
     <Stack className="h-full gap-0">

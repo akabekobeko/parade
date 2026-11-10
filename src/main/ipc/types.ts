@@ -960,6 +960,11 @@ export type MpBridge = {
   readonly app: {
     /** Resolve the runtime {@link Versions} report. */
     readonly getVersions: () => Promise<IpcResult<Versions>>;
+    /**
+     * Whether the main process runs with `PARADE_STARTUP_TRACE=1`
+     * (README "Startup Trace"); gates the Renderer's startup marks.
+     */
+    readonly startupTraceEnabled: boolean;
     /** Open an `https:` link in the default browser. */
     readonly openExternal: (
       request: OpenExternalRequest,
