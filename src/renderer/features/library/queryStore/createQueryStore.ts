@@ -28,6 +28,9 @@ const LOADING: FetchState<never> = { status: "loading" };
  *   fetch and oscillate between loading and success forever.
  * - Every applied response passes a generation check, so a response that
  *   crossed an invalidation is discarded instead of overwriting fresh data.
+ * - `prefetch` starts a key's fetch without a subscriber (the bootstrap)
+ *   and resolves when it settles; a key already cached is not fetched again.
+ *   The entry is then an ordinary idle entry, reclaimed by invalidation.
  *
  * @param fetch - Key → Main query resolver.
  * @returns The store.
@@ -108,6 +111,34 @@ export const createQueryStore = (fetch: QueryFetcher): QueryStore => {
         listener();
       }
     },
+    prefetch: <T>(key: QueryKey): Promise<FetchState<T>> =>
+      new Promise((resolve) => {
+        let entry = entries.get(key);
+        if (entry === undefined) {
+          entry = { state: LOADING, generation: 0, listeners: new Set() };
+          entries.set(key, entry);
+          start(key, entry);
+        }
+
+        if (entry.state.status !== "loading") {
+          resolve(entry.state as FetchState<T>);
+          return;
+        }
+
+        // Wait as a listener, so an invalidation in the meantime refetches
+        // (instead of reclaiming the key) and this resolves with that result.
+        const waiting = entry;
+        const listener = (): void => {
+          const state = waiting.state;
+          if (state.status === "loading") {
+            return;
+          }
+
+          waiting.listeners.delete(listener);
+          resolve(state as FetchState<T>);
+        };
+        waiting.listeners.add(listener);
+      }),
     keys: () => [...entries.keys()],
     invalidate: (key) => {
       const targets =

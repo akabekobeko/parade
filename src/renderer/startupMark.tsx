@@ -1,4 +1,4 @@
-import { useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 
 /**
  * Renderer side of the startup trace (`src/main/startupTrace.ts`, README
@@ -55,10 +55,15 @@ export const useStartupMarkWhen = (label: string, ready: boolean): void => {
 };
 
 /**
- * Marks the first React commit (`renderer:react-committed`) and its paint
- * (`renderer:react-painted`). Rendered once next to `App`.
+ * Marks the first React commit (`renderer:react-committed`), the end of its
+ * passive effects (`renderer:react-effects-flushed`; rendered last next to
+ * `App`, so the siblings' effects have run by then) and its paint
+ * (`renderer:react-painted`).
  */
 export const StartupMark = (): null => {
   useStartupMarkWhen("renderer:react", true);
+  useEffect(() => {
+    markStartup("renderer:react-effects-flushed");
+  }, []);
   return null;
 };
