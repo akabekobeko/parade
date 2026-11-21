@@ -18,7 +18,7 @@
 ```
 
 - 機能 1 件は `flex flex-col gap-4` の `li` で、`h3`、`p`、画像の 2 カラム グリッド (`grid gap-4 md:grid-cols-2 md:gap-6`) の順です。見出しと説明文は左寄せのまま、幅は `max-w-prose` で読みやすい行長に抑えます
-- 画像は `figure` で包み、下に `figcaption` としてテーマ名 ("Dark" / "Light"、`home.screenshot.dark` / `home.screenshot.light`) を `text-xs text-muted-foreground` で中央寄せに添えます。2 枚が「同じ画面のテーマ違い」であることを文字でも示し、スクリーン リーダーには alt でテーマを読ませます
+- 画像は `figure` で包みます。テーマ名のキャプションは付けません (2026-11-21 改訂。当初は `figcaption` に "Dark" / "Light" を添えていたが、画像を見れば明白で冗長なため削除)。スクリーン リーダーには alt (`home.screenshot.dark` / `home.screenshot.light` を含む) でテーマを読ませます
 - ダークを左、ライトを右に固定します。`md` 未満ではダーク、ライトの順に縦に並びます
 - 機能と機能の間隔は `ul` の `gap-14` にします (現在の `gap-12` より広げ、画像 2 枚のブロックの区切りを見やすくする)。間隔はすべて gap と padding で、margin は使いません
 - アプリの「Light and dark」の説明は不要になるので、ヒーローの直後にテーマ切り替えの案内は足しません。サイト自体のテーマ切り替えはヘッダーにあります
