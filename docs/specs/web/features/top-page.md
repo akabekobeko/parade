@@ -19,8 +19,8 @@
 機能ごとに「見出し、2 - 3 文の説明、同じ画面のダークとライトのスクリーンショット」を縦に並べます (2026-11-03 改訂。v1.6 までは説明文と 1 枚のスクリーンショットを 2 カラムで左右交互に置いていた。[公式サイトの機能一覧のレイアウト](../../v1.7/features/web-feature-layout.md))。項目は現在のバージョン (v1.7) の機能から選びます。
 
 - 機能 1 件は `li` (`flex flex-col gap-4`) で、`h3`、`p` (`max-w-prose`)、画像の 2 カラム グリッド (`grid gap-4 md:grid-cols-2 md:gap-6`) の順。機能と機能の間隔は `ul` の `gap-14`
-- 画像は `figure` で包み、`figcaption` にテーマ名 ("Dark" / "Light"、`home.screenshot.dark` / `home.screenshot.light`) を `text-xs text-muted-foreground` で中央寄せに添える。ダークを左、ライトを右に固定し、`md` 未満ではダーク、ライトの順に縦に並ぶ
-- 画像の `alt` は機能の alt にテーマ名を添えた `home.screenshot.alt` ("{alt} ({theme} theme)") で、スクリーン リーダーにも 2 枚がテーマ違いであることが伝わる
+- 画像は `figure` で包む。テーマ名のキャプションは付けない (2026-11-21 改訂。当初は `figcaption` に "Dark" / "Light" を添えていたが、画像を見れば明白で冗長なため削除)。ダークを左、ライトを右に固定し、`md` 未満ではダーク、ライトの順に縦に並ぶ
+- 画像の `alt` は機能の alt にテーマ名 (`home.screenshot.dark` / `home.screenshot.light`) を添えた `home.screenshot.alt` ("{alt} ({theme} theme)") で、スクリーン リーダーにも 2 枚がテーマ違いであることが伝わる
 
 | 機能 (キー) | 説明の要点 | スクリーンショット |
 | --- | --- | --- |

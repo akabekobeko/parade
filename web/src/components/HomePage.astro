@@ -158,7 +158,7 @@ const FEATURE_SIZES =
           </p>
           <div class="grid gap-4 md:grid-cols-2 md:gap-6">
             {THEMES.map((theme) => (
-              <figure class="flex flex-col gap-2">
+              <figure>
                 <Picture
                   src={feature[theme]}
                   widths={WIDTHS}
@@ -172,13 +172,6 @@ const FEATURE_SIZES =
                   loading="lazy"
                   class="h-auto w-full"
                 />
-                {/* The theme is already in the alt; keep the caption visual only. */}
-                <figcaption
-                  aria-hidden="true"
-                  class="text-center text-xs text-muted-foreground"
-                >
-                  {t(`home.screenshot.${theme}`)}
-                </figcaption>
               </figure>
             ))}
           </div>
