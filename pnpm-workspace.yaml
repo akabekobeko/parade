@@ -6,15 +6,4 @@ allowBuilds:
   lefthook: true
   msw: true
 minimumReleaseAgeExclude:
-  - '@biomejs/biome@2.5.8'
-  - '@biomejs/cli-darwin-arm64@2.5.8'
-  - '@biomejs/cli-darwin-x64@2.5.8'
-  - '@biomejs/cli-linux-arm64-musl@2.5.8'
-  - '@biomejs/cli-linux-arm64@2.5.8'
-  - '@biomejs/cli-linux-x64-musl@2.5.8'
-  - '@biomejs/cli-linux-x64@2.5.8'
-  - '@biomejs/cli-win32-arm64@2.5.8'
-  - '@biomejs/cli-win32-x64@2.5.8'
   - '@akabeko/music-metadata-editor@1.1.0 || 1.1.1 || 1.2.0'
-  - prettier@3.9.10
-  - react-resizable-panels@4.19.1
